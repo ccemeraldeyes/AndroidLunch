@@ -1,1 +1,1 @@
-This Will serve as our Readme File for our project including build instructions and usage notes.
+This will serve as our readme File for our project including build instructions and usage notes.
