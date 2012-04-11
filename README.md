@@ -1,7 +1,1 @@
-I really shouldn't be able to push this.
-
-This is my attempt to FUCK SHIT UP -Davis
-
-Testing, testing,.... Troy
-
-This edit was made in eclipse and pushed with EGit -Davis
+This Will serve as our Readme File for our project including build instructions and usage notes.
