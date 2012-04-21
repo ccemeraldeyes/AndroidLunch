@@ -6,6 +6,9 @@ import android.os.Bundle;
 
 public class Splash extends Activity{
 
+	
+	// Lawrence Comment
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -18,7 +21,7 @@ public class Splash extends Activity{
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} finally {
-					Intent openStartingPoint = new Intent("we.should.MAIN");
+					Intent openStartingPoint = new Intent("we.should.MAP");
 					startActivity(openStartingPoint);
 				}
 			}
