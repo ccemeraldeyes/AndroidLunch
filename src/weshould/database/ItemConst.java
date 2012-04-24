@@ -1,0 +1,18 @@
+package weshould.database;
+
+/**
+ * Contains Constant values for the list items database table
+ * Used in database methods
+ * @author  UW CSE403 SP12
+ */
+public class ItemConst {
+	
+	public static final int 	DATABASE_VERSION=1;
+	public static final String 	DATABASE_NAME="WeShould.db", // filename on device
+								TBL_NAME="category", 		 // table name
+								ID="id",                     // unique Id
+								NAME="name",                 // item name
+								CAT_ID="category_id",        // references Category Id
+								MAPPABLE="mappable",         // boolean 
+								DATA="data";             	 // json code								
+}
