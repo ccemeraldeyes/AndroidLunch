@@ -1,6 +1,8 @@
 package we.should;
 
 import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,17 +10,22 @@ import android.widget.TabHost;
 import android.widget.TextView;
 
 import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapView;
 
-public class WeShouldActivity extends MapActivity {
+public class WeShouldActivity extends MapActivity implements LocationListener{
 	
 	/** The TabHost that cycles between categories. **/
 	private TabHost mTabHost;
+	private MapView map;
+	
 	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        map = (MapView) findViewById(R.id.mapview);
+        map.setBuiltInZoomControls(true);
         
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         this.mTabHost.setup();
@@ -53,5 +60,25 @@ public class WeShouldActivity extends MapActivity {
 	@Override
 	protected boolean isRouteDisplayed() {
 		return false;
+	}
+
+	public void onLocationChanged(Location arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onProviderDisabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onProviderEnabled(String provider) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		// TODO Auto-generated method stub
+		
 	}
 }
