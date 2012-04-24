@@ -2,9 +2,9 @@ package we.should.test;
 
 import junit.framework.TestCase;
 
-public class ItemUnitTest extends TestCase {
+public class GenericItemUnitTest extends TestCase {
 
-	public ItemUnitTest(String name) {
+	public GenericItemUnitTest(String name) {
 		super(name);
 	}
 
@@ -15,8 +15,8 @@ public class ItemUnitTest extends TestCase {
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
-	public void testGet() {
-		assertTrue(2==2);
+	public void testGetSet() {
+		
 	}
 
 }

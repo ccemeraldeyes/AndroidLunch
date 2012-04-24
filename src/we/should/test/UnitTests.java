@@ -14,7 +14,7 @@ public class UnitTests extends TestSuite {
 	}
 	public UnitTests(String name) {
 		super(name);
-		addTestSuite(ItemUnitTest.class);
+		addTestSuite(GenericItemUnitTest.class);
 	}
 
 }
