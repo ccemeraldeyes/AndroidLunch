@@ -3,7 +3,7 @@ package we.should.list;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class Item implements Comparable<Item> {
+public abstract class Item {
 	
 	public abstract Set<Address> getAddresses();
 	
