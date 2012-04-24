@@ -133,8 +133,8 @@ public class WSdb {
 	 * @param color unique color used to identify tag
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
-	 * 
 	 */
+	
 	public long insertTag(String name /*, int color*/){
 		try{
 			Log.v("WSdb.insertTag","inserting tag");
