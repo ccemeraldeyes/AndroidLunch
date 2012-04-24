@@ -10,7 +10,7 @@ import java.util.Set;
  */
 public abstract class Category {
 	
-	private final String name;
+	protected String name;
 	
 	public Category(String name){
 		this.name = name;
@@ -18,6 +18,10 @@ public abstract class Category {
 	public abstract Set<Item> getItems();
 	
 	public abstract Item newItem();
+	
+	public abstract boolean addItem(Item i);
+	
+	public abstract Map<String, FieldType> getFields();
 	
 	static final Set<Category> getCategories(){
 		return null;
