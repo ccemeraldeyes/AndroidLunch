@@ -5,12 +5,6 @@ import java.util.Set;
 
 public abstract class Item implements Comparable<Item> {
 	
-	private final Category category;
-	
-	private Item(Category c){
-		this.category = c;
-	}
-	
 	public abstract Set<Address> getAddresses();
 	
 	public abstract String getComment();
