@@ -1,10 +1,11 @@
 
 package we.should.list;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
- * @author Davis
+ * @author Davis Shepherd
  *
  */
 public abstract class Category {
@@ -14,14 +15,13 @@ public abstract class Category {
 	public Category(String name){
 		this.name = name;
 	}
-	
 	public abstract Set<Item> getItems();
 	
 	public abstract Item newItem();
 	
 	static final Set<Category> getCategories(){
 		return null;
-		//TODO: return all categories
+		//TODO: parses the DataBase and Returns a Set of Category objects
 	}
 
 }
