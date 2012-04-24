@@ -1,4 +1,4 @@
-package weshould.database;
+package we.should.database;
 
 public class Item_TagConst {
 	public static final int 	DATABASE_VERSION=1;
