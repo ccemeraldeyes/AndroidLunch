@@ -4,6 +4,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+
 public class UnitTests extends TestSuite {
 
 	public static Test suite() {
@@ -15,7 +16,7 @@ public class UnitTests extends TestSuite {
 	public UnitTests(String name) {
 		super(name);
 		addTestSuite(ItemUnitTest.class);
-		addTestSuite(DBUnitTest.class);
+		addTest(DBUnitTest.suite());
 	}
 
 }
