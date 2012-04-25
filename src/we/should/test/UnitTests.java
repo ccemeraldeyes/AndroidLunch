@@ -14,7 +14,6 @@ public class UnitTests extends TestSuite {
 	}
 	public UnitTests(String name) {
 		super(name);
-		addTest(DBUnitTest.suite());
 	}
 
 }
