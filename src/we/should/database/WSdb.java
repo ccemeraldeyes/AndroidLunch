@@ -107,7 +107,7 @@ public class WSdb {
 	 * 
 	 * @param name of category being entered
 	 * @param color unique color to identify category
-	 * @param schema string to identify category schema    //TODO: json also?
+	 * @param schema string to identify category schema 
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
 	 * 
@@ -136,7 +136,7 @@ public class WSdb {
 	 * @exception ex caught SQLiteException if insert fails
 	 */
 	
-	public long insertTag(String name /*, int color*/){
+	public long insertTag(String name){
 		try{
 			Log.v("WSdb.insertTag","inserting tag");
 			ContentValues newTaskValue = new ContentValues();
@@ -149,7 +149,15 @@ public class WSdb {
 		}
 	}
 	
-	
+	/**
+	 * Insert an item-tag relationship into the database- "Tag an item"
+	 * 
+	 * @param itemID key id of item to be tagged
+	 * @param tagID key id of tag to be placed on item
+	 * @return row ID of newly inserted row, or -1 if an error occurred
+	 * @exception ex caught SQLiteException if insert fails
+	 * 
+	 */
 	public long insertItem_Tag(int itemID, int tagID){
 		try{
 			Log.v("WSdb.insertTag","inserting tag");
@@ -211,15 +219,15 @@ public class WSdb {
 	}
 	
 	/**
-	 * getAllItems ordered by name
+	 * get the item with id == itemId
 	 * 
 	 * @return cursor to the item
 	 * 
 	 * SQL query
 	 * select * from item where id=[given id]
 	 */
-	public Cursor getItem(int id){
-		return db.query(ItemConst.TBL_NAME, null , ItemConst.ID + "=" + id,
+	public Cursor getItem(int itemId){
+		return db.query(ItemConst.TBL_NAME, null , ItemConst.ID + "=" + itemId,
 				null, null, null, null);
 	}
 	
@@ -235,6 +243,20 @@ public class WSdb {
 	public Cursor getAllCategories(){
 		return db.query(CategoryConst.TBL_NAME, null, null,
 				null, null, null, "name");
+	}
+	
+	/**
+	 * get the category with id=catId
+	 * 
+	 * @param catId key id of the category you want to return
+	 * @return cursor to single category
+	 * 
+	 * SQL query
+	 * select * from category where id=[given id]
+	 */
+	public Cursor getCategory(int catId){
+		return db.query(CategoryConst.TBL_NAME, null, CategoryConst.ID + "=" + + catId,
+				null, null, null, null);
 	}
 	
 	
@@ -259,7 +281,9 @@ public class WSdb {
 	 * @return cursor to list of all item id# with the given tag
 	 *  
 	 * SQL query
-	 * select * from item_tag where item_tag.item_id=tagId
+	 * select * from item_tag, item 
+	 *   where item_tag.tag_id=tagId 
+	 *   and item_tag.item_id = item.id
 	 */
 	public Cursor getItemsOfTag(int tagId){
 		String sqlStatement = "Select * from " + ItemConst.TBL_NAME + 
@@ -327,12 +351,12 @@ public class WSdb {
 	}
 	
 	
-	/**
-	 * Change the name of a Category
+	// TODO: How to handle changing category.... different schema
+	/* Change the name of a Category
 	 * 
 	 * @param catID id of category to update
 	 * @param newName new name of category
-	 */
+	 *
 	public void UpdateCategoryName(int catID, String newName){
 		Log.v("DB.updateCatName","change name of categoryId=" + 
 		          catID + " to " +  newName);
@@ -341,7 +365,7 @@ public class WSdb {
 		String whereClause=CategoryConst.ID + "=" + catID;
 		db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
 	}
-	
+	*/
 	
 	/**
 	 * Change the name of a Tag
@@ -444,8 +468,8 @@ public class WSdb {
 	        insertItem("Itemname2", 1, false, "DATA2 here");
 	        insertCategory("Cat 1", 123456, "schema for cat 1");
 	        insertCategory("cat 2", 654321, "schema for cat 2");
-	        insertTag("tag1");//, 888888);
-	        insertTag("tag2");//, 555555);
+	        insertTag("tag1");
+	        insertTag("tag2");
 	        insertItem_Tag(1,2);
 	        insertItem_Tag(1,1);
 		} catch (Exception e) {
