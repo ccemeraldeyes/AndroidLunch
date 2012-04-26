@@ -15,7 +15,7 @@ import android.util.Log;
 
 /**
  * WeShould Database class - contains database methods used in the 
- * 							 WeShould Android Application
+ * 							 WeShould Android Application<br/>
  * 
  * NOTE: Most methods are sending Log verbose output.  Running LogCat while executing displays information.
  * See DBexamples.txt for examples on how to call the methods and parse results.
@@ -44,9 +44,10 @@ public class WSdb {
 	
 	/**
 	 * open database for writing
+	 * 
 	 * @exception ex caught SQLiteException if failure to open writable database,
 	 * 				 will open readable if fails 
-	 * @returns true if db is open and writable, false otherwise
+	 * @return true if db is open and writable, false otherwise
 	 */
 	public boolean open(){
 		
@@ -66,6 +67,7 @@ public class WSdb {
 	
 	/**
 	 * check if the database is currently open
+	 * 
 	 * @return true if open, false otherwise
 	 */
 	public boolean isOpen(){
@@ -94,7 +96,7 @@ public class WSdb {
 	 * @param data json code holding item schema & data
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
-	 * @
+	 * 
 	 */
 	
 	
@@ -114,7 +116,8 @@ public class WSdb {
 		}
 	}
 	
-	//TODO: assert color is 6digit number
+	
+	//TODO: assert color is 6 digit hex number
 	/**
 	 * Insert a category into the database
 	 * 
@@ -144,7 +147,6 @@ public class WSdb {
 	 * Insert a Tag into the database
 	 * 
 	 * @param name of Tag
-	 * @param color unique color used to identify tag
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
 	 */
@@ -291,7 +293,7 @@ public class WSdb {
 	/**
 	 * getAllItemsOfTag - get every item with given tag
 	 * 
-	 * @param  - id of the tag of the items to return
+	 * @param tagId key id of the tag of the items to return
 	 * @return cursor to list of all item id# with the given tag
 	 *  
 	 * SQL query
@@ -315,13 +317,15 @@ public class WSdb {
 	
 	
 	/**
-	 * getAllItemsOfTag - get every item with given tag
+	 * getAllTagsOfItem - get every tag of item with given id
 	 * 
-	 * @param  - id of the tag of the items to return
-	 * @return cursor to list of all item id# with the given tag
+	 * @param  itemId id of the item to get all tags of
+	 * @return cursor to list of all tag id# of the given item
 	 *  
 	 * SQL query
-	 * select * from item_tag where item_tag.item_id=tagId
+	 * select * from item_tag, tag
+	 *   where item_tag.item_id=itemId
+	 *   and item_tag.tag_id= tag.id
 	 */
 	public Cursor getTagsOfItem(int itemId){
 		
@@ -346,7 +350,7 @@ public class WSdb {
 	 * @param sql the SQL query
 	 * @param selection may include ?s in where clause which will be
 	 * 		  replaced by vlaues from selection[]
-	 * @return
+	 * @return cursor to results
 	 */
 	public Cursor rawQuery(String sql, String[]selection){
 		return db.rawQuery(sql, selection);
@@ -456,9 +460,9 @@ public class WSdb {
 		return true;
 	}
 	
-	
+	// TODO: items with this category?
 	/**
-	 * deletes Category with given id.  // TODO: items with this category?
+	 * deletes Category with given id.  
 	 *
 	 * @param catId id of the category to be deleted
 	 */
