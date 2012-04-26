@@ -1,5 +1,6 @@
 package we.should.list;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -7,36 +8,37 @@ import java.util.Set;
 public class GenericItem extends Item {
 	private final Category c;
 	private Map<String, String> values;
-	private String name;
+	private Set<android.location.Address> addresses;
+	
 	
 	
 	public GenericItem(Category c) {
 		this.c = c;
 		values = new HashMap<String, String>();
-		Map<String, FieldType> fields = c.getFields();
-		for(Map.Entry<String, FieldType> i : fields.entrySet()){
-			String key = i.getKey().toString() + "," + i.getValue().toString();
-			values.put(key, null);
+		Set<Field> fields = c.getFields();
+		for(Field i : fields){
+			values.put(i.key(), null);
 		}
-		// TODO Auto-generated constructor stub
+		for(Field i : Field.values()) {
+			if(! values.containsKey(i.key())){
+				values.put(i.key(), null);
+			}
+		}
 	}
 
 	@Override
-	public Set<Address> getAddresses() {
-		// TODO Auto-generated method stub
-		return null;
+	public Set<android.location.Address> getAddresses() {
+		return Collections.unmodifiableSet(addresses);
 	}
 
 	@Override
 	public String getComment() {
-		// TODO Auto-generated method stub
-		return null;
+		return values.get(Field.Comment.key()); 
 	}
 
 	@Override
 	public void delete() {
-		// TODO 
-
+		c.removeItem(this);
 	}
 
 	@Override
@@ -46,25 +48,17 @@ public class GenericItem extends Item {
 
 	@Override
 	public String getName() {
-		return this.name;
-	}
-
-	@Override
-	public Map<String, String> getFields() {
-		// TODO Auto-generated method stub
-		return null;
+		return values.get(Field.Name.key());
 	}
 
 	@Override
 	public String getPhoneNo() {
-		// TODO Auto-generated method stub
-		return null;
+		return values.get(Field.PhoneNumber.key());
 	}
 
 	@Override
 	public void set(String key, String value) {
-		// TODO Auto-generated method stub
-
+		values.put(key, value);
 	}
 
 	@Override

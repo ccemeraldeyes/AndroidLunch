@@ -1,5 +1,6 @@
 package we.should.list;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.List;
@@ -7,12 +8,13 @@ import java.util.Set;
 import java.util.HashSet;
 
 public class GenericCategory extends Category {
-	private Map<String, FieldType> fields;
+	private Set<Field> fields;
 	private List<Item> items; 
 	
-	public GenericCategory(String name, Map<String, FieldType> fields) {
+	public GenericCategory(String name, Set<Field> fields) {
 		super(name);
 		this.fields = fields;
+		this.items = new ArrayList<Item>();
 		
 	}
 	@Override
@@ -32,8 +34,12 @@ public class GenericCategory extends Category {
 		return this.items.add(i);
 	}
 	@Override
-	public Map<String, FieldType> getFields(){
-		return Collections.unmodifiableMap(fields);
+	public Set<Field> getFields(){
+		return Collections.unmodifiableSet(fields);
+	}
+	@Override
+	public boolean removeItem(Item i) {
+		return this.items.remove(i);
 	}
 
 }

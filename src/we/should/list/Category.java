@@ -21,7 +21,9 @@ public abstract class Category {
 	
 	public abstract boolean addItem(Item i);
 	
-	public abstract Map<String, FieldType> getFields();
+	public abstract boolean removeItem(Item i);
+	
+	public abstract Set<Field> getFields();
 	
 	static final Set<Category> getCategories(){
 		return null;
