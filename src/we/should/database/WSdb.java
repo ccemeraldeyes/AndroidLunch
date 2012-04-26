@@ -4,17 +4,24 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
+import android.database.sqlite.*;//SQLiteException;
 
 import android.util.Log;
+
+//TODO: public boolean isDatabaseIntegrityOk()
+//TODO: compile statements
+
+
 
 /**
  * WeShould Database class - contains database methods used in the 
  * 							 WeShould Android Application
+ * 
+ * NOTE: Most methods are sending Log verbose output.  Running LogCat while executing displays information.
+ * See DBexamples.txt for examples on how to call the methods and parse results.
  * @author  UW CSE403 SP12
  * 
- * most methods are sending Log verbose output.  running LogCat while executing displays information.
- * See DBexamples.txt for examples on how to call the methods and get results.
+ * 
  *
  */
 public class WSdb {
@@ -42,6 +49,7 @@ public class WSdb {
 	 * @returns true if db is open and writable, false otherwise
 	 */
 	public boolean open(){
+		
 		try {
 			db = dbhelper.getWritableDatabase();
 		} catch(SQLiteException ex) {
@@ -49,7 +57,10 @@ public class WSdb {
 			db = dbhelper.getReadableDatabase();
 			return false;
 		}
+		//TODO: this may go in create
+		db.execSQL("PRAGMA foreign_keys=ON;");
 		return true;
+	
 	}
 	
 	
@@ -83,10 +94,12 @@ public class WSdb {
 	 * @param data json code holding item schema & data
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
+	 * @
 	 */
 	
 	
 	public long insertItem(String name, int categoryId, boolean mappable, String data){
+		
 		try{
 			Log.v("WSDB.insertItem","Inserting Item");	
 			ContentValues newTaskValue = new ContentValues();
@@ -101,16 +114,16 @@ public class WSdb {
 		}
 	}
 	
-	
+	//TODO: assert color is 6digit number
 	/**
 	 * Insert a category into the database
 	 * 
 	 * @param name of category being entered
-	 * @param color unique color to identify category
+	 * @param color 6 digit RGB value of color to identify category
 	 * @param schema string to identify category schema 
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
-	 * 
+	 * @exception SQLConstraintException
 	 */
 	public long insertCategory(String name, int color, String schema){
 		try{
@@ -141,7 +154,6 @@ public class WSdb {
 			Log.v("WSdb.insertTag","inserting tag");
 			ContentValues newTaskValue = new ContentValues();
 			newTaskValue.put(TagConst.NAME, name);
-			//newTaskValue.put(TagConst.COLOR, color);
 			return db.insert(TagConst.TBL_NAME, null, newTaskValue);
 		} catch(SQLiteException ex) {
 			Log.v("InsertTag exception caught", ex.getMessage());
@@ -214,8 +226,8 @@ public class WSdb {
 	 * select * from item order by name
 	 */
 	public Cursor getAllItems(){
-		return db.query(ItemConst.TBL_NAME, null, null,
-				null, null, null, "name");
+		return db.query(ItemConst.TBL_NAME, null, null,null, null,
+						null, "name");
 	}
 	
 	/**
@@ -227,8 +239,9 @@ public class WSdb {
 	 * select * from item where id=[given id]
 	 */
 	public Cursor getItem(int itemId){
-		return db.query(ItemConst.TBL_NAME, null , ItemConst.ID + "=" + itemId,
-				null, null, null, null);
+		String where = ItemConst.ID + "=" + itemId;
+		return db.query(ItemConst.TBL_NAME, null , where, null, null,
+						null, null);
 	}
 	
 	
@@ -255,8 +268,9 @@ public class WSdb {
 	 * select * from category where id=[given id]
 	 */
 	public Cursor getCategory(int catId){
-		return db.query(CategoryConst.TBL_NAME, null, CategoryConst.ID + "=" + + catId,
-				null, null, null, null);
+		String where=CategoryConst.ID + "=" + catId;
+		return db.query(CategoryConst.TBL_NAME, null, where, null,
+						null, null, null);
 	}
 	
 	
@@ -269,8 +283,8 @@ public class WSdb {
 	 * select * from tag order by name
 	 */
 	public Cursor getAllTags(){
-		return db.query(TagConst.TBL_NAME, null, null,
-				null, null, null, "name");
+		return db.query(TagConst.TBL_NAME, null, null, null, null,
+						null, "name");
 	}
 	
 	
@@ -286,10 +300,15 @@ public class WSdb {
 	 *   and item_tag.item_id = item.id
 	 */
 	public Cursor getItemsOfTag(int tagId){
-		String sqlStatement = "Select * from " + ItemConst.TBL_NAME + 
-				" i, " + Item_TagConst.TBL_NAME + " it " +
-				"where i." + ItemConst.ID + " = it." + Item_TagConst.ITEM_ID +
-				" and it." + Item_TagConst.TAG_ID + " = " + tagId;
+		
+		String from= ItemConst.TBL_NAME + " i, " + 
+					 Item_TagConst.TBL_NAME + " it ";
+		
+		String where="i." + ItemConst.ID + " = it." + 
+					 Item_TagConst.ITEM_ID + " and it." + 
+					 Item_TagConst.TAG_ID + " = " + tagId;
+		
+		String sqlStatement = "Select * from " + from + " where " + where;
 		
 		return db.rawQuery(sqlStatement,null);
 	}
@@ -305,10 +324,16 @@ public class WSdb {
 	 * select * from item_tag where item_tag.item_id=tagId
 	 */
 	public Cursor getTagsOfItem(int itemId){
-		String sqlStatement = "Select * from " + TagConst.TBL_NAME + 
-				" t, " + Item_TagConst.TBL_NAME + " it " +
-				"where t." + TagConst.ID + " = it." + Item_TagConst.TAG_ID +
-				" and it." + Item_TagConst.ITEM_ID + " = " + itemId;
+		
+		String from = TagConst.TBL_NAME + " t, " + 
+					  Item_TagConst.TBL_NAME + " it";
+		
+		String where = "t." + TagConst.ID + " = it." + 
+					   Item_TagConst.TAG_ID + " and it." + 
+				       Item_TagConst.ITEM_ID + " = " + itemId;
+		
+		String sqlStatement = "Select * from " + from + " where " + 
+				       		   where;
 		
 		return db.rawQuery(sqlStatement,null);
 	}
@@ -406,15 +431,29 @@ public class WSdb {
 	
 	/**
 	 * deletes item with given id.  Also deletes its tag associations
-	 *
-	 * @param itemId
+	 *  
+	 * @param itemId id of item to be deleted
+	 * @return true on successful deletion, 
+	 *         false if transaction conflicts with referential 
+	 *               integrity and transaction rolled back
 	 */
-	public void deleteItem(int itemId){
-		// delete the item-tag associations
-		db.delete(Item_TagConst.TBL_NAME, 
-				  Item_TagConst.ITEM_ID + "=" + itemId, null);
-		//delete the item
-		db.delete(ItemConst.TBL_NAME, ItemConst.ID + "=" + itemId, null);
+	public boolean deleteItem(int itemId){
+		
+		db.beginTransaction();
+		try{
+			// delete the item-tag associations
+			db.delete(Item_TagConst.TBL_NAME, Item_TagConst.ITEM_ID +
+					  "=" + itemId, null);
+			//delete the item
+			db.delete(ItemConst.TBL_NAME, ItemConst.ID + "=" + itemId, 
+					null);
+		} finally{
+			if (db.inTransaction())
+				db.endTransaction();
+			else
+				return false;
+		}
+		return true;
 	}
 	
 	
@@ -464,10 +503,10 @@ public class WSdb {
 	public void fillTables(){
 		try {
 			Log.v("WSdb.fillTables","enter test data");
-			insertItem("Itemname1", 2, true, "DATA here");
-	        insertItem("Itemname2", 1, false, "DATA2 here");
 	        insertCategory("Cat 1", 123456, "schema for cat 1");
 	        insertCategory("cat 2", 654321, "schema for cat 2");
+		    insertItem("Itemname1", 2, true, "DATA here");
+	        insertItem("Itemname2", 1, false, "DATA2 here");    
 	        insertTag("tag1");
 	        insertTag("tag2");
 	        insertItem_Tag(1,2);
