@@ -1,4 +1,4 @@
-package weshould.database;
+package we.should.database;
 
 import android.content.Context;
 import android.database.SQLException;

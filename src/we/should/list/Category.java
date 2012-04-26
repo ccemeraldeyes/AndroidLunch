@@ -31,5 +31,3 @@ public abstract class Category {
 	}
 
 }
-
-

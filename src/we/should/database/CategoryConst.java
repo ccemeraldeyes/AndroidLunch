@@ -1,4 +1,4 @@
-package weshould.database;
+package we.should.database;
 
 public class CategoryConst {
 	public static final int 	DATABASE_VERSION=1;
