@@ -7,21 +7,21 @@ import java.util.Set;
 
 public class GenericItem extends Item {
 	private final Category c;
-	private Map<String, String> values;
+	private Map<Field, String> values;
 	private Set<android.location.Address> addresses;
 	
 	
 	
 	public GenericItem(Category c) {
 		this.c = c;
-		values = new HashMap<String, String>();
+		values = new HashMap<Field, String>();
 		Set<Field> fields = c.getFields();
 		for(Field i : fields){
-			values.put(i.key(), null);
+			values.put(i, null);
 		}
 		for(Field i : Field.values()) {
 			if(! values.containsKey(i.key())){
-				values.put(i.key(), null);
+				values.put(i, null);
 			}
 		}
 	}
@@ -57,7 +57,7 @@ public class GenericItem extends Item {
 	}
 
 	@Override
-	public void set(String key, String value) {
+	public void set(Field key, String value) {
 		values.put(key, value);
 	}
 

@@ -16,7 +16,7 @@ public abstract class Item {
 		
 	public abstract String getPhoneNo();
 	
-	public abstract void set(String key, String value);
+	public abstract void set(Field key, String value);
 	
 	public abstract void save();
 	
