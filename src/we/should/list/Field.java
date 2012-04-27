@@ -16,7 +16,7 @@ public enum Field {
 		this.type = f;
 		this.name = name;
 	}
-	String key(){
+	public String toString(){
 		return this.name + " " + this.type;
 	}
 	

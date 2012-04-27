@@ -8,10 +8,10 @@ import java.util.Set;
 import java.util.HashSet;
 
 public class GenericCategory extends Category {
-	private Set<Field> fields;
+	private List<Field> fields;
 	private List<Item> items; 
 	
-	public GenericCategory(String name, Set<Field> fields) {
+	public GenericCategory(String name, List<Field> fields) {
 		super(name);
 		this.fields = fields;
 		this.items = new ArrayList<Item>();
@@ -34,8 +34,8 @@ public class GenericCategory extends Category {
 		return this.items.add(i);
 	}
 	@Override
-	public Set<Field> getFields(){
-		return Collections.unmodifiableSet(fields);
+	public List<Field> getFields(){
+		return Collections.unmodifiableList(fields);
 	}
 	@Override
 	public boolean removeItem(Item i) {

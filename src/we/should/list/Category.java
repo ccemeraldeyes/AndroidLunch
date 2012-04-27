@@ -1,8 +1,7 @@
 
 package we.should.list;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Davis Shepherd
@@ -23,7 +22,7 @@ public abstract class Category {
 	
 	public abstract boolean removeItem(Item i);
 	
-	public abstract Set<Field> getFields();
+	public abstract List<Field> getFields();
 	
 	static final Set<Category> getCategories(){
 		return null;

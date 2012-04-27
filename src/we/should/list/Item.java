@@ -10,7 +10,7 @@ public abstract class Item {
 	
 	public abstract void delete();
 	
-	public abstract String get(String key);
+	public abstract String get(Field key);
 	
 	public abstract String getName();
 		
