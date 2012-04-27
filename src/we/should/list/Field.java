@@ -42,4 +42,11 @@ public class Field {
 		out.add(COMMENT);
 		return out;
 	}
+	public static List<Field> getMovieFields(){
+		List<Field> out = new LinkedList<Field>();
+		out.add(NAME);
+		out.add(RATING);
+		out.add(COMMENT);
+		return out;
+	}
 }
