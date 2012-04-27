@@ -68,7 +68,7 @@ public abstract class Item {
 	/**
 	 * Sets the value contained in the Field, key. If key is not contained in this's 
 	 * category then throws IllegalArgumentException
-	 * @param key-FieldObject that you wish to alter
+	 * @param key - FieldObject that you wish to alter
 	 * @param value - the value that will be assigned to the given field.
 	 * @exception IllegalArgumentException
 	 */
