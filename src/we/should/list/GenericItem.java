@@ -4,6 +4,8 @@ import java.util.*;
 
 
 
+
+
 public class GenericItem extends Item {
 	private final Category c;
 	private Map<Field, String> values;
@@ -12,7 +14,7 @@ public class GenericItem extends Item {
 	
 	
 	
-	public GenericItem(Category c) {
+	protected GenericItem(Category c) {
 		this.c = c;
 		values = new HashMap<Field, String>();
 		List<Field> fields = c.getFields();
