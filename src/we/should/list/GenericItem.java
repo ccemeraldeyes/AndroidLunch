@@ -19,11 +19,6 @@ public class GenericItem extends Item {
 		for(Field i : fields){
 			values.put(i, null);
 		}
-		for(Field i : Field.values()) {
-			if(! values.containsKey(i.toString())){
-				values.put(i, null);
-			}
-		}
 	}
 
 	@Override
@@ -33,7 +28,7 @@ public class GenericItem extends Item {
 
 	@Override
 	public String getComment() {
-		return values.get(Field.Comment); 
+		return values.get(Field.COMMENT); 
 	}
 
 	@Override
@@ -46,18 +41,18 @@ public class GenericItem extends Item {
 		if(c.getFields().contains(key)) {
 			return values.get(key);
 		} else {
-			throw new IllegalArgumentException(key.toString() + " is not a field of the " + c.name + " category.");
+			throw new IllegalArgumentException(key.toString() + " is not a field of the " + c.getName() + " category.");
 		}
 	}
 
 	@Override
 	public String getName() {
-		return values.get(Field.Name);
+		return values.get(Field.NAME);
 	}
 
 	@Override
 	public String getPhoneNo() {
-		return values.get(Field.PhoneNumber);
+		return values.get(Field.PHONENUMBER);
 	}
 	
 	@Override
@@ -65,7 +60,7 @@ public class GenericItem extends Item {
 		if(c.getFields().contains(key)){
 			values.put(key, value);
 		} else {
-			throw new IllegalArgumentException(key.toString() + " is not a field of the " + c.name + " category.");
+			throw new IllegalArgumentException(key.toString() + " is not a field of the " + c.getName() + " category.");
 		}
 	}
 	/**
