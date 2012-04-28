@@ -2,6 +2,7 @@ package we.should;
 
 import we.should.database.WSdb;
 import android.content.Context;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
@@ -19,7 +21,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
 	/** The TabHost that cycles between categories. **/
 	private TabHost mTabHost;
 	private MapView map;
-	private WSdb db;
 	
     /** Called when the activity is first created. */
     @Override
@@ -31,12 +32,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
         
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         this.mTabHost.setup();
-        Log.v("oncreate", "opening db");
-        db=new WSdb(this);
-        db.open();
-        db.rebuildTest();
-        db.close();
-        Log.v("oncreate","db opened");
         
         // Just spoof the tabs for the ZFR.  This would be dynamically loaded
         // once we begin work on production code.

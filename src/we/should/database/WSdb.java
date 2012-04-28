@@ -3,7 +3,6 @@ package we.should.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.*;//SQLiteException;
 
 import android.util.Log;
@@ -101,7 +100,8 @@ public class WSdb {
 	
 	
 	public long insertItem(String name, int categoryId, boolean mappable, String data){
-		
+		if (hasNoChars(name) || hasNoChars(data) || categoryId<1)
+			return -1;
 		try{
 			Log.v("WSDB.insertItem","Inserting Item");	
 			ContentValues newTaskValue = new ContentValues();
@@ -128,7 +128,18 @@ public class WSdb {
 	 * @exception ex caught SQLiteException if insert fails
 	 * @exception SQLConstraintException
 	 */
-	public long insertCategory(String name, int color, String schema){
+	public long insertCategory(String name, String color, String schema){
+		
+		//check for null and empty strings
+		if (hasNoChars(name) || hasNoChars(color) || hasNoChars(schema))
+			return -1;
+		
+		// validate color hex value
+		if (!isHexString(color) || color.length()!=6){ 
+			Log.e("WSdb.insertCategory", "color not a hex value");
+			return -1;
+		}
+		
 		try{
 			Log.v("WSdb.insertCategory","Inserting category");
 			ContentValues newTaskValue = new ContentValues();
@@ -152,6 +163,8 @@ public class WSdb {
 	 */
 	
 	public long insertTag(String name){
+		if(hasNoChars(name))
+			return -1;
 		try{
 			Log.v("WSdb.insertTag","inserting tag");
 			ContentValues newTaskValue = new ContentValues();
@@ -162,6 +175,7 @@ public class WSdb {
 			return -1;				
 		}
 	}
+	
 	
 	/**
 	 * Insert an item-tag relationship into the database- "Tag an item"
@@ -243,6 +257,21 @@ public class WSdb {
 	public Cursor getItem(int itemId){
 		String where = ItemConst.ID + "=" + itemId;
 		return db.query(ItemConst.TBL_NAME, null , where, null, null,
+						null, null);
+	}
+	
+	
+	/**
+	 * get the tag with id == tagId
+	 * 
+	 * @return cursor to the tag
+	 * 
+	 * SQL query
+	 * select * from tag where tagid=[given id]
+	 */
+	public Cursor getTag(int tagId){
+		String where = TagConst.ID + "=" + tagId;
+		return db.query(TagConst.TBL_NAME, null , where, null, null,
 						null, null);
 	}
 	
@@ -369,32 +398,49 @@ public class WSdb {
 	 * 
 	 * @param catID id of category to update
 	 * @param color new color of category
+	 * @return number of rows updated (0 if failed, 1 if success)
 	 */
-	public void UpdateCategoryColor(int catID, int color){
+	public int updateCategoryColor(int catID, String color){
+	
 		Log.v("DB.updateCatColor","change color of categoryId=" + 
-	          catID + " to #" +  color);
+		          catID + " to #" +  color);
+		if (!isHexString(color) || color.length()!=6 || catID<1)
+			return 0;
+		int affected=0;
+		//db.beginTransaction();
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(CategoryConst.COLOR, color);
 		String whereClause=CategoryConst.ID + "=" + catID;
-		db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
+		affected=db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
+		//db.endTransaction();
+		return affected;
+		
 	}
 	
 	
-	// TODO: How to handle changing category.... different schema
-	/* Change the name of a Category
+	//TODO: figure out transaction rollback 
+	
+	/** Change the name of a Category
 	 * 
 	 * @param catID id of category to update
 	 * @param newName new name of category
 	 *
-	public void UpdateCategoryName(int catID, String newName){
+	 */
+	public int updateCategoryName(int catID, String newName){
 		Log.v("DB.updateCatName","change name of categoryId=" + 
 		          catID + " to " +  newName);
+		if (hasNoChars(newName) || catID<1)
+			return 0;
+		int affected=0;
+		//db.beginTransaction();
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(CategoryConst.NAME, newName);
 		String whereClause=CategoryConst.ID + "=" + catID;
-		db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
+		affected=db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
+		
+		return affected;
 	}
-	*/
+	
 	
 	/**
 	 * Change the name of a Tag
@@ -402,13 +448,17 @@ public class WSdb {
 	 * @param tagID id of tag to update
 	 * @param newName new name of tag
 	 */
-	public void UpdateTagName(int tagID, String newName){
+	public int updateTagName(int tagID, String newName){
 		Log.v("DB.updateTagName","change name of tagId=" + 
 		          tagID + " to " +  newName);
+		if (hasNoChars(newName) || tagID<1)
+			return 0;
+		int affected=0;
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(TagConst.NAME, newName);
 		String whereClause=TagConst.ID + "=" + tagID;
-		db.update(TagConst.TBL_NAME, updateValue, whereClause, null);
+		affected = db.update(TagConst.TBL_NAME, updateValue, whereClause, null);
+		return affected;
 	}
 	
 	/**
@@ -417,19 +467,25 @@ public class WSdb {
 	 * @param itemID id of item to update
 	 * @param newName new name of item
 	 */
-	public void UpdateItemName(int itemID, String newName){
+	public int updateItemName(int itemID, String newName){
 		Log.v("DB.updateItemName","change name of itemId=" + 
 		          itemID + " to " +  newName);
+		
+		if (hasNoChars(newName) || itemID<1)
+			return 0;
+		
+		int affected=0;
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(ItemConst.NAME, newName);
 		String whereClause=ItemConst.ID + "=" + itemID;
-		db.update(ItemConst.TBL_NAME, updateValue, whereClause, null);
+		affected=db.update(ItemConst.TBL_NAME, updateValue, whereClause, null);
+		return affected;
 	}
+	
 	
 	
 	/****************************************************************
 	 *                         Deletes
-	 *          Note: items are deleted from DB only, not memory
 	 ***************************************************************/
 	
 	
@@ -491,6 +547,14 @@ public class WSdb {
 	 * 				Rebuild database and fill with test data
 	 ***************************************************************/
 	
+	
+	public void rebuildTables(){
+		dbhelper.dropAllTables(db);
+		dbhelper.createTables(db);
+	}
+	
+	
+	
 	/**
 	 * Drops tables, re-creates them and fills with sample data
 	 */
@@ -507,8 +571,8 @@ public class WSdb {
 	public void fillTables(){
 		try {
 			Log.v("WSdb.fillTables","enter test data");
-	        insertCategory("Cat 1", 123456, "schema for cat 1");
-	        insertCategory("cat 2", 654321, "schema for cat 2");
+	        insertCategory("Cat 1", "123456", "schema for cat 1");
+	        insertCategory("cat 2", "654321", "schema for cat 2");
 		    insertItem("Itemname1", 2, true, "DATA here");
 	        insertItem("Itemname2", 1, false, "DATA2 here");    
 	        insertTag("tag1");
@@ -519,5 +583,57 @@ public class WSdb {
 			Log.v("NotesDB.fillTables exception: ", e.getMessage());
 		}
 	}	
+	
+	
+	/****************************************************************
+	 * 						Helper Functions
+	 ***************************************************************/
+	
+	/**
+	 * Test a character to see if it is a hex value
+	 * 
+	 * @param c character to test if hex value
+	 * @return true if c is a hex value, false otherwise
+	 */
+	public static boolean isHexChar(char c){
+		c= Character.toUpperCase(c);
+		if (Character.isDigit(c) || c>='A' && c<='F')
+			return true;
+		else 
+			return false;
+	}
+	
+	
+	/**
+	 * Test a string to see if in contains strictly Hex characters
+	 * 
+	 * @param str String to test if hex value
+	 * @return true if str is a hex value, false if null or otherwise
+	 */
+	public static boolean isHexString(String str){
+		if(hasNoChars(str))
+			return false;
+		for (int i=0; i < str.length(); i++){
+			if(!isHexChar(str.charAt(i)))
+				return false;
+		}		
+		return true;
+	}
+	
+	/**
+	 * 
+	 * @param str
+	 * @return true on empty or whitespace, false on null or other
+	 */
+	public static boolean hasNoChars(String str){
+		if (str==null) return true;
+	
+		//remove all white space
+		str=str.replaceAll("\\s+", "");	
+		if (str.length()==0) return true;
+		
+		return false;
+	}
+	
 }
 
