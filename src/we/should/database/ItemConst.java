@@ -1,4 +1,4 @@
-package weshould.database;
+package we.should.database;
 
 /**
  * Contains Constant values for the list items database table
