@@ -32,14 +32,9 @@ public class GenericItem extends Item {
 
 	@Override
 	public Set<Address> getAddresses(Context c) throws IOException {
-		Geocoder g = new Geocoder(c);
+		Geocoder g = new Geocoder(c, Locale.ENGLISH);
 		String address = this.get(Field.ADDRESS);
-		List<Address> out = null;
-		try{
-			out =  g.getFromLocationName(address, 1);
-		} catch(IOException ioE){
-			throw ioE;
-		}
+		List<Address> out =  g.getFromLocationName(address, 1);
 		return new HashSet<Address>(out);
 	}
 
