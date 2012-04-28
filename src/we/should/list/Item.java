@@ -20,14 +20,18 @@
  */
 package we.should.list;
 
+import java.io.IOException;
 import java.util.Set;
+
+import android.content.Context;
 
 public abstract class Item {
 	
 	/**
 	 * @return a set of Address objects corresponding to the location(s) of this.
+	 * @throws IOException 
 	 */
-	public abstract Set<android.location.Address> getAddresses();
+	public abstract Set<android.location.Address> getAddresses(Context c) throws IOException;
 	
 	/**
 	 * 
