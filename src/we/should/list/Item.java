@@ -10,13 +10,13 @@ public abstract class Item {
 	
 	public abstract void delete();
 	
-	public abstract String get(String key);
+	public abstract String get(Field key);
 	
 	public abstract String getName();
 		
 	public abstract String getPhoneNo();
 	
-	public abstract void set(String key, String value);
+	public abstract void set(Field key, String value);
 	
 	public abstract void save();
 	

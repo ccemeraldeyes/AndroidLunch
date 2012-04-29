@@ -1,17 +1,13 @@
 package we.should.list;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
+
 
 public class GenericCategory extends Category {
-	private Set<Field> fields;
+	private List<Field> fields;
 	private List<Item> items; 
 	
-	public GenericCategory(String name, Set<Field> fields) {
+	public GenericCategory(String name, List<Field> fields) {
 		super(name);
 		this.fields = fields;
 		this.items = new ArrayList<Item>();
@@ -30,15 +26,15 @@ public class GenericCategory extends Category {
 	}
 	
 	@Override
-	public boolean addItem(Item i) {
+	protected boolean addItem(Item i) {
 		return this.items.add(i);
 	}
 	@Override
-	public Set<Field> getFields(){
-		return Collections.unmodifiableSet(fields);
+	public List<Field> getFields(){
+		return Collections.unmodifiableList(fields);
 	}
 	@Override
-	public boolean removeItem(Item i) {
+	protected boolean removeItem(Item i) {
 		return this.items.remove(i);
 	}
 
