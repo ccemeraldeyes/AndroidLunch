@@ -8,9 +8,6 @@ import android.database.sqlite.*;//SQLiteException;
 import android.util.Log;
 
 //TODO: public boolean isDatabaseIntegrityOk()
-//TODO: compile statements
-
-
 
 /**
  * WeShould Database class - contains database methods used in the 
@@ -116,8 +113,7 @@ public class WSdb {
 		}
 	}
 	
-	
-	//TODO: assert color is 6 digit hex number
+
 	/**
 	 * Insert a category into the database
 	 * 
@@ -371,6 +367,22 @@ public class WSdb {
 		return db.rawQuery(sqlStatement,null);
 	}
 	
+	
+	/**
+	 * get all items of the given category
+	 * 
+	 * @param catId id if the category
+	 * @return cursor to all items in this category
+	 * 
+	 * select * from item where cat_id=[given id]
+	 */
+	public Cursor getItemsOfCategory(int catId){
+		String where=ItemConst.CAT_ID + "=" + catId;
+		return db.query(ItemConst.TBL_NAME, null, where, null,
+						null, null, null);
+	}
+	
+	
 		
 	
 	//TODO: great for testing, should remove for release
@@ -522,9 +534,20 @@ public class WSdb {
 	 *
 	 * @param catId id of the category to be deleted
 	 */
-	public void deleteCategory(int catId){
-		db.delete(CategoryConst.TBL_NAME,  CategoryConst.ID + "=" + 
-					catId, null);
+	public boolean deleteCategory(int catId){
+		
+		// do not delete category if there are items associated with it
+		Cursor c = getItemsOfCategory(catId);
+		if (c.getCount()>0) return false;
+		
+		int affected = db.delete(CategoryConst.TBL_NAME,  
+				       CategoryConst.ID + "=" + catId, null);
+		
+		// if no rows deleted, return false
+		if (affected>0)
+			return true;
+
+		return false;
 	}
 	
 	
