@@ -3,14 +3,10 @@ package we.should.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.*;//SQLiteException;
-
+import android.database.sqlite.*;
 import android.util.Log;
 
-//TODO: public boolean isDatabaseIntegrityOk()
-//TODO: compile statements
-
-
+//TODO: add transactions & rollbacks?? 
 
 /**
  * WeShould Database class - contains database methods used in the 
@@ -26,7 +22,7 @@ import android.util.Log;
 public class WSdb {
 	private SQLiteDatabase db; 
 	private final Context context;
-	private DBHelper dbhelper; // database helper object
+	private DBHelper dbhelper;
 	
 
 	/**
@@ -57,10 +53,8 @@ public class WSdb {
 			db = dbhelper.getReadableDatabase();
 			return false;
 		}
-		//TODO: this may go in create
 		db.execSQL("PRAGMA foreign_keys=ON;");
 		return true;
-	
 	}
 	
 	
@@ -116,8 +110,7 @@ public class WSdb {
 		}
 	}
 	
-	
-	//TODO: assert color is 6 digit hex number
+
 	/**
 	 * Insert a category into the database
 	 * 
@@ -289,6 +282,7 @@ public class WSdb {
 				null, null, null, "name");
 	}
 	
+	
 	/**
 	 * get the category with id=catId
 	 * 
@@ -371,6 +365,22 @@ public class WSdb {
 		return db.rawQuery(sqlStatement,null);
 	}
 	
+	
+	/**
+	 * get all items of the given category
+	 * 
+	 * @param catId id if the category
+	 * @return cursor to all items in this category
+	 * 
+	 * select * from item where cat_id=[given id]
+	 */
+	public Cursor getItemsOfCategory(int catId){
+		String where=ItemConst.CAT_ID + "=" + catId;
+		return db.query(ItemConst.TBL_NAME, null, where, null,
+						null, null, null);
+	}
+	
+	
 		
 	
 	//TODO: great for testing, should remove for release
@@ -394,7 +404,7 @@ public class WSdb {
 	 ***************************************************************/
 	
 	/**
-	 * Change the color of a Cagetory
+	 * Change the color of a Category
 	 * 
 	 * @param catID id of category to update
 	 * @param color new color of category
@@ -407,18 +417,15 @@ public class WSdb {
 		if (!isHexString(color) || color.length()!=6 || catID<1)
 			return 0;
 		int affected=0;
-		//db.beginTransaction();
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(CategoryConst.COLOR, color);
 		String whereClause=CategoryConst.ID + "=" + catID;
 		affected=db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
-		//db.endTransaction();
 		return affected;
 		
 	}
 	
 	
-	//TODO: figure out transaction rollback 
 	
 	/** Change the name of a Category
 	 * 
@@ -432,12 +439,10 @@ public class WSdb {
 		if (hasNoChars(newName) || catID<1)
 			return 0;
 		int affected=0;
-		//db.beginTransaction();
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(CategoryConst.NAME, newName);
 		String whereClause=CategoryConst.ID + "=" + catID;
 		affected=db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
-		
 		return affected;
 	}
 	
@@ -522,9 +527,20 @@ public class WSdb {
 	 *
 	 * @param catId id of the category to be deleted
 	 */
-	public void deleteCategory(int catId){
-		db.delete(CategoryConst.TBL_NAME,  CategoryConst.ID + "=" + 
-					catId, null);
+	public boolean deleteCategory(int catId){
+		
+		// do not delete category if there are items associated with it
+		Cursor c = getItemsOfCategory(catId);
+		if (c.getCount()>0) return false;
+		
+		int affected = db.delete(CategoryConst.TBL_NAME,  
+				       CategoryConst.ID + "=" + catId, null);
+		
+		// if no rows deleted, return false
+		if (affected>0)
+			return true;
+		else
+			return false;
 	}
 	
 	
@@ -533,12 +549,25 @@ public class WSdb {
 	 *
 	 * @param tagId id of tag to be deleted
 	 */
-	public void deleteTag(int tagId){
+	public boolean deleteTag(int tagId){
 		// delete the item-tag associations
-		db.delete(Item_TagConst.TBL_NAME, 
+		int affected = db.delete(Item_TagConst.TBL_NAME, 
 				  Item_TagConst.TAG_ID + "=" + tagId, null);
-		//delete the item
-		db.delete(TagConst.TBL_NAME, TagConst.ID + "=" + tagId, null);
+		
+		Log.v("WSdb.deleteTag",
+			  "deleted " + affected + " item tag associations");
+		
+		//delete the Tag
+		affected=db.delete(TagConst.TBL_NAME, 
+				           TagConst.ID + "=" + tagId, null);
+		
+		Log.v("WSdb.deleteTag","deleted " + affected + " tags");
+		
+		if (affected > 0)
+			return true;
+		else
+			return false;
+
 	}
 	
 	
