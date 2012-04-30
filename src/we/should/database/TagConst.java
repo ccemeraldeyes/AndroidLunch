@@ -6,6 +6,7 @@ public class TagConst {
 								TBL_NAME="tag",
 								ID="id", // unique id
 								NAME="name";
+								//COLOR="color";
 								
 }
 

@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 
 public class Splash extends Activity{
+
+	
+	// Lawrence Comment
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -14,7 +17,7 @@ public class Splash extends Activity{
 		Thread timer = new Thread() {
 			public void run() {
 				try {
-					sleep(2000);
+					sleep(5000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} finally {

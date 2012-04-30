@@ -15,34 +15,32 @@ import android.util.Log;
  */
 public class DBHelper extends SQLiteOpenHelper{
 
-	// Create table strings
+	// Create table strings - SQL string to create each table
+	private static final String CREATE_TABLE_ITEM="create table " +
+			ItemConst.TBL_NAME + " (" +
+			ItemConst.ID +" integer primary key autoincrement, "+
+			ItemConst.NAME + " text not null, " +
+			ItemConst.CAT_ID + " integer not null, " +
+			ItemConst.MAPPABLE +  " bool not null, " +
+			ItemConst.DATA + " text not null);";
+	
 	private static final String CREATE_TABLE_CATEGORY="create table " +
 			CategoryConst.TBL_NAME + " (" +
 			CategoryConst.ID + " integer primary key autoincrement, " +
-			CategoryConst.NAME + " text UNIQUE not null, " +
-			CategoryConst.COLOR + " text not null, " + //rgb value 6 digit hex
+			CategoryConst.NAME + " text not null, " +
+			CategoryConst.COLOR + " integer not null, " +
 			CategoryConst.SCHEMA + " schema text not null);";
 	
 	private static final String CREATE_TABLE_TAG="create table " +
 			TagConst.TBL_NAME + " ("+
 			TagConst.ID + " integer primary key autoincrement, " +
-			TagConst.NAME + " text UNIQUE not null);";
-	
-	private static final String CREATE_TABLE_ITEM="create table " +
-			ItemConst.TBL_NAME + " (" +
-			ItemConst.ID +" integer primary key autoincrement, "+
-			ItemConst.NAME + " text UNIQUE not null, " +
-			ItemConst.CAT_ID + " integer references " + 
-			  CategoryConst.TBL_NAME + "(" + CategoryConst.ID + "), " +
-			ItemConst.MAPPABLE +  " bool not null, " +
-			ItemConst.DATA + " text not null);";
+			TagConst.NAME + " text not null);";//, " +
+			//TagConst.COLOR +" integer not null);";
 	
 	private static final String CREATE_TABLE_ITEMTAG="create table " +
 			Item_TagConst.TBL_NAME + " (" +
-			Item_TagConst.ITEM_ID + " integer references " + 
-				ItemConst.TBL_NAME + "(" + ItemConst.ID + "), " +
-			Item_TagConst.TAG_ID + " integer references " + 
-				TagConst.TBL_NAME + "(" + TagConst.ID +"));";
+			Item_TagConst.ITEM_ID + " integer not null, " +
+			Item_TagConst.TAG_ID + " integer not null);";
 	
 	
 	/**
@@ -73,6 +71,7 @@ public class DBHelper extends SQLiteOpenHelper{
 		}
 	}
 	
+	
 
 	@Override
 	/**
@@ -91,16 +90,6 @@ public class DBHelper extends SQLiteOpenHelper{
 			onCreate(db);
 	}
 	
-	
-	@Override
-	/**
-	 * @param db database being opened
-	 */
-	public void onOpen(SQLiteDatabase db) {
-		super.onOpen(db);
-	}
-	
-	
 	/**
 	 * dropAllTables - remove all db tables
 	 * All data will be lost
@@ -110,11 +99,11 @@ public class DBHelper extends SQLiteOpenHelper{
 		Log.v("DBHelper.dropAllTables", "Dropping all tables");
 	
 		try {
-			// drop order matters to satisfy constraints
-			db.execSQL("drop table if exists "+ Item_TagConst.TBL_NAME);
 			db.execSQL("drop table if exists "+ ItemConst.TBL_NAME);
 			db.execSQL("drop table if exists "+ CategoryConst.TBL_NAME);
 			db.execSQL("drop table if exists "+ TagConst.TBL_NAME);
+			db.execSQL("drop table if exists "+ Item_TagConst.TBL_NAME);
+
 		} catch (SQLException e) {
 			Log.v("DBHelper.dropAllTables","Ooops! Error");
 			e.printStackTrace();
@@ -122,10 +111,9 @@ public class DBHelper extends SQLiteOpenHelper{
 		Log.v("DBhelper.dropAllTables", "Exiting in good status");
 	}
 	
-	
 	/**
+	 * 
 	 * create all tables
-	 *
 	 * @param db name of database
 	 */
 	public void createTables(SQLiteDatabase db){
@@ -139,7 +127,6 @@ public class DBHelper extends SQLiteOpenHelper{
 			Log.v("DBHelper.createTables exception", ex.getMessage());
 		}
 	}
-	
 	
 	/**
 	 * Rebuild database - drops all tables and recreates them
