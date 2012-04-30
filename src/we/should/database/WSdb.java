@@ -57,7 +57,6 @@ public class WSdb {
 		//TODO: this may go in create
 		db.execSQL("PRAGMA foreign_keys=ON;");
 		return true;
-	
 	}
 	
 	
