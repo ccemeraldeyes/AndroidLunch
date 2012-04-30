@@ -1,18 +1,27 @@
 package we.should.list;
 
+import java.io.IOException;
 import java.util.*;
+
+import we.should.Splash;
+
+
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
+
+
 
 
 
 public class GenericItem extends Item {
 	private final Category c;
 	private Map<Field, String> values;
-	private Set<android.location.Address> addresses;
 	private boolean added = false;
 	
 	
 	
-	public GenericItem(Category c) {
+	protected GenericItem(Category c) {
 		this.c = c;
 		values = new HashMap<Field, String>();
 		List<Field> fields = c.getFields();
@@ -22,8 +31,11 @@ public class GenericItem extends Item {
 	}
 
 	@Override
-	public Set<android.location.Address> getAddresses() {
-		return Collections.unmodifiableSet(addresses);
+	public Set<Address> getAddresses(Context c) throws IOException {
+		Geocoder g = new Geocoder(c, Locale.ENGLISH);
+		String address = this.get(Field.ADDRESS);
+		List<Address> out =  g.getFromLocationName(address, 1);
+		return new HashSet<Address>(out);
 	}
 
 	@Override
