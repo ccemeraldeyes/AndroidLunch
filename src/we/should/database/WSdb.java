@@ -12,13 +12,14 @@ import android.util.Log;
  * WeShould Database class - contains database methods used in the 
  * 							 WeShould Android Application<br/>
  * 
- * NOTE: Most methods are sending Log verbose output.  Running LogCat while executing displays information.
- * See DBexamples.txt for examples on how to call the methods and parse results.
- * @author  UW CSE403 SP12
+ * NOTE: Most methods are sending Log verbose output.  Running LogCat 
+ * 		 while executing displays information.  See DBexamples.txt for 
+ * 		 examples on how to call the methods and parse results.
  * 
- * 
- *
+ * @author  Troy Schuring
+ * 			UW CSE403 SP12
  */
+
 public class WSdb {
 	private SQLiteDatabase db; 
 	private final Context context;
