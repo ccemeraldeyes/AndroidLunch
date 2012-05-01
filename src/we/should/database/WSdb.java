@@ -19,10 +19,8 @@ import android.util.Log;
  * NOTE: Most methods are sending Log verbose output.  Running LogCat while executing displays information.
  * See DBexamples.txt for examples on how to call the methods and parse results.
  * @author  UW CSE403 SP12
- * 
- * 
- *
  */
+
 public class WSdb {
 	private SQLiteDatabase db; 
 	private final Context context;
@@ -370,6 +368,21 @@ public class WSdb {
 		
 		return db.rawQuery(sqlStatement,null);
 	}
+	
+	/**
+	 * get all items of the given category
+	 * 
+	 * @param catId id if the category
+	 * @return cursor to all items in this category
+	 * 
+	 * select * from item where cat_id=[given id]
+	 */
+	public Cursor getItemsOfCategory(int catId){
+		String where=ItemConst.CAT_ID + "=" + catId;
+		return db.query(ItemConst.TBL_NAME, null, where, null,
+						null, null, null);
+	}
+	
 	
 		
 	
