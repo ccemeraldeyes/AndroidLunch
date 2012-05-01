@@ -6,9 +6,6 @@
 
     <uses-sdk android:minSdkVersion="8" />
     <uses-permission android:name="android.permission.INTERNET"/>
-	<instrumentation android:name="android.test.InstrumentationTestRunner"
-    android:targetPackage="we.should.test"
-    android:label="Unit Tests" />
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
