@@ -1,7 +1,8 @@
 package we.should;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import android.content.Context;
 import android.location.Criteria;
@@ -10,7 +11,13 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TabHost;
+import android.widget.TabHost.TabContentFactory;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
@@ -45,20 +52,20 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
         // once we begin work on production code.
         // pittsw: 4/20/12
         TabHost.TabSpec spec;
-        View view;
+        TabPopulator tp = new TabPopulator();
         spec = mTabHost.newTabSpec("restaurants").setIndicator("  Restaurants  ")
-        		.setContent(android.R.id.list);
+        		.setContent(tp);
         mTabHost.addTab(spec);
         spec = mTabHost.newTabSpec("movies").setIndicator("  Movies  ")
-        		.setContent(android.R.id.list);
+        		.setContent(tp);
         mTabHost.addTab(spec);
         spec = mTabHost.newTabSpec("other").setIndicator("  Other  ")
-        		.setContent(android.R.id.list);
+        		.setContent(tp);
         mTabHost.addTab(spec);
         
         for (int i = 0; i < 10; i++) {
 	        spec = mTabHost.newTabSpec("other").setIndicator("  Other " + i + "  ")
-	        		.setContent(android.R.id.list);
+	        		.setContent(tp);
 	        mTabHost.addTab(spec);
         }
 
@@ -109,7 +116,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
 		GeoPoint ourLocation = new GeoPoint(devX, devY);
 		controller.animateTo(ourLocation);
 	}
-
 	
 	//We will handle this later.
 	public void onProviderDisabled(String provider) {		
@@ -122,6 +128,34 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
 	@Override
 	protected boolean isRouteDisplayed() {
 		return false;
+	}
+	
+	private class TabPopulator implements TabContentFactory {
+		
+		private final String[] DATA = {
+		    "Afghanistan", "Albania", "Algeria"
+		  };
+
+		public View createTabContent(String tag) {
+			ListView lv = new ListView(getApplicationContext());
+			
+			List<String> list = new ArrayList<String>(Arrays.asList(DATA));
+			list.add(0, tag);
+			lv.setAdapter(new ArrayAdapter<String>(getApplicationContext(),
+					      android.R.layout.simple_list_item_1, list));
+			
+			lv.setOnItemClickListener(new OnItemClickListener() {
+			    public void onItemClick(AdapterView<?> parent, View view,
+			        int position, long id) {
+			      // When clicked, show a toast with the TextView text
+			      Toast.makeText(getApplicationContext(), ((TextView) view).getText(),
+			          Toast.LENGTH_SHORT).show();
+			    }
+			  });
+			
+			return lv;
+		}
+		
 	}
     
 }
