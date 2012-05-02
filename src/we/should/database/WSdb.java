@@ -3,14 +3,9 @@ package we.should.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.*;//SQLiteException;
+import android.database.sqlite.*;
 
 import android.util.Log;
-
-//TODO: public boolean isDatabaseIntegrityOk()
-//TODO: compile statements
-
-
 
 /**
  * WeShould Database class - contains database methods used in the 
@@ -18,13 +13,13 @@ import android.util.Log;
  * 
  * NOTE: Most methods are sending Log verbose output.  Running LogCat while executing displays information.
  * See DBexamples.txt for examples on how to call the methods and parse results.
- * @author  UW CSE403 SP12
+ * @author  Troy Schuring - UW CSE403 SP12
  */
 
 public class WSdb {
 	private SQLiteDatabase db; 
 	private final Context context;
-	private DBHelper dbhelper; // database helper object
+	private DBHelper dbhelper;
 	
 
 	/**
@@ -47,7 +42,6 @@ public class WSdb {
 	 * @return true if db is open and writable, false otherwise
 	 */
 	public boolean open(){
-		
 		try {
 			db = dbhelper.getWritableDatabase();
 		} catch(SQLiteException ex) {
@@ -55,10 +49,8 @@ public class WSdb {
 			db = dbhelper.getReadableDatabase();
 			return false;
 		}
-		//TODO: this may go in create
 		db.execSQL("PRAGMA foreign_keys=ON;");
 		return true;
-	
 	}
 	
 	
@@ -81,7 +73,7 @@ public class WSdb {
 	
 	
 	/****************************************************************
-	 *                        Insert Methods
+	 *                      Insert Methods
 	 ***************************************************************/
 	
 	/**
@@ -93,10 +85,7 @@ public class WSdb {
 	 * @param data json code holding item schema & data
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
-	 * 
 	 */
-	
-	
 	public long insertItem(String name, int categoryId, boolean mappable, String data){
 		if (hasNoChars(name) || hasNoChars(data) || categoryId<1)
 			return -1;
@@ -115,7 +104,6 @@ public class WSdb {
 	}
 	
 	
-	//TODO: assert color is 6 digit hex number
 	/**
 	 * Insert a category into the database
 	 * 
@@ -159,7 +147,6 @@ public class WSdb {
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
 	 */
-	
 	public long insertTag(String name){
 		if(hasNoChars(name))
 			return -1;
@@ -182,7 +169,6 @@ public class WSdb {
 	 * @param tagID key id of tag to be placed on item
 	 * @return row ID of newly inserted row, or -1 if an error occurred
 	 * @exception ex caught SQLiteException if insert fails
-	 * 
 	 */
 	public long insertItem_Tag(int itemID, int tagID){
 		try{
@@ -369,6 +355,7 @@ public class WSdb {
 		return db.rawQuery(sqlStatement,null);
 	}
 	
+	
 	/**
 	 * get all items of the given category
 	 * 
@@ -383,8 +370,6 @@ public class WSdb {
 						null, null, null);
 	}
 	
-	
-		
 	
 	//TODO: great for testing, should remove for release
 	/**
@@ -414,38 +399,35 @@ public class WSdb {
 	 * @return number of rows updated (0 if failed, 1 if success)
 	 */
 	public int updateCategoryColor(int catID, String color){
-	
 		Log.v("DB.updateCatColor","change color of categoryId=" + 
 		          catID + " to #" +  color);
+		
 		if (!isHexString(color) || color.length()!=6 || catID<1)
 			return 0;
+		
 		int affected=0;
-		//db.beginTransaction();
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(CategoryConst.COLOR, color);
 		String whereClause=CategoryConst.ID + "=" + catID;
 		affected=db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
-		//db.endTransaction();
 		return affected;
 		
 	}
 	
 	
-	//TODO: figure out transaction rollback 
-	
 	/** Change the name of a Category
 	 * 
 	 * @param catID id of category to update
 	 * @param newName new name of category
-	 *
 	 */
 	public int updateCategoryName(int catID, String newName){
 		Log.v("DB.updateCatName","change name of categoryId=" + 
 		          catID + " to " +  newName);
+		
 		if (hasNoChars(newName) || catID<1)
 			return 0;
+		
 		int affected=0;
-		//db.beginTransaction();
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(CategoryConst.NAME, newName);
 		String whereClause=CategoryConst.ID + "=" + catID;
@@ -464,8 +446,10 @@ public class WSdb {
 	public int updateTagName(int tagID, String newName){
 		Log.v("DB.updateTagName","change name of tagId=" + 
 		          tagID + " to " +  newName);
+		
 		if (hasNoChars(newName) || tagID<1)
 			return 0;
+		
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(TagConst.NAME, newName);
@@ -498,7 +482,7 @@ public class WSdb {
 	
 	
 	/****************************************************************
-	 *                         Deletes
+	 *                          Deletes
 	 ***************************************************************/
 	
 	
@@ -508,7 +492,7 @@ public class WSdb {
 	 * @param itemId id of item to be deleted
 	 * @return true on successful deletion, 
 	 *         false if transaction conflicts with referential 
-	 *               integrity and transaction rolled back
+	 *         integrity and transaction rolled back
 	 */
 	public boolean deleteItem(int itemId){
 		
@@ -529,15 +513,26 @@ public class WSdb {
 		return true;
 	}
 	
-	// TODO: items with this category?
+	
 	/**
 	 * deletes Category with given id.  
 	 *
 	 * @param catId id of the category to be deleted
+	 * @return true if category deleted, false otherwise
 	 */
-	public void deleteCategory(int catId){
-		db.delete(CategoryConst.TBL_NAME,  CategoryConst.ID + "=" + 
-					catId, null);
+	public boolean deleteCategory(int catId){
+		// do not delete category if there are items associated with it		
+		Cursor c = getItemsOfCategory(catId);
+		if (c.getCount()>0) return false;
+		
+		int affected = db.delete(CategoryConst.TBL_NAME,
+				       CategoryConst.ID + "=" + catId, null);		
+		
+		// if no rows deleted, return false
+		if (affected>0)
+			return true;
+		else
+			return false;	
 	}
 	
 	
@@ -545,27 +540,37 @@ public class WSdb {
 	 * deletes tag with given id.  Also deletes its item_tag associations
 	 *
 	 * @param tagId id of tag to be deleted
+	 * @return true if tag deleted, false otherwise
 	 */
-	public void deleteTag(int tagId){
-		// delete the item-tag associations
-		db.delete(Item_TagConst.TBL_NAME, 
-				  Item_TagConst.TAG_ID + "=" + tagId, null);
-		//delete the item
-		db.delete(TagConst.TBL_NAME, TagConst.ID + "=" + tagId, null);
+	public boolean deleteTag(int tagId){
+		// delete the item-tag associations		
+		int affected = db.delete(Item_TagConst.TBL_NAME,
+				Item_TagConst.TAG_ID + "=" + tagId, null);		
+		Log.v("WSdb.deleteTag",
+			  "deleted " + affected + " item tag associations");		
+		//delete the Tag		
+		affected=db.delete(TagConst.TBL_NAME, 
+				TagConst.ID + "=" + tagId, null);		
+		Log.v("WSdb.deleteTag","deleted " + affected + " tags");
+		if (affected > 0)			
+			return true;		
+		else			
+			return false;	
 	}
 	
 	
 	/****************************************************************
-	 * 						Testing
-	 * 				Rebuild database and fill with test data
+	 *                          Testing
+	 *         Rebuild database and fill with test data
 	 ***************************************************************/
 	
-	
+	/**
+	 * drop all tables and then create all tables
+	 */
 	public void rebuildTables(){
 		dbhelper.dropAllTables(db);
 		dbhelper.createTables(db);
 	}
-	
 	
 	
 	/**
@@ -599,7 +604,7 @@ public class WSdb {
 	
 	
 	/****************************************************************
-	 * 						Helper Functions
+	 *                     Helper Functions
 	 ***************************************************************/
 	
 	/**
@@ -624,18 +629,20 @@ public class WSdb {
 	 * @return true if str is a hex value, false if null or otherwise
 	 */
 	public static boolean isHexString(String str){
-		if(hasNoChars(str))
-			return false;
+		if(hasNoChars(str)) return false;
+		
 		for (int i=0; i < str.length(); i++){
 			if(!isHexChar(str.charAt(i)))
 				return false;
-		}		
+		}
+		
 		return true;
 	}
 	
 	/**
+	 * Check the given string for any character other than space
 	 * 
-	 * @param str
+	 * @param str string to check
 	 * @return true on empty or whitespace, false on null or other
 	 */
 	public static boolean hasNoChars(String str){
@@ -647,6 +654,4 @@ public class WSdb {
 		
 		return false;
 	}
-	
 }
-
