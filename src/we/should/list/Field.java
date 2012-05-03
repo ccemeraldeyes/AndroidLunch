@@ -3,7 +3,13 @@ package we.should.list;
 import java.util.*;
 
 import we.should.list.FieldType;
-
+/**
+ * 
+ * @author Davis
+ * This is a helper class that is used to inform the UI how to render different fields
+ * in each item/category. It contains simply a name and a field type.
+ *
+ */
 public class Field {
 	public static final Field NAME = new Field("name", FieldType.TextField);
 	public static final Field PHONENUMBER = new Field("phoneNumber", FieldType.TextField);
@@ -42,6 +48,10 @@ public class Field {
 		out.add(COMMENT);
 		return out;
 	}
+	/**
+	 * Returns a list of Fields associated with the Movie category
+	 * @return a list of relevant Movie fields.
+	 */
 	public static List<Field> getMovieFields(){
 		List<Field> out = new LinkedList<Field>();
 		out.add(NAME);

@@ -47,6 +47,11 @@ public abstract class Item {
 	public abstract void delete();
 	
 	/**
+	 * Returns the category of this item
+	 * @return the category object associated with this item.
+	 */
+	public abstract Category getCategory();
+	/**
 	 * Returns the value contained in the given field, only if the given field is
 	 * part of this items category, otherwise throws illegal argument exception.
 	 * @param key 
