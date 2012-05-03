@@ -7,9 +7,9 @@ package we.should.database;
  */
 public class TagConst {
 	public static final int 	DATABASE_VERSION=1;
-	public static final String 	DATABASE_NAME="WeShould.db",
-								TBL_NAME="tag",
-								ID="id",
-								NAME="name";
+	public static final String 	DATABASE_NAME="WeShould.db",// filename on device
+								TBL_NAME="tag",				// table name
+								ID="id",					// unique id
+								NAME="name";				// tag name
 }
 
