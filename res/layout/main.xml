@@ -15,7 +15,7 @@
 		    android:clickable="true"
 		    android:layout_weight="1"
 	     	android:state_enabled="true"
-		    android:apiKey="0vP08l5PbglWjRr57dC3YMejBwVm1beO9_BtklA" />
+		    android:apiKey="0DoNDgNVMWMt9SQbYRPf0stllVK-L5wbl8773sA" />
         <HorizontalScrollView
                 android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
