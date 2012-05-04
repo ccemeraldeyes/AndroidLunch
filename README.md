@@ -1,1 +1,2 @@
-This will serve as our readme File for our project including build instructions and usage notes.
+User Documentation --> https://github.com/ccemeraldeyes/AndroidLunch/wiki/User-documentation
+Developer Documentation --> https://github.com/ccemeraldeyes/AndroidLunch/wiki/Developer-documentation
