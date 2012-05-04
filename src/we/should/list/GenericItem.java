@@ -10,7 +10,21 @@ import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 
-
+/**
+ * 
+ * @author Davis
+ * This class represents an entry in a user's we should list. It contains all 
+ * of the user entered metadata regarding a location or activity, and is linked
+ * to the Category object that created it.  The fields of this are limited to the
+ * fields defined in the Category factory that created it.
+ * 
+ * Representation Invariants:
+ * 		
+ * 		added <---> c.contains(this)
+ * 		
+ * 		values.keys() == c.fields
+ * 
+ */
 
 
 
@@ -28,8 +42,16 @@ public class GenericItem extends Item {
 		for(Field i : fields){
 			values.put(i, null);
 		}
+		checkRep();
 	}
-
+	/**
+	 * asserts that the representation invariant is held.
+	 */
+	private void checkRep(){
+		if(added) assert(c.getItems().contains(this));
+		else assert(!c.getItems().contains(this));
+		assert(new HashSet<Field>(c.getFields()).equals(values.keySet()));
+	}
 	@Override
 	public Set<Address> getAddresses(Context c) throws IOException {
 		Geocoder g = new Geocoder(c, Locale.ENGLISH);
@@ -74,6 +96,8 @@ public class GenericItem extends Item {
 		} else {
 			throw new IllegalArgumentException(key.toString() + " is not a field of the " + c.getName() + " category.");
 		}
+		checkRep();
+
 	}
 	/**
 	 * Adds this to the category object that produced it.
@@ -81,17 +105,23 @@ public class GenericItem extends Item {
 	 */
 	@Override
 	public void save() {
+		checkRep();
 		if(!added) {
 			c.addItem(this);
 			added = true;
 		}
-
+		checkRep();
 	}
 
 	@Override
 	public Set<String> getTags() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public Category getCategory() {
+		return this.c;
 	}
 
 }

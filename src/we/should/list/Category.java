@@ -8,6 +8,14 @@ import we.should.database.*;
 /**
  * @author Davis Shepherd
  *
+ *	The Category class represents an abstraction for a set of items that
+ *  fall under this category.  It provides a factory method for adding items as well
+ *  as returning items that have already been made. 
+ *  
+ * 
+ *  
+ *  
+ *  
  */
 public abstract class Category {
 	
