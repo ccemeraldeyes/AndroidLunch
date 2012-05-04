@@ -34,6 +34,10 @@ public class WSdb {
 									 ItemConst.DATABASE_VERSION);
 	}
 	
+	public SQLiteDatabase getDB(){
+		return this.db;
+	}
+	
 	
 	/**
 	 * Open database for writing
