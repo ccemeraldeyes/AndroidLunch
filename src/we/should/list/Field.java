@@ -18,8 +18,7 @@ public class Field {
 	public static final Field RATING = new Field("rating", FieldType.Rating);
 	public static final Field COMMENT = new Field("comment", FieldType.MultilineTextField);
 	public static final Field TAGS = new Field("tags", FieldType.MultilineTextField);
-	
-
+ 
 	private FieldType type;
 	private String name;
 	
