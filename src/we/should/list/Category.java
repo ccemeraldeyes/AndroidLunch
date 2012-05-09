@@ -1,31 +1,87 @@
 
 package we.should.list;
 
+import java.io.IOException;
 import java.util.*;
 
+import org.json.*;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.util.Log;
+
+import we.should.WeShouldActivity;
 import we.should.database.*;
 
 /**
  * @author Davis Shepherd
  *
+ *	The Category class represents an abstraction for a set of items that
+ *  fall under this category.  It provides a factory method for adding items as well
+ *  as returning items that have already been made. 
+ *  
+ * 
+ *  
+ *  
+ *  
  */
 public abstract class Category {
-	
-	private final String name;
+	public static final String DEFAULT_COLOR = "FFFFFF";
+	protected final String name;	
+	protected Context ctx = null;
+	protected int id;
+	protected String color; //test value
+	protected List<Field> fields;
+
 	
 	/**
 	 * Creates a new abstract Category with the given name.
 	 * @param name - name of this category
 	 */
-	protected Category(String name){
-		this.name = name;
+	protected Category(String name, Context ctx){
+		if(name == null) this.name = "";
+		else this.name = name;
+		this.fields = new LinkedList<Field>();
+		this.color = Category.DEFAULT_COLOR;
+		this.ctx = ctx;
+		this.id = 0;
+	}
+	protected Category(String name, List<Field> fields, Context ctx){
+		this(name, ctx);
+		if (fields != null) this.fields = fields;
+		this.color = Category.DEFAULT_COLOR;
+	}
+	protected Category(String name, JSONArray a, Context ctx){
+		this(name, ctx);
+		try {
+			this.fields = fieldsFromDB(a);
+		} catch (JSONException e) {
+			this.fields = new LinkedList<Field>();
+			Log.w("Category constructor", "JSONArray passed to constructor has error");
+		}
+		this.color = Category.DEFAULT_COLOR;
+	}
+	/**
+	 * Sets the color representation of this category
+	 * @param color is a hexadecimal representation of the color to set
+	 */
+	public void setColor(String color) {
+		if(color.matches("^[0-9A-Fa-f]+$")) this.color = color;
+		else throw new IllegalArgumentException("Color string " + color + " is not hex!");
+	}
+	/**
+	 * Returns the hexidecimal representation of this color
+	 * @return the color of this
+	 */
+	public String getColor(){
+		return this.color;
 	}
 	/**
 	 * Returns the items contained in this. That is the items that have both be created with
 	 * newItem() and then saved with Item.save().
 	 * @return the set of items in this
 	 */
-	public abstract Set<Item> getItems();
+	public abstract List<Item> getItems();
 	
 	
 	/**
@@ -56,6 +112,13 @@ public abstract class Category {
 	public abstract List<Field> getFields();
 	
 	/**
+	 * Saves this category object to the database associated with the given context
+	 * @param ctx specifies the context of the database
+	 * @throws IOException 
+	 */
+	public abstract void save();
+	
+	/**
 	 * Returns the name of this Category
 	 * @return name of this category
 	 */
@@ -66,10 +129,50 @@ public abstract class Category {
 	/**
 	 * Parses the database and returns all categories that have been created
 	 * @return the list of created categories
+	 * @throws JSONException 
 	 */
-	static final Set<Category> getCategories(){
-		return null;
-		//TODO: parse DB and return the categories contained.
+	public static final Set<Category> getCategories(Context ctx) {
+		WSdb db = new WSdb(ctx);
+		db.open();
+		Cursor c = db.getAllCategories();
+		Category cat = null;
+		Set<Category> out = new HashSet<Category>();
+		while(c.moveToNext()){
+			 int id = c.getInt(0);
+			 String name = c.getString(1);
+			 String color = c.getString(2);
+			 String schema = c.getString(3);
+			 if (name.equals("Movies")){
+				 cat = new Movies(ctx);
+			 } else {
+				 JSONArray schemaList;
+				try {
+					schemaList = new JSONArray(schema);
+					cat = new GenericCategory(name, schemaList, ctx);
+				} catch (JSONException e) {
+					Log.e("Category.getCategories", "Field Schema improperly formatted!", e);
+				}
+			 }
+			 cat.id = id;
+			 cat.color = color;
+			 out.add(cat);
+		}
+		db.close();
+		return out;
+	}
+	JSONArray fieldsToDB(){
+		JSONArray out = new JSONArray();
+		for(Field f : this.fields){
+			out.put(f.toDB());
+		}
+		return out;
+	}
+	List<Field> fieldsFromDB(JSONArray a) throws JSONException{
+		List<Field> out = new LinkedList<Field>();
+		for(int i = 0; i < a.length(); i++){
+			out.add(new Field(a.getString(i)));
+		}
+		return out;
 	}
 	
 

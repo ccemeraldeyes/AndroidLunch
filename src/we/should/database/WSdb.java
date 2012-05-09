@@ -4,9 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.*;
-import android.util.Log;
 
-//TODO: add transactions & rollbacks?? 
+
+import android.util.Log;
 
 /**
  * WeShould Database class - contains database methods used in the 
@@ -28,6 +28,7 @@ public class WSdb {
 
 	/**
 	 * WeShould Database Constructor
+	 * 
 	 * @param c context to use to create the database helper
 	 */
 	public WSdb(Context c){
@@ -39,14 +40,13 @@ public class WSdb {
 	
 	
 	/**
-	 * open database for writing
+	 * Open database for writing
 	 * 
-	 * @exception ex caught SQLiteException if failure to open writable database,
-	 * 				 will open readable if fails 
 	 * @return true if db is open and writable, false otherwise
+	 * @exception ex caught SQLiteException if failure to open writable database,
+	 * 			  will open readable if fails 
 	 */
 	public boolean open(){
-		
 		try {
 			db = dbhelper.getWritableDatabase();
 		} catch(SQLiteException ex) {
@@ -60,7 +60,7 @@ public class WSdb {
 	
 	
 	/**
-	 * check if the database is currently open
+	 * Check if the database is currently open
 	 * 
 	 * @return true if open, false otherwise
 	 */
@@ -70,7 +70,7 @@ public class WSdb {
 	
 	
 	/**
-	 * close open database object 
+	 * Close open database object 
 	 */
 	public void close(){
 		dbhelper.close(); 
@@ -78,7 +78,7 @@ public class WSdb {
 	
 	
 	/****************************************************************
-	 *                        Insert Methods
+	 *                      Insert Methods
 	 ***************************************************************/
 	
 	/**
@@ -90,10 +90,7 @@ public class WSdb {
 	 * @param data json code holding item schema & data
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
-	 * 
 	 */
-	
-	
 	public long insertItem(String name, int categoryId, boolean mappable, String data){
 		if (hasNoChars(name) || hasNoChars(data) || categoryId<1)
 			return -1;
@@ -102,7 +99,7 @@ public class WSdb {
 			ContentValues newTaskValue = new ContentValues();
 			newTaskValue.put(ItemConst.NAME, name);
 			newTaskValue.put(ItemConst.CAT_ID, categoryId);
-			newTaskValue.put(ItemConst.MAPPABLE, mappable);
+			
 			newTaskValue.put(ItemConst.DATA, data);
 			return db.insert(ItemConst.TBL_NAME, null, newTaskValue);
 		} catch(SQLiteException ex) {
@@ -155,7 +152,6 @@ public class WSdb {
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
 	 */
-	
 	public long insertTag(String name){
 		if(hasNoChars(name))
 			return -1;
@@ -178,7 +174,6 @@ public class WSdb {
 	 * @param tagID key id of tag to be placed on item
 	 * @return row ID of newly inserted row, or -1 if an error occurred
 	 * @exception ex caught SQLiteException if insert fails
-	 * 
 	 */
 	public long insertItem_Tag(int itemID, int tagID){
 		try{
@@ -228,7 +223,7 @@ public class WSdb {
 	
 	
 	/**
-	 * getAllItems ordered by name
+	 * Get the list of all items ordered by name
 	 * 
 	 * @return cursor to ordered list of items
 	 * 
@@ -241,7 +236,7 @@ public class WSdb {
 	}
 	
 	/**
-	 * get the item with id == itemId
+	 * Get the item with id=<code>itemId</code>
 	 * 
 	 * @return cursor to the item
 	 * 
@@ -256,7 +251,7 @@ public class WSdb {
 	
 	
 	/**
-	 * get the tag with id == tagId
+	 * Get the tag with id=<code>tagId</code>
 	 * 
 	 * @return cursor to the tag
 	 * 
@@ -271,7 +266,7 @@ public class WSdb {
 	
 	
 	/**
-	 * getAllCategories ordered by name
+	 * Get the list of all categories ordered by name
 	 * 
 	 * @return cursor to ordered list of categories
 	 * 
@@ -285,7 +280,7 @@ public class WSdb {
 	
 	
 	/**
-	 * get the category with id=catId
+	 * Get the category with id=<code>catId</code>
 	 * 
 	 * @param catId key id of the category you want to return
 	 * @return cursor to single category
@@ -301,7 +296,7 @@ public class WSdb {
 	
 	
 	/**
-	 * getAllTags ordered by name
+	 * Get the list of all tags ordered by name
 	 * 
 	 * @return cursor to ordered list of tags
 	 * 
@@ -315,7 +310,7 @@ public class WSdb {
 	
 	
 	/**
-	 * getAllItemsOfTag - get every item with given tag
+	 * Get every item with tag <code>tagId</code>
 	 * 
 	 * @param tagId key id of the tag of the items to return
 	 * @return cursor to list of all item id# with the given tag
@@ -341,7 +336,7 @@ public class WSdb {
 	
 	
 	/**
-	 * getAllTagsOfItem - get every tag of item with given id
+	 * Get every tag of of an item with given <code>itemId</code>
 	 * 
 	 * @param  itemId id of the item to get all tags of
 	 * @return cursor to list of all tag id# of the given item
@@ -366,9 +361,10 @@ public class WSdb {
 		return db.rawQuery(sqlStatement,null);
 	}
 	
-	
+
+
 	/**
-	 * get all items of the given category
+	 * get all items of the category with id=<code>catId</code>
 	 * 
 	 * @param catId id if the category
 	 * @return cursor to all items in this category
@@ -382,11 +378,10 @@ public class WSdb {
 	}
 	
 	
-		
-	
 	//TODO: great for testing, should remove for release
 	/**
-	 * executes sql query
+	 * Executes  a given SQL query
+	 * 
 	 * @param sql the SQL query
 	 * @param selection may include ?s in where clause which will be
 	 * 		  replaced by vlaues from selection[]
@@ -412,11 +407,12 @@ public class WSdb {
 	 * @return number of rows updated (0 if failed, 1 if success)
 	 */
 	public int updateCategoryColor(int catID, String color){
-	
 		Log.v("DB.updateCatColor","change color of categoryId=" + 
 		          catID + " to #" +  color);
+		
 		if (!isHexString(color) || color.length()!=6 || catID<1)
 			return 0;
+		
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(CategoryConst.COLOR, color);
@@ -427,18 +423,18 @@ public class WSdb {
 	}
 	
 	
-	
 	/** Change the name of a Category
 	 * 
 	 * @param catID id of category to update
 	 * @param newName new name of category
-	 *
 	 */
 	public int updateCategoryName(int catID, String newName){
 		Log.v("DB.updateCatName","change name of categoryId=" + 
 		          catID + " to " +  newName);
+		
 		if (hasNoChars(newName) || catID<1)
 			return 0;
+		
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(CategoryConst.NAME, newName);
@@ -457,8 +453,10 @@ public class WSdb {
 	public int updateTagName(int tagID, String newName){
 		Log.v("DB.updateTagName","change name of tagId=" + 
 		          tagID + " to " +  newName);
+		
 		if (hasNoChars(newName) || tagID<1)
 			return 0;
+		
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(TagConst.NAME, newName);
@@ -491,17 +489,17 @@ public class WSdb {
 	
 	
 	/****************************************************************
-	 *                         Deletes
+	 *                          Deletes
 	 ***************************************************************/
 	
 	
 	/**
-	 * deletes item with given id.  Also deletes its tag associations
+	 * Deletes an item and item-tag associations
 	 *  
 	 * @param itemId id of item to be deleted
 	 * @return true on successful deletion, 
 	 *         false if transaction conflicts with referential 
-	 *               integrity and transaction rolled back
+	 *         integrity and transaction rolled back
 	 */
 	public boolean deleteItem(int itemId){
 		
@@ -522,67 +520,87 @@ public class WSdb {
 		return true;
 	}
 	
-	// TODO: items with this category?
+	
 	/**
-	 * deletes Category with given id.  
+	 * Deletes a Category. Requires no items to have this category id
 	 *
 	 * @param catId id of the category to be deleted
+	 * @return true if category deleted, false otherwise
 	 */
 	public boolean deleteCategory(int catId){
-		
-		// do not delete category if there are items associated with it
+
+		// do not delete category if there are items associated with it		
 		Cursor c = getItemsOfCategory(catId);
 		if (c.getCount()>0) return false;
 		
-		int affected = db.delete(CategoryConst.TBL_NAME,  
-				       CategoryConst.ID + "=" + catId, null);
+		int affected = db.delete(CategoryConst.TBL_NAME,
+				       CategoryConst.ID + "=" + catId, null);		
 		
 		// if no rows deleted, return false
 		if (affected>0)
 			return true;
 		else
-			return false;
+
+			return false;	
 	}
 	
 	
 	/**
-	 * deletes tag with given id.  Also deletes its item_tag associations
+	 * Deletes a tag and its item_tag associations
 	 *
 	 * @param tagId id of tag to be deleted
+	 * @return true if tag deleted, false otherwise
 	 */
 	public boolean deleteTag(int tagId){
-		// delete the item-tag associations
-		int affected = db.delete(Item_TagConst.TBL_NAME, 
-				  Item_TagConst.TAG_ID + "=" + tagId, null);
-		
+		// delete the item-tag associations		
+		int affected = db.delete(Item_TagConst.TBL_NAME,
+				Item_TagConst.TAG_ID + "=" + tagId, null);		
 		Log.v("WSdb.deleteTag",
-			  "deleted " + affected + " item tag associations");
-		
-		//delete the Tag
+			  "deleted " + affected + " item tag associations");		
+		//delete the Tag		
 		affected=db.delete(TagConst.TBL_NAME, 
-				           TagConst.ID + "=" + tagId, null);
-		
+				TagConst.ID + "=" + tagId, null);		
 		Log.v("WSdb.deleteTag","deleted " + affected + " tags");
-		
-		if (affected > 0)
-			return true;
-		else
-			return false;
+		if (affected > 0)			
+			return true;		
+		else			
+			return false;	
+	}
+	
+	/**
+	 * Delete an item-tag relationship -- "Untag an item"
+	 * 
+	 * @param itemId id of item
+	 * @param tagId id of tag
+	 * @return true if successfully deleted, false otherwise
+	 */
 
+	public boolean deleteItemTagRel(int itemId, int tagId){
+		int affected=0;
+		String where = Item_TagConst.ITEM_ID + "=" + itemId + " and " +
+		               Item_TagConst.TAG_ID + "=" + tagId;
+		
+		affected=db.delete(Item_TagConst.TBL_NAME, where, null);
+		
+		if (affected > 0)			
+			return true;		
+		else			
+			return false;
 	}
 	
 	
 	/****************************************************************
-	 * 						Testing
-	 * 				Rebuild database and fill with test data
+	 *                          Testing
+	 *         Rebuild database and fill with test data
 	 ***************************************************************/
 	
-	
+	/**
+	 * Drop all tables then create all tables
+	 */
 	public void rebuildTables(){
 		dbhelper.dropAllTables(db);
 		dbhelper.createTables(db);
 	}
-	
 	
 	
 	/**
@@ -616,7 +634,7 @@ public class WSdb {
 	
 	
 	/****************************************************************
-	 * 						Helper Functions
+	 *                     Helper Functions
 	 ***************************************************************/
 	
 	/**
@@ -641,18 +659,20 @@ public class WSdb {
 	 * @return true if str is a hex value, false if null or otherwise
 	 */
 	public static boolean isHexString(String str){
-		if(hasNoChars(str))
-			return false;
+		if(hasNoChars(str)) return false;
+		
 		for (int i=0; i < str.length(); i++){
 			if(!isHexChar(str.charAt(i)))
 				return false;
-		}		
+		}
+		
 		return true;
 	}
 	
 	/**
+	 * Check the given string for any character other than space
 	 * 
-	 * @param str
+	 * @param str string to check
 	 * @return true on empty or whitespace, false on null or other
 	 */
 	public static boolean hasNoChars(String str){
@@ -664,6 +684,4 @@ public class WSdb {
 		
 		return false;
 	}
-	
 }
-

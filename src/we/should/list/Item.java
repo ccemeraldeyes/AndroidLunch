@@ -27,11 +27,17 @@ import android.content.Context;
 
 public abstract class Item {
 	
+	protected int id;
+	protected Context ctx;
+	
+	protected Item(Context ctx){
+		this.ctx = ctx;
+	}
 	/**
 	 * @return a set of Address objects corresponding to the location(s) of this.
 	 * @throws IOException 
 	 */
-	public abstract Set<android.location.Address> getAddresses(Context c) throws IOException;
+	public abstract Set<android.location.Address> getAddresses();
 	
 	/**
 	 * 
@@ -46,6 +52,11 @@ public abstract class Item {
 	 */
 	public abstract void delete();
 	
+	/**
+	 * Returns the category of this item
+	 * @return the category object associated with this item.
+	 */
+	public abstract Category getCategory();
 	/**
 	 * Returns the value contained in the given field, only if the given field is
 	 * part of this items category, otherwise throws illegal argument exception.
@@ -79,7 +90,8 @@ public abstract class Item {
 	public abstract void set(Field key, String value);
 	
 	/**
-	 * Adds this item to the category factory that created it.
+	 * Adds this item to the category factory that created it, and saves to the database.
+	 * @param c specifies the context of the database. 
 	 * @modifies this.C
 	 */
 	public abstract void save();
@@ -89,5 +101,12 @@ public abstract class Item {
 	 * @return A Set of tag strings.
 	 */
 	public abstract Set<String> getTags();
+	
+	/**
+	 * Adds a tag string to this item. If s matches an
+	 * existing tag, it will not be added
+	 * @param s is the tag to be added
+	 */
+	public abstract void addTag(String s);
 	
 }

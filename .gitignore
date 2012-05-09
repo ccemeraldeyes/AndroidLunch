@@ -1,4 +1,6 @@
 .gitignore
 bin/
 gen/
+doc/
 javadoc/
+
