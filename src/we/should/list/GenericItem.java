@@ -36,7 +36,6 @@ import android.location.Geocoder;
 
 public class GenericItem extends Item {
 	private final Category c;
-	private Context ctx;
 	private int id;
 	private Map<Field, String> values;
 	private boolean added = false;
@@ -119,9 +118,8 @@ public class GenericItem extends Item {
 		if(!added) {
 			this.c.addItem(this);
 			this.added = true;
-		if(this.ctx == null) this.ctx = ctx;
-		if(this.ctx != null){
-			WSdb db = new WSdb(this.ctx);
+		if(ctx != null){
+			WSdb db = new WSdb(ctx);
 			db.open();
 			if (this.id==0) {
 				//this.id=

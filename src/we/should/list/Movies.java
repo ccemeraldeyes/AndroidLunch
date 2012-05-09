@@ -5,14 +5,16 @@ package we.should.list;
 
 import java.util.*;
 
+import android.content.Context;
+
 /**
  * @author Davis
  *
  */
 public class Movies extends GenericCategory {
 	
-	public Movies(){
-		super("Movies", Field.getMovieFields());
+	public Movies(Context ctx){
+		super("Movies", Field.getMovieFields(), ctx);
 	}
 	
 	@Override

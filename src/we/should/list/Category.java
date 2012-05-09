@@ -28,7 +28,7 @@ import we.should.database.*;
 public abstract class Category {
 	public static final String DEFAULT_COLOR = "FFFFFF";
 	protected final String name;	
-	protected Context c = null;
+	protected Context ctx = null;
 	protected int id;
 	protected String color; //test value
 	protected List<Field> fields;
@@ -38,25 +38,26 @@ public abstract class Category {
 	 * Creates a new abstract Category with the given name.
 	 * @param name - name of this category
 	 */
-	protected Category(String name){
+	protected Category(String name, Context ctx){
 		this.name = name;
 		this.fields = new LinkedList<Field>();
-		this.color = this.DEFAULT_COLOR;
+		this.color = Category.DEFAULT_COLOR;
+		this.ctx = ctx;
 	}
-	protected Category(String name, List<Field> fields){
-		this(name);
+	protected Category(String name, List<Field> fields, Context ctx){
+		this(name, ctx);
 		this.fields = fields;
-		this.color = this.DEFAULT_COLOR;
+		this.color = Category.DEFAULT_COLOR;
 	}
-	protected Category(String name, JSONArray a){
-		this(name);
+	protected Category(String name, JSONArray a, Context ctx){
+		this(name, ctx);
 		try {
 			this.fields = fieldsFromDB(a);
 		} catch (JSONException e) {
 			this.fields = new LinkedList<Field>();
 			Log.w("Category constructor", "JSONArray passed to constructor has error");
 		}
-		this.color = this.DEFAULT_COLOR;
+		this.color = Category.DEFAULT_COLOR;
 	}
 	/**
 	 * Sets the color representation of this category
@@ -113,7 +114,7 @@ public abstract class Category {
 	 * @param ctx specifies the context of the database
 	 * @throws IOException 
 	 */
-	public abstract void save(Context ctx);
+	public abstract void save();
 	
 	/**
 	 * Returns the name of this Category
@@ -140,12 +141,12 @@ public abstract class Category {
 			 String color = c.getString(2);
 			 String schema = c.getString(3);
 			 if (name.equals("Movies")){
-				 cat = new Movies();
+				 cat = new Movies(ctx);
 			 } else {
 				 JSONArray schemaList;
 				try {
 					schemaList = new JSONArray(schema);
-					cat = new GenericCategory(name, schemaList);
+					cat = new GenericCategory(name, schemaList, ctx);
 				} catch (JSONException e) {
 					Log.e("Category.getCategories", "Field Schema improperly formatted!");
 					e.printStackTrace();
@@ -153,7 +154,6 @@ public abstract class Category {
 			 }
 			 cat.id = id;
 			 cat.color = color;
-			 cat.c = ctx;
 			 out.add(cat);
 		}
 		db.close();

@@ -1,26 +1,23 @@
 package we.should.list;
 
-import java.io.Serializable;
 import java.util.*;
 
 import we.should.list.FieldType;
 /**
  * 
- * @author Davis
+ * @author Davis Shepherd
  * This is a helper class that is used to inform the UI how to render different fields
  * in each item/category. It contains simply a name and a field type.
  *
  */
-public class Field implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class Field {
+	
 	public static final Field NAME = new Field("name", FieldType.TextField);
 	public static final Field PHONENUMBER = new Field("phoneNumber", FieldType.TextField);
 	public static final Field ADDRESS = new Field("address", FieldType.MultilineTextField);
 	public static final Field RATING = new Field("rating", FieldType.Rating);
 	public static final Field COMMENT = new Field("comment", FieldType.MultilineTextField);
+	public static final Field TAGS = new Field("tags", FieldType.MultilineTextField);
 	
 
 	private FieldType type;
@@ -40,7 +37,7 @@ public class Field implements Serializable {
 	 * @param desc formatted as <name> : <type>
 	 * @throws IllegalArgumentException
 	 */
-	public Field(String desc) throws IllegalArgumentException{
+	protected Field(String desc) throws IllegalArgumentException{
 		String[] sp = desc.split(":");
 		try{
 			this.type = FieldType.values()[Integer.parseInt(sp[1])];
@@ -67,7 +64,11 @@ public class Field implements Serializable {
 	public String getName() {
 		return name;
 	}
-	public String toDB(){
+	/**
+	 * Used to flatten the object for DB usage
+	 * @return a unique identifying string for this
+	 */
+	protected String toDB(){
 		int fieldType = this.type.ordinal();
 		return this.name + ":" + fieldType;
 	}
@@ -82,6 +83,7 @@ public class Field implements Serializable {
 		out.add(ADDRESS);
 		out.add(RATING);
 		out.add(COMMENT);
+		out.add(TAGS);
 		return out;
 	}
 	/**
@@ -93,6 +95,7 @@ public class Field implements Serializable {
 		out.add(NAME);
 		out.add(RATING);
 		out.add(COMMENT);
+		out.add(TAGS);
 		return out;
 	}
 	/**

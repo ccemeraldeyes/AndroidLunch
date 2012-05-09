@@ -29,14 +29,14 @@ public class GenericCategory extends Category {
 	private boolean sync = false;
 	
 	
-	public GenericCategory(String name, List<Field> fields) {
-		super(name, fields);
+	public GenericCategory(String name, List<Field> fields, Context ctx) {
+		super(name, fields, ctx);
 		items = new LinkedList<Item>();
 		checkRep();
 		
 	}
-	protected GenericCategory(String name, JSONArray a) throws JSONException{
-		super(name, a);
+	protected GenericCategory(String name, JSONArray a, Context ctx) throws JSONException{
+		super(name, a, ctx);
 		items = new LinkedList<Item>();
 		checkRep();
 	}
@@ -51,11 +51,11 @@ public class GenericCategory extends Category {
 	}
 	@Override
 	public List<Item> getItems() {
-		if (c == null){
+		if (ctx == null){
 			throw new IllegalStateException("Category Has not yet been saved!");
 		}
 		if (!sync) {
-			WSdb db = new WSdb(c);
+			WSdb db = new WSdb(ctx);
 			db.open();
 			Cursor cur = db.getItemsOfCategory(this.id);
 			while (cur.moveToNext()) {
@@ -98,12 +98,11 @@ public class GenericCategory extends Category {
 		return this.items.remove(i);
 	}
 	@Override
-	public void save(Context c) {
-		WSdb db = new WSdb(c);
+	public void save() {
+		WSdb db = new WSdb(ctx);
 		db.open();
-		if(this.c == null){
+		if(ctx == null){
 			this.id = (int) db.insertCategory(this.name, this.color, fieldsToDB().toString());
-			this.c = c;
 		} else {
 			db.updateCategoryColor(this.id, this.color);
 			db.updateCategoryName(this.id, this.name);
