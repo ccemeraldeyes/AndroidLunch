@@ -2,11 +2,17 @@ package we.should.list;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.Map.Entry;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import we.should.Splash;
+import we.should.database.WSdb;
 
 
 import android.content.Context;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 
@@ -30,6 +36,8 @@ import android.location.Geocoder;
 
 public class GenericItem extends Item {
 	private final Category c;
+	private Context ctx;
+	private int id;
 	private Map<Field, String> values;
 	private boolean added = false;
 	
@@ -99,16 +107,26 @@ public class GenericItem extends Item {
 		checkRep();
 
 	}
-	/**
-	 * Adds this to the category object that produced it.
-	 * Will only add itself once even after multiple calls will 
-	 */
+	
 	@Override
-	public void save() {
+	public void save(Context ctx) {
 		checkRep();
 		if(!added) {
-			c.addItem(this);
-			added = true;
+			this.c.addItem(this);
+			this.added = true;
+		if(this.ctx == null) this.ctx = ctx;
+		if(this.ctx != null){
+			WSdb db = new WSdb(this.ctx);
+			db.open();
+			if (this.id==0) {
+				//this.id=
+				this.id = (int) db.insertItem(this.getName(), this.c.id, false, dataToDB()
+						.toString());
+			} else {
+				//update
+			}
+			db.close();
+		}
 		}
 		checkRep();
 	}
@@ -122,6 +140,43 @@ public class GenericItem extends Item {
 	@Override
 	public Category getCategory() {
 		return this.c;
+	}
+	
+	private JSONObject dataToDB(){
+		JSONObject out = new JSONObject();
+		for(Entry<Field, String> e : values.entrySet()){
+			try {
+				out.put(e.getKey().toDB(), e.getValue());
+			} catch (JSONException err) {
+				err.printStackTrace();
+			}
+		}
+		return out;
+	}
+	/**
+	 * Restores the values held in this item from a JSONObject DB entry
+	 * @param d
+	 * @throws JSONException
+	 * @modifies this.values
+	 */
+	protected void DBtoData(JSONObject d) throws JSONException{
+		@SuppressWarnings("unchecked")
+		Iterator<String> i = d.keys();
+		while(i.hasNext()){
+			String fieldString = i.next();
+			String value = d.getString(fieldString);
+			Field f = new Field(fieldString);
+			this.values.put(f, value);
+		}
+	}
+	public boolean equals(Object other){
+		if(other == this) return true;
+		if(other == null || !(other instanceof GenericItem)) return false;
+		GenericItem cp= GenericItem.class.cast(other);
+		return this.values.equals(cp.values);
+	}
+	public String toString(){
+		return this.getName();
 	}
 
 }

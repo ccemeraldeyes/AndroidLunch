@@ -27,6 +27,8 @@ import android.content.Context;
 
 public abstract class Item {
 	
+	protected int id;
+	
 	/**
 	 * @return a set of Address objects corresponding to the location(s) of this.
 	 * @throws IOException 
@@ -84,10 +86,11 @@ public abstract class Item {
 	public abstract void set(Field key, String value);
 	
 	/**
-	 * Adds this item to the category factory that created it.
+	 * Adds this item to the category factory that created it, and saves to the database.
+	 * @param c specifies the context of the database. 
 	 * @modifies this.C
 	 */
-	public abstract void save();
+	public abstract void save(Context c);
 	
 	/**
 	 * Returns the set of tags assigned to this item

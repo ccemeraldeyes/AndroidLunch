@@ -1,5 +1,6 @@
 package we.should.list;
 
+import java.io.Serializable;
 import java.util.*;
 
 import we.should.list.FieldType;
@@ -10,12 +11,17 @@ import we.should.list.FieldType;
  * in each item/category. It contains simply a name and a field type.
  *
  */
-public class Field {
+public class Field implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public static final Field NAME = new Field("name", FieldType.TextField);
 	public static final Field PHONENUMBER = new Field("phoneNumber", FieldType.TextField);
 	public static final Field ADDRESS = new Field("address", FieldType.MultilineTextField);
 	public static final Field RATING = new Field("rating", FieldType.Rating);
 	public static final Field COMMENT = new Field("comment", FieldType.MultilineTextField);
+	
 
 	private FieldType type;
 	private String name;
@@ -30,10 +36,40 @@ public class Field {
 		this.name = name;
 	}
 	/**
+	 * Creates a new field object matching the string desc
+	 * @param desc formatted as <name> : <type>
+	 * @throws IllegalArgumentException
+	 */
+	public Field(String desc) throws IllegalArgumentException{
+		String[] sp = desc.split(":");
+		try{
+			this.type = FieldType.values()[Integer.parseInt(sp[1])];
+		} catch(NumberFormatException e) {
+			throw new IllegalArgumentException("The input string: " + desc + " is improperly formatted!");
+		}
+		this.name = sp[0];
+	}
+	/**
 	 * @return this.name + " " + this.type;
 	 */
 	public String toString(){
 		return this.name + " " + this.type;
+	}
+	/**
+	 * @return the type of this
+	 */
+	public FieldType getType() {
+		return type;
+	}
+	/**
+	 * @return the name of this
+	 */
+	public String getName() {
+		return name;
+	}
+	public String toDB(){
+		int fieldType = this.type.ordinal();
+		return this.name + ":" + fieldType;
 	}
 	/**
 	 * Returns a list of the static default variables.
@@ -58,5 +94,23 @@ public class Field {
 		out.add(RATING);
 		out.add(COMMENT);
 		return out;
+	}
+	/**
+	 * @ param other object to which the comparison is made
+	 * @ return true if the name and type of other is equal to this
+	 */
+	@Override
+	public boolean equals(Object other){
+		if(other == this) return true;
+		if(other == null || !(other instanceof Field)) return false;
+		Field cp= Field.class.cast(other);
+		return this.type.equals(cp.type) && this.name.equals(cp.name);
+	}
+	/**
+	 * @return a hash code 
+	 */
+	@Override
+	public int hashCode(){
+		return this.name.hashCode()*10 + this.type.ordinal();
 	}
 }

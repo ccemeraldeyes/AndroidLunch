@@ -10,10 +10,9 @@ import java.util.*;
  *
  */
 public class Movies extends GenericCategory {
-	private static List<Field> fields = Field.getMovieFields();
 	
 	public Movies(){
-		super("Movies", fields);
+		super("Movies", Field.getMovieFields());
 	}
 	
 	@Override
