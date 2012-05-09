@@ -5,8 +5,11 @@ import we.should.database.*;
 import java.util.Arrays;
 import java.util.List;
 
+import we.should.database.WSdb;
+
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -51,14 +54,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
         map = (MapView) findViewById(R.id.mapview);
         map.setBuiltInZoomControls(true);       
         controller = map.getController();
-        
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         this.mTabHost.setup();
         
+
         db = new WSdb(this);
 
         //DBFILE = db.getDB().getPath();
-
         
         // Just spoof the tabs for the ZFR.  This would be dynamically loaded
         // once we begin work on production code.
@@ -190,5 +192,5 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
 		}
 		
 	}
-    
+	
 }

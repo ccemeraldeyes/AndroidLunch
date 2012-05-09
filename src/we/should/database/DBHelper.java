@@ -20,13 +20,16 @@ public class DBHelper extends SQLiteOpenHelper{
 	                CategoryConst.TBL_NAME + " (" +
                     CategoryConst.ID + " integer primary key autoincrement, " +
 	                CategoryConst.NAME + " text UNIQUE not null, " +
-                    CategoryConst.COLOR + " text not null, " +
+                    CategoryConst.COLOR + " integer references " +
+	                  ColorConst.TBL_NAME + " (" + ColorConst.ID + "), " +
 	                CategoryConst.SCHEMA + " schema text not null);";	
 	
-	private static final String CREATE_TABLE_TAG="create table " +			
-	                TagConst.TBL_NAME + " ("+			
-			        TagConst.ID + " integer primary key autoincrement, " +
-	                TagConst.NAME + " text UNIQUE not null);";	
+	private static final String CREATE_TABLE_COLOR="create table " + 
+					ColorConst.TBL_NAME + " (" + 
+					ColorConst.ID + " integer primary key autoincrement, " +
+					ColorConst.NAME + " text UNIQUE not null, " +
+					ColorConst.RGB + " text not null, " +
+					ColorConst.DRAWABLE + " text not null);";
 	
 	private static final String CREATE_TABLE_ITEM="create table " +			
 	                ItemConst.TBL_NAME + " (" +
@@ -34,9 +37,22 @@ public class DBHelper extends SQLiteOpenHelper{
 	                ItemConst.NAME + " text UNIQUE not null, " +
 			        ItemConst.CAT_ID + " integer references " +
 	                   CategoryConst.TBL_NAME + "(" + CategoryConst.ID + "), " +
-			        ItemConst.MAPPABLE +  " bool not null, " +
-	                ItemConst.DATA + " text not null);";	
+	                ItemConst.DATA + " text not null);";
 	
+	private static final String CREATE_TABLE_ITEMTAG="create table " + 
+					Item_TagConst.TBL_NAME + " (" + 
+					Item_TagConst.ITEM_ID + " integer references " + 
+					  ItemConst.TBL_NAME + "(" + ItemConst.ID + "), " + 
+					Item_TagConst.TAG_ID + " integer references " + 
+					  TagConst.TBL_NAME + "(" + TagConst.ID +"));";
+	
+	private static final String CREATE_TABLE_TAG="create table " + 
+					TagConst.TBL_NAME + " ("+ 
+					TagConst.ID + " integer primary key autoincrement, " + 
+					TagConst.NAME + " text UNIQUE not null);";	
+	
+	
+<<<<<<< HEAD
 	private static final String CREATE_TABLE_ITEMTAG="create table " +
 	                Item_TagConst.TBL_NAME + " (" +
                     Item_TagConst.ITEM_ID + " integer references " +
@@ -44,6 +60,8 @@ public class DBHelper extends SQLiteOpenHelper{
                     Item_TagConst.TAG_ID + " integer references " + 
 	                   TagConst.TBL_NAME + "(" + TagConst.ID +"));";
 
+=======
+>>>>>>> weshoulddev
 	
 	
 	/**
@@ -118,7 +136,11 @@ public class DBHelper extends SQLiteOpenHelper{
 			db.execSQL("drop table if exists "+ ItemConst.TBL_NAME);
 			db.execSQL("drop table if exists "+ CategoryConst.TBL_NAME);
 			db.execSQL("drop table if exists "+ TagConst.TBL_NAME);
+<<<<<<< HEAD
 
+=======
+			db.execSQL("drop table if exists "+ ColorConst.TBL_NAME);
+>>>>>>> weshoulddev
 			
 		} catch (SQLiteException ex) {
 			Log.e("DBHelper.dropAllTables","Ooops! Error");
@@ -139,6 +161,7 @@ public class DBHelper extends SQLiteOpenHelper{
 		Log.v("DBhelper.createTables","Creating tables");
 		try {
 			// create order matters to avoid constraint exception
+			db.execSQL(CREATE_TABLE_COLOR);			
 			db.execSQL(CREATE_TABLE_CATEGORY);
 			db.execSQL(CREATE_TABLE_ITEM);
 			db.execSQL(CREATE_TABLE_TAG);
