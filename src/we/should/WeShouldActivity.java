@@ -59,7 +59,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
         
 
         db = new WSdb(this);
-        DBFILE = db.getDB().getPath();
+        //DBFILE = db.getDB().getPath();
         
         // Just spoof the tabs for the ZFR.  This would be dynamically loaded
         // once we begin work on production code.
