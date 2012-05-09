@@ -13,6 +13,5 @@ public class ItemConst {
 								ID="id",                     // unique Id
 								NAME="name",                 // item name
 								CAT_ID="category_id",        // references Category Id
-								MAPPABLE="mappable",         // boolean 
 								DATA="data";             	 // json code								
 }
