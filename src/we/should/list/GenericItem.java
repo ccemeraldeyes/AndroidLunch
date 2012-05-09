@@ -61,10 +61,15 @@ public class GenericItem extends Item {
 		assert(new HashSet<Field>(c.getFields()).equals(values.keySet()));
 	}
 	@Override
-	public Set<Address> getAddresses(Context c) throws IOException {
+	public Set<Address> getAddresses(Context c) {
 		Geocoder g = new Geocoder(c, Locale.ENGLISH);
 		String address = this.get(Field.ADDRESS);
-		List<Address> out =  g.getFromLocationName(address, 1);
+		List<Address> out;
+		try {
+			out = g.getFromLocationName(address, 1);
+		} catch (IOException e) {
+			return null;
+		}
 		return new HashSet<Address>(out);
 	}
 

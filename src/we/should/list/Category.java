@@ -156,6 +156,7 @@ public abstract class Category {
 			 cat.c = ctx;
 			 out.add(cat);
 		}
+		db.close();
 		return out;
 	}
 	JSONArray fieldsToDB(){

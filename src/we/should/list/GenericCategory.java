@@ -109,7 +109,6 @@ public class GenericCategory extends Category {
 			db.updateCategoryName(this.id, this.name);
 		}
 		db.close();
-		
 	}
 	/**
 	 * Returns true if this.fields == other.fields, and
