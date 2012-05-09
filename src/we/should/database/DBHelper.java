@@ -52,16 +52,6 @@ public class DBHelper extends SQLiteOpenHelper{
 					TagConst.NAME + " text UNIQUE not null);";	
 	
 	
-<<<<<<< HEAD
-	private static final String CREATE_TABLE_ITEMTAG="create table " +
-	                Item_TagConst.TBL_NAME + " (" +
-                    Item_TagConst.ITEM_ID + " integer references " +
-                       ItemConst.TBL_NAME + "(" + ItemConst.ID + "), " +
-                    Item_TagConst.TAG_ID + " integer references " + 
-	                   TagConst.TBL_NAME + "(" + TagConst.ID +"));";
-
-=======
->>>>>>> weshoulddev
 	
 	
 	/**
@@ -136,11 +126,7 @@ public class DBHelper extends SQLiteOpenHelper{
 			db.execSQL("drop table if exists "+ ItemConst.TBL_NAME);
 			db.execSQL("drop table if exists "+ CategoryConst.TBL_NAME);
 			db.execSQL("drop table if exists "+ TagConst.TBL_NAME);
-<<<<<<< HEAD
-
-=======
 			db.execSQL("drop table if exists "+ ColorConst.TBL_NAME);
->>>>>>> weshoulddev
 			
 		} catch (SQLiteException ex) {
 			Log.e("DBHelper.dropAllTables","Ooops! Error");
