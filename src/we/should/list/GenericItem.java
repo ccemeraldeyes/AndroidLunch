@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,6 +16,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
+import android.util.Log;
 
 /**
  * 
@@ -36,13 +38,13 @@ import android.location.Geocoder;
 
 public class GenericItem extends Item {
 	private final Category c;
-	private int id;
 	private Map<Field, String> values;
 	private boolean added = false;
 	
 	
 	
-	protected GenericItem(Category c) {
+	protected GenericItem(Category c, Context ctx) {
+		super(ctx);
 		this.c = c;
 		values = new HashMap<Field, String>();
 		List<Field> fields = c.getFields();
@@ -60,16 +62,28 @@ public class GenericItem extends Item {
 		assert(new HashSet<Field>(c.getFields()).equals(values.keySet()));
 	}
 	@Override
-	public Set<Address> getAddresses(Context c) {
-		Geocoder g = new Geocoder(c, Locale.ENGLISH);
-		String address = this.get(Field.ADDRESS);
-		List<Address> out;
-		try {
-			out = g.getFromLocationName(address, 1);
-		} catch (IOException e) {
-			return null;
+	public Set<Address> getAddresses() {
+		List<Address> out = new LinkedList<Address>();
+		boolean err = ctx == null;
+		if (ctx != null) {
+			Geocoder g = new Geocoder(ctx, Locale.US);
+			String address = this.get(Field.ADDRESS);
+			try {
+				out = g.getFromLocationName(address, 1);
+			} catch (IOException e) {
+				Log.w("GenericItem.getAdresses", "Server error. Could not fetch geo data.");
+				err = true;
+			}
+		} 
+		if(err) {
+			String addStr = this.get(Field.ADDRESS);
+			Address a = new Address(Locale.US);
+			a.setAddressLine(0, addStr);
+			out.add(a);
+			Log.w("GenericItem.getAdresses", "Context is null, so no geo data can be loaded.");
 		}
 		return new HashSet<Address>(out);
+
 	}
 
 	@Override
@@ -103,43 +117,66 @@ public class GenericItem extends Item {
 	
 	@Override
 	public void set(Field key, String value) throws IllegalArgumentException {
+		if(key.equals(Field.TAGS)){
+			throw new IllegalArgumentException(Field.TAGS + " cannot be set with this method!");
+		}
 		if(c.getFields().contains(key)){
 			values.put(key, value);
 		} else {
 			throw new IllegalArgumentException(key.toString() + " is not a field of the " + c.getName() + " category.");
 		}
 		checkRep();
-
 	}
 	
 	@Override
-	public void save(Context ctx) {
+	public void save() {
 		checkRep();
 		if(!added) {
 			this.c.addItem(this);
 			this.added = true;
+		}
 		if(ctx != null){
 			WSdb db = new WSdb(ctx);
 			db.open();
-			if (this.id==0) {
-				//this.id=
-				this.id = (int) db.insertItem(this.getName(), this.c.id, false, dataToDB()
-						.toString());
-			} else {
-				//update
-			}
+			if (this.id != 0) {
+				db.deleteItem(this.id);
+			} 
+			this.id = (int) db.insertItem(this.getName(), 
+					this.c.id, false, dataToDB().toString());
 			db.close();
-		}
+		} else {
+			Log.w("GenericItem.save()", "Item not be saved to Database because context is null");
 		}
 		checkRep();
 	}
 
 	@Override
 	public Set<String> getTags() {
-		// TODO Auto-generated method stub
-		return null;
+		String tags = this.get(Field.TAGS);
+		if(tags == null) tags = "";
+		Set<String> result = new HashSet<String>();
+		try {
+			JSONArray out = new JSONArray(tags);
+			for(int i = 0; i < out.length(); i++){
+				result.add(out.getString(i));
+			}
+		} catch (JSONException e) {
+			Log.e("GenericItem.getTags", "Tags string improperly formatted, returning empty set!");
+		}
+		return result;
 	}
-
+	@Override
+	public void addTag(String s) {
+		Set<String> tags = this.getTags();
+		if (!tags.contains(s)){
+			tags.add(s);
+			JSONArray newTags = new JSONArray();
+			for(String tag : tags){
+				newTags.put(tag);
+			}
+			values.put(Field.TAGS, newTags.toString());
+		}
+	}
 	@Override
 	public Category getCategory() {
 		return this.c;

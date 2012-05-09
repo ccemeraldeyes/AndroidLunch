@@ -28,12 +28,16 @@ import android.content.Context;
 public abstract class Item {
 	
 	protected int id;
+	protected Context ctx;
 	
+	protected Item(Context ctx){
+		this.ctx = ctx;
+	}
 	/**
 	 * @return a set of Address objects corresponding to the location(s) of this.
 	 * @throws IOException 
 	 */
-	public abstract Set<android.location.Address> getAddresses(Context c);
+	public abstract Set<android.location.Address> getAddresses();
 	
 	/**
 	 * 
@@ -90,12 +94,19 @@ public abstract class Item {
 	 * @param c specifies the context of the database. 
 	 * @modifies this.C
 	 */
-	public abstract void save(Context c);
+	public abstract void save();
 	
 	/**
 	 * Returns the set of tags assigned to this item
 	 * @return A Set of tag strings.
 	 */
 	public abstract Set<String> getTags();
+	
+	/**
+	 * Adds a tag string to this item. If s matches an
+	 * existing tag, it will not be added
+	 * @param s is the tag to be added
+	 */
+	public abstract void addTag(String s);
 	
 }

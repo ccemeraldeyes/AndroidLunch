@@ -39,14 +39,16 @@ public abstract class Category {
 	 * @param name - name of this category
 	 */
 	protected Category(String name, Context ctx){
-		this.name = name;
+		if(name == null) this.name = "";
+		else this.name = name;
 		this.fields = new LinkedList<Field>();
 		this.color = Category.DEFAULT_COLOR;
 		this.ctx = ctx;
+		this.id = 0;
 	}
 	protected Category(String name, List<Field> fields, Context ctx){
 		this(name, ctx);
-		this.fields = fields;
+		if (fields != null) this.fields = fields;
 		this.color = Category.DEFAULT_COLOR;
 	}
 	protected Category(String name, JSONArray a, Context ctx){
@@ -148,8 +150,7 @@ public abstract class Category {
 					schemaList = new JSONArray(schema);
 					cat = new GenericCategory(name, schemaList, ctx);
 				} catch (JSONException e) {
-					Log.e("Category.getCategories", "Field Schema improperly formatted!");
-					e.printStackTrace();
+					Log.e("Category.getCategories", "Field Schema improperly formatted!", e);
 				}
 			 }
 			 cat.id = id;

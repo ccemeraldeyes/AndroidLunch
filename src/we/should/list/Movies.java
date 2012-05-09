@@ -3,8 +3,6 @@
  */
 package we.should.list;
 
-import java.util.*;
-
 import android.content.Context;
 
 /**
@@ -19,7 +17,7 @@ public class Movies extends GenericCategory {
 	
 	@Override
 	public Item newItem() {
-		Item i = new MovieItem(this);
+		Item i = new MovieItem(this, ctx);
 		return i;
 	}
 }

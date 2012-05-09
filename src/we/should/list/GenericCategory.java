@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import we.should.database.WSdb;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 
 /**
  * 
@@ -51,20 +52,17 @@ public class GenericCategory extends Category {
 	}
 	@Override
 	public List<Item> getItems() {
-		if (ctx == null){
-			throw new IllegalStateException("Category Has not yet been saved!");
-		}
-		if (!sync) {
+		if (!sync && ctx != null && id != 0) {
 			WSdb db = new WSdb(ctx);
 			db.open();
 			Cursor cur = db.getItemsOfCategory(this.id);
 			while (cur.moveToNext()) {
-				String name = cur.getString(1);
 				JSONObject data = null;
 				try {
 					data = new JSONObject(cur.getString(4));
-					GenericItem nIt = new GenericItem(this);
+					GenericItem nIt = new GenericItem(this, ctx);
 					nIt.DBtoData(data);
+					nIt.id = cur.getInt(0);
 					if(!this.items.contains(nIt)) this.items.add(nIt);
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
@@ -79,7 +77,7 @@ public class GenericCategory extends Category {
 
 	@Override
 	public Item newItem() {
-		Item i = new GenericItem(this);
+		Item i = new GenericItem(this, ctx);
 		return i;
 	}
 	
@@ -99,15 +97,20 @@ public class GenericCategory extends Category {
 	}
 	@Override
 	public void save() {
-		WSdb db = new WSdb(ctx);
-		db.open();
-		if(ctx == null){
-			this.id = (int) db.insertCategory(this.name, this.color, fieldsToDB().toString());
+		if (ctx != null) {
+			WSdb db = new WSdb(ctx);
+			db.open();
+			if (this.id == 0) {
+				this.id = (int) db.insertCategory(this.name, this.color,
+						fieldsToDB().toString());
+			} else {
+				db.updateCategoryColor(this.id, this.color);
+				db.updateCategoryName(this.id, this.name);
+			}
+			db.close();
 		} else {
-			db.updateCategoryColor(this.id, this.color);
-			db.updateCategoryName(this.id, this.name);
+			Log.w("GenericCategory.save()", "Category not saved to database because context is null");
 		}
-		db.close();
 	}
 	/**
 	 * Returns true if this.fields == other.fields, and
