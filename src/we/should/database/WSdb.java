@@ -151,7 +151,7 @@ public class WSdb {
 	 */
 	public long insertColor(String name, String rgb, String drawable){
 		Log.v("InsertColor", name + " " + rgb + " " + drawable);
-		if(hasNoChars(name) || hasNoChars(drawable))
+		if(hasNoChars(name)) //|| rgb.matches(expr))
 			return -1;
 		
 		// validate color hex value
