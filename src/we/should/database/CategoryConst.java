@@ -11,6 +11,6 @@ public class CategoryConst {
 								TBL_NAME="category",		// table name
 								ID="id", 					// unique id		
 								NAME="name",				// category name
-								COLOR="color",				// color rgb hex value
+								COLOR="color",				// id of color
 								SCHEMA="schema";			// json code
 }

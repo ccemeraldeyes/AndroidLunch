@@ -2,16 +2,18 @@
 package we.should.list;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
-import org.json.*;
+import org.json.JSONArray;
+import org.json.JSONException;
 
+import we.should.database.WSdb;
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
-
-import we.should.WeShouldActivity;
-import we.should.database.*;
 
 /**
  * @author Davis Shepherd
