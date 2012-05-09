@@ -496,32 +496,7 @@ public class WSdb {
 		
 	}
 	
-	//TODO: REMOVE
-	/* Remove
-	
-	/** Change the name of a Category
-	 * 
-	 * @param catID id of category to update
-	 * @param newName new name of category
-	 *
-	public int updateCategoryName(int catID, String newName){
-		Log.v("DB.updateCatName","change name of categoryId=" + 
-		          catID + " to " +  newName);
-		
-		if (hasNoChars(newName) || catID<1)
-			return 0;
-		
-		int affected=0;
-		ContentValues updateValue = new ContentValues();
-		updateValue.put(CategoryConst.NAME, newName);
-		String whereClause=CategoryConst.ID + "=" + catID;
-		affected=db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
-		
-		return affected;
-	}
-	
-	*/
-	
+
 	/**
 	 * Change the name of a Tag
 	 * 
