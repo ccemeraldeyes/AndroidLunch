@@ -1,6 +1,7 @@
 package we.should;
 
 import java.util.ArrayList;
+import we.should.database.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,7 +43,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
 	private String towers;
 	private int devX, devY;
 	private MyLocationOverlay myLocationOverlay;
-    private WSdb db;
+	protected WSdb db;
+	protected String DBFILE;
+    
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,11 +54,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
         map = (MapView) findViewById(R.id.mapview);
         map.setBuiltInZoomControls(true);       
         controller = map.getController();
-        db= new WSdb(this);
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         this.mTabHost.setup();
         
 
+        db = new WSdb(this);
+        DBFILE = db.getDB().getPath();
+        
         // Just spoof the tabs for the ZFR.  This would be dynamically loaded
         // once we begin work on production code.
         // pittsw: 4/20/12
