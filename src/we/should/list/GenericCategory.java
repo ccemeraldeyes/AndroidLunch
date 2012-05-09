@@ -1,7 +1,5 @@
 package we.should.list;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,8 +63,7 @@ public class GenericCategory extends Category {
 					nIt.id = cur.getInt(0);
 					if(!this.items.contains(nIt)) this.items.add(nIt);
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Log.e("GenericCategory.getItems()", "Database data string improperly formatted");
 				}
 			}
 			db.close();
@@ -101,11 +98,11 @@ public class GenericCategory extends Category {
 			WSdb db = new WSdb(ctx);
 			db.open();
 			if (this.id == 0) {
-				this.id = (int) db.insertCategory(this.name, this.color,
+				this.id = (int) db.insertCategory(this.name, this.color.hashCode(),
 						fieldsToDB().toString());
 			} else {
-				db.updateCategoryColor(this.id, this.color);
-				db.updateCategoryName(this.id, this.name);
+				db.updateCategory(this.id, this.name, this.color.hashCode(), fieldsToDB().toString());
+				//TODO:Manage color ids
 			}
 			db.close();
 		} else {

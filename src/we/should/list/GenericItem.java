@@ -1,19 +1,22 @@
 package we.should.list;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import we.should.Splash;
 import we.should.database.WSdb;
-
-
 import android.content.Context;
-import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
@@ -142,7 +145,7 @@ public class GenericItem extends Item {
 				db.deleteItem(this.id);
 			} 
 			this.id = (int) db.insertItem(this.getName(), 
-					this.c.id, false, dataToDB().toString());
+					this.c.id, dataToDB().toString());
 			db.close();
 		} else {
 			Log.w("GenericItem.save()", "Item not be saved to Database because context is null");
@@ -169,6 +172,12 @@ public class GenericItem extends Item {
 	public void addTag(String s) {
 		Set<String> tags = this.getTags();
 		if (!tags.contains(s)){
+			if(ctx != null){
+				WSdb db = new WSdb(ctx);
+				db.open();
+				db.insertTag(s);
+				db.close();
+			}
 			tags.add(s);
 			JSONArray newTags = new JSONArray();
 			for(String tag : tags){
