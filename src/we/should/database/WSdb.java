@@ -14,16 +14,12 @@ import android.util.Log;
  * NOTE: Most methods are sending Log verbose output.  Running LogCat while executing displays information.
  * See DBexamples.txt for examples on how to call the methods and parse results.
  * @author  Troy Schuring - UW CSE403 SP12
- * 
- * 
- * 
- * 
  */
 
 //TODO: inserts return ID or 0 if fail.
 //TODO: display error causes to user?
-//TODO: updates vs inserts, return failed values
-//TODO: update return bool?
+//TODO: updates vs inserts, return failed values (update ret 0 or 1 insert ret -1 or row)
+//TODO: update return bool? as is... 0 fail, 1 success
 //TODO: transactions
 
 public class WSdb {
@@ -611,8 +607,8 @@ public class WSdb {
 	 */
 	public boolean deleteItem(int itemId){
 		int affected=0;
-		//db.beginTransaction();
-		//try{
+		db.beginTransaction();
+		try{
 			// delete the item-tag associations
 			affected=db.delete(Item_TagConst.TBL_NAME, Item_TagConst.ITEM_ID +
 					  "=" + itemId, null);
@@ -623,22 +619,17 @@ public class WSdb {
 					null);
 			Log.v("WSdb.deleteTag",
 					  "deleted " + affected + " items");
-		//} finally{
+			db.setTransactionSuccessful();
+		} finally{
 			//if (db.inTransaction()){
-				//db.endTransaction();
-			//}else{
-				//return false;
-			//}
-		//}
-		
-		//return true;
-		
-		if (affected>0){
+			db.endTransaction();
+			if (affected>0){
 			Log.v("WSdb.deleteCategory",
 					  "deleted " + affected + " category successfully");		
 			return true;
-		}else
-			return false;	
+			}
+		}
+		return false;	
 	}
 	
 	
@@ -713,22 +704,29 @@ public class WSdb {
 	/**
 	 * Delete the color with key id=<code>colorId</code>
 	 * 
-	 * @param colorId
-	 * @return
+	 * @param colorId key id of color to delete
+	 * @return true if deleted, false otherwise
 	 */
 	public boolean deleteColor(int colorId){
-		
 		int affected=0;
+		
+		Cursor c=getAllColors();
+		
+		while(c.moveToNext()){
+			if (c.getInt(0)==colorId){
+				Log.e("db.deleteColor", "Cannot delete: Category " + c.getString(1) + " is using this color.");
+				return false;
+			}
+		}
+		String where = ColorConst.ID + "=" + colorId;	
+		affected=db.delete(ColorConst.TBL_NAME, where, null);
 		
 		if (affected > 0)			
 			return true;		
 		else			
 			return false;
 	}
-	
-	
-	
-	
+
 	/****************************************************************
 	 *                          Testing
 	 *         Rebuild database and fill with test data
@@ -741,7 +739,6 @@ public class WSdb {
 		dbhelper.dropAllTables(db);
 		dbhelper.createTables(db);
 	}
-	
 	
 	/**
 	 * Drops tables, re-creates them and fills with sample data
