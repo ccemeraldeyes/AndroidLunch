@@ -57,7 +57,7 @@ public class GenericCategory extends Category {
 			while (cur.moveToNext()) {
 				JSONObject data = null;
 				try {
-					data = new JSONObject(cur.getString(4));
+					data = new JSONObject(cur.getString(3));
 					GenericItem nIt = new GenericItem(this, ctx);
 					nIt.DBtoData(data);
 					nIt.id = cur.getInt(0);
@@ -80,6 +80,7 @@ public class GenericCategory extends Category {
 	
 	@Override
 	protected boolean addItem(Item i) {
+		assert(i.getCategory()==this);
 		Boolean output = this.items.add(i);
 		checkRep();
 		return output;
