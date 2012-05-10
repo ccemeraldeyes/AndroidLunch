@@ -20,10 +20,12 @@ import android.util.Log;
  * 			UW CSE403 SP12
  */
 
-//TODO: inserts return ID or 0 if fail.
-//TODO: updates vs inserts, return failed values (update ret 0 or 1 insert ret -1 or row)
-//TODO: update return bool? as is... 0 fail, 1 success
-//TODO: transactions
+//TODO: InsertItem...make itemid,tagid a key or unique, sql will enforce
+//TODO: inserts return ID or 0 if fail... verify returns line#=ID
+//TODO: transactions, may not need them.
+//TODO: question... should I remove categoryID from update?
+//TODO: validate colorID? id > 0 or >=0???
+//TODO: updates throw exceptions... OK or catch?  if keep, add throws
 
 public class WSdb {
 	private SQLiteDatabase db; 
@@ -132,8 +134,8 @@ public class WSdb {
 	 * @exception SQLConstraintException
 	 */
 	public long insertCategory(String name, int colorID, String schema){
+		//TODO: verify colorID
 		Log.v("InsertCategory", name + " " + colorID + " " + schema);
-		//TODO: validate colorID?
 		//check for null and empty strings
 		if (hasNoChars(name) || hasNoChars(schema)){
 			Log.e("db.insertCategory","argument name or schema empty");
@@ -187,7 +189,7 @@ public class WSdb {
 	public long insertItem_Tag(int itemID, int tagID){
 		Log.v("WSdb.insertItem_Tag","inserting (item,tag)=(" + itemID + "," + tagID + ")");
 
-		//TODO: if I make itemid,tagid a key, sql will enforce this
+		//TODO: if I make itemid,tagid a key or unique, sql will enforce this
 		// check to see if item is already tagged with this tag
 		if(isItemTagged(itemID, tagID)){
 			Log.e("db.insertItem_Tag","This item_tag already exists");
@@ -430,13 +432,14 @@ public class WSdb {
 	 * @param schema JSON string defining category fields
 	 * @return number of rows updated (0 if failed, 1 if success)
 	 */
-	public int updateCategory(int catID, String name, int colorID, String schema){
+	public boolean updateCategory(int catID, String name, int colorID, String schema){
 		Log.v("DB.updateCatColor","update category categoryId=" + 
 		          catID);
 
+		
 		if (hasNoChars(name) || colorID < 1 || hasNoChars(schema)){
 			Log.e("db.updateCategory","Invalid Argument");
-			return 0;
+			return false;
 		}	
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
@@ -445,8 +448,10 @@ public class WSdb {
 		updateValue.put(CategoryConst.SCHEMA, schema);
 		String whereClause=CategoryConst.ID + "=" + catID;
 		affected=db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
-		return affected;
-		
+		if (affected > 0) 
+			return true;
+		else
+			return false;
 	}
 	
 
@@ -456,19 +461,22 @@ public class WSdb {
 	 * @param tagID id of tag to update
 	 * @param newName new name of tag
 	 */
-	public int updateTag(int tagID, String newName){
+	public boolean updateTag(int tagID, String newName){
 		Log.v("DB.updateTag","update tagId=" + tagID);
 		
 		if (hasNoChars(newName) || tagID<1){
 			Log.e("db.updateTag","Invalid argument");
-			return 0;
+			return false;
 		}
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(TagConst.NAME, newName);
 		String whereClause=TagConst.ID + "=" + tagID;
 		affected = db.update(TagConst.TBL_NAME, updateValue, whereClause, null);
-		return affected;
+		if (affected > 0) 
+			return true;
+		else
+			return false;
 	}
 	
 	/**
@@ -480,12 +488,12 @@ public class WSdb {
 	 * @param data string of JSON field data
 	 * @return number of rows updated (0 if failed, 1 if success)
 	 */
-	public int updateItem(int itemID, String name, int catId, String data){
+	public boolean updateItem(int itemID, String name, int catId, String data){
 		Log.v("DB.updateItem","updating item itemId=" + itemID);
 		
 		if (hasNoChars(name) || itemID<1){
 			Log.e("db.updateItem","Invalid argument");
-			return 0;
+			return false;
 		}
 		int affected=0;
 		
@@ -496,7 +504,10 @@ public class WSdb {
 		
 		String whereClause=ItemConst.ID + "=" + itemID;
 		affected = db.update(ItemConst.TBL_NAME, updateValue, whereClause, null);
-		return affected;
+		if (affected > 0) 
+			return true;
+		else
+			return false;
 	}
 	
 	
@@ -504,7 +515,6 @@ public class WSdb {
 	 *                          Deletes
 	 ***************************************************************/
 	
-	//TODO: clean up and figure out transactions
 	/**
 	 * Deletes an item and item-tag associations
 	 *  
@@ -680,7 +690,6 @@ public class WSdb {
 			if(!isHexChar(str.charAt(i)))
 				return false;
 		}
-		
 		return true;
 	}
 	

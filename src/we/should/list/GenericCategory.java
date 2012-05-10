@@ -57,7 +57,7 @@ public class GenericCategory extends Category {
 			while (cur.moveToNext()) {
 				JSONObject data = null;
 				try {
-					data = new JSONObject(cur.getString(4));
+					data = new JSONObject(cur.getString(3));
 					GenericItem nIt = new GenericItem(this, ctx);
 					nIt.DBtoData(data);
 					nIt.id = cur.getInt(0);
