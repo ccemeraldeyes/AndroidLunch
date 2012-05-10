@@ -101,6 +101,9 @@ public class GenericItem extends Item {
 
 	@Override
 	public String get(Field key) throws IllegalArgumentException{
+		if(key.equals(Field.TAGS)){
+			throw new IllegalArgumentException("Use the getTags() method to access the tags of this.");
+		}
 		if(c.getFields().contains(key)) {
 			return values.get(key);
 		} else {
@@ -175,7 +178,8 @@ public class GenericItem extends Item {
 			if(ctx != null){
 				WSdb db = new WSdb(ctx);
 				db.open();
-				db.insertTag(s);
+				int tagID = (int) db.insertTag(s);
+				db.insertItem_Tag(id, tagID);
 				db.close();
 			}
 			tags.add(s);

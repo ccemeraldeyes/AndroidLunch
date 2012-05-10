@@ -80,6 +80,7 @@ public class GenericCategory extends Category {
 	
 	@Override
 	protected boolean addItem(Item i) {
+		assert(i.getCategory()==this);
 		Boolean output = this.items.add(i);
 		checkRep();
 		return output;
