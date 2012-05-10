@@ -20,7 +20,7 @@ public class DBHelper extends SQLiteOpenHelper{
 	                CategoryConst.TBL_NAME + " (" +
                     CategoryConst.ID + " integer primary key autoincrement, " +
 	                CategoryConst.NAME + " text UNIQUE not null, " +
-                    CategoryConst.COLOR + " integer " +
+                    CategoryConst.COLOR + " integer not null, " +
 	                CategoryConst.SCHEMA + " schema text not null);";	
 	
 	private static final String CREATE_TABLE_ITEM="create table " +			
@@ -123,7 +123,6 @@ public class DBHelper extends SQLiteOpenHelper{
 			Log.e("DBHelper.dropAllTables","Ooops! Error");
 			ex.printStackTrace();
 		}
-		//Log.v("DBhelper.dropAllTables", "tables=")
 		Log.v("DBhelper.dropAllTables", "Exiting in good status");
 	}
 	

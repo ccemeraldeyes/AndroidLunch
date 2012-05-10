@@ -21,7 +21,6 @@ import android.util.Log;
  */
 
 //TODO: inserts return ID or 0 if fail.
-//TODO: display error causes to user?
 //TODO: updates vs inserts, return failed values (update ret 0 or 1 insert ret -1 or row)
 //TODO: update return bool? as is... 0 fail, 1 success
 //TODO: transactions
@@ -97,24 +96,26 @@ public class WSdb {
 	 * 
 	 * @param name of Item being entered
 	 * @param categoryId unique id of Item's category
-	 * @param mappable boolean true if item can be mapped, false otherwise
 	 * @param data json code holding item schema & data
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
 	 */
 	public long insertItem(String name, int categoryId, String data){
 		Log.v("db.insertItem",name + " " + categoryId + " " + data);
-		if (hasNoChars(name) || hasNoChars(data) || categoryId<1)
+		if (hasNoChars(name) || hasNoChars(data) || categoryId<1){
+			Log.e("db.insertItem","invalid argument - " + name + 
+					" or " + data + " or " + categoryId);
 			return -1;
+		}
+			
 		try{
-			Log.v("WSDB.insertItem","Inserting Item");	
 			ContentValues newTaskValue = new ContentValues();
 			newTaskValue.put(ItemConst.NAME, name);
 			newTaskValue.put(ItemConst.CAT_ID, categoryId);
 			newTaskValue.put(ItemConst.DATA, data);
 			return db.insert(ItemConst.TBL_NAME, null, newTaskValue);
 		} catch(SQLiteException ex) {
-			Log.v("Insert Item exception caught", ex.getMessage());
+			Log.e("Insert Item exception caught", ex.getMessage());
 			return -1;				
 		}
 	}
@@ -132,19 +133,20 @@ public class WSdb {
 	 */
 	public long insertCategory(String name, int colorID, String schema){
 		Log.v("InsertCategory", name + " " + colorID + " " + schema);
+		//TODO: validate colorID?
 		//check for null and empty strings
-		if (hasNoChars(name) || colorID < 1 || hasNoChars(schema))
+		if (hasNoChars(name) || hasNoChars(schema)){
+			Log.e("db.insertCategory","argument name or schema empty");
 			return -1;
-		
+		}
 		try{
-			Log.v("WSdb.insertCategory","Inserting category");
 			ContentValues newTaskValue = new ContentValues();
 			newTaskValue.put(CategoryConst.NAME, name);
 			newTaskValue.put(CategoryConst.COLOR, colorID);
 			newTaskValue.put(CategoryConst.SCHEMA, schema);
 			return db.insert(CategoryConst.TBL_NAME, null, newTaskValue);
 		} catch(SQLiteException ex) {
-			Log.v("InsertCategory exception caught", ex.getMessage());
+			Log.e("InsertCategory exception caught", ex.getMessage());
 			return -1;				
 		}
 	}
@@ -158,15 +160,17 @@ public class WSdb {
 	 * @exception ex caught SQLiteException if insert fails
 	 */
 	public long insertTag(String name){
-		if(hasNoChars(name))
+		Log.v("WSdb.insertTag","inserting tag" + name);
+		if(hasNoChars(name)){
+			Log.e("db.insertTag","argument (name) is empty");
 			return -1;
+		}
 		try{
-			Log.v("WSdb.insertTag","inserting tag");
 			ContentValues newTaskValue = new ContentValues();
 			newTaskValue.put(TagConst.NAME, name);
 			return db.insert(TagConst.TBL_NAME, null, newTaskValue);
 		} catch(SQLiteException ex) {
-			Log.v("InsertTag exception caught", ex.getMessage());
+			Log.e("InsertTag exception caught", ex.getMessage());
 			return -1;				
 		}
 	}
@@ -181,19 +185,21 @@ public class WSdb {
 	 * @exception ex caught SQLiteException if insert fails
 	 */
 	public long insertItem_Tag(int itemID, int tagID){
+		Log.v("WSdb.insertItem_Tag","inserting (item,tag)=(" + itemID + "," + tagID + ")");
+
 		//TODO: if I make itemid,tagid a key, sql will enforce this
 		// check to see if item is already tagged with this tag
-		if(isItemTagged(itemID, tagID))
+		if(isItemTagged(itemID, tagID)){
+			Log.e("db.insertItem_Tag","This item_tag already exists");
 			return -1;
-		
+		}
 		try{
-			Log.v("WSdb.insertTag","inserting tag");
 			ContentValues newTaskValue = new ContentValues();
 			newTaskValue.put(Item_TagConst.ITEM_ID, itemID);
 			newTaskValue.put(Item_TagConst.TAG_ID, tagID);
 			return db.insert(Item_TagConst.TBL_NAME, null, newTaskValue);
 		} catch(SQLiteException ex) {
-			Log.v("InsertTag exception caught", ex.getMessage());
+			Log.e("InsertTag exception caught", ex.getMessage());
 			return -1;				
 		}
 	}
@@ -233,7 +239,7 @@ public class WSdb {
 	
 	
 	/**
-	 * Get the list of all items ordered by name
+	 * Get the list of all items ordered by id
 	 * 
 	 * @return cursor to list of all items ordered by id (default)
 	 * 
@@ -248,7 +254,8 @@ public class WSdb {
 	/**
 	 * Get the item with id=<code>itemId</code>
 	 * 
-	 * @return cursor to the item
+	 * @return cursor to the list containing item if it exists in the 
+	 * 			database
 	 * 
 	 * SQL query
 	 * select * from item where id=[given id]
@@ -277,7 +284,8 @@ public class WSdb {
 	 * Get the category with id=<code>catId</code>
 	 * 
 	 * @param catId key id of the category you want to return
-	 * @return cursor to single category
+	 * @return cursor to list containing category if it exists in the 
+	 * 			database
 	 * 
 	 * SQL query
 	 * select * from category where id=[given id]
@@ -305,7 +313,8 @@ public class WSdb {
 	/**
 	 * Get the tag with id=<code>tagId</code>
 	 * 
-	 * @return cursor to the tag
+	 * @return cursor to the list containing tag if it exists in 
+	 * 			database
 	 * 
 	 * SQL query
 	 * select * from tag where tagid=[given id]
@@ -315,10 +324,11 @@ public class WSdb {
 		return db.query(TagConst.TBL_NAME, null , where, null, null,
 						null, null);
 	}
+	
 	/**
 	 * Get every item with tag <code>tagId</code>
 	 * 
-	 * @param tagId key id of the tag of the items to return
+	 * @param taagId key id of the tag of the items to return
 	 * @return cursor to list of all item id# with the given tag
 	 *  
 	 * SQL query
@@ -339,7 +349,6 @@ public class WSdb {
 		
 		return db.rawQuery(sqlStatement,null);
 	}
-	
 	
 	/**
 	 * Get every tag of of an item with given <code>itemId</code>
@@ -368,7 +377,6 @@ public class WSdb {
 	}
 	
 
-
 	/**
 	 * get all items of the category with id=<code>catId</code>
 	 * 
@@ -382,21 +390,7 @@ public class WSdb {
 		return db.query(ItemConst.TBL_NAME, null, where, null,
 						null, null, null);
 	}
-	
-	
-	//TODO: great for testing, should remove for release
-	/**
-	 * Executes  a given SQL query
-	 * 
-	 * @param sql the SQL query
-	 * @param selection may include ?s in where clause which will be
-	 * 		  replaced by vlaues from selection[]
-	 * @return cursor to results
-	 */
-	public Cursor rawQuery(String sql, String[]selection){
-		return db.rawQuery(sql, selection);
-	}
-	
+
 	
 	/**
 	 * check to see if a given item has a given tag
@@ -419,8 +413,7 @@ public class WSdb {
 			return false;
 	}
 	
-	
-	
+		
 	/****************************************************************
 	 *                         Updates
 	 *                      Rename, Move
@@ -441,9 +434,10 @@ public class WSdb {
 		Log.v("DB.updateCatColor","update category categoryId=" + 
 		          catID);
 
-		if (hasNoChars(name) || colorID < 1 || hasNoChars(schema))
+		if (hasNoChars(name) || colorID < 1 || hasNoChars(schema)){
+			Log.e("db.updateCategory","Invalid Argument");
 			return 0;
-		
+		}	
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(CategoryConst.NAME, name);
@@ -463,12 +457,12 @@ public class WSdb {
 	 * @param newName new name of tag
 	 */
 	public int updateTag(int tagID, String newName){
-		Log.v("DB.updateTag","change name of tagId=" + 
-		          tagID + " to " +  newName);
+		Log.v("DB.updateTag","update tagId=" + tagID);
 		
-		if (hasNoChars(newName) || tagID<1)
+		if (hasNoChars(newName) || tagID<1){
+			Log.e("db.updateTag","Invalid argument");
 			return 0;
-		
+		}
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(TagConst.NAME, newName);
@@ -486,16 +480,17 @@ public class WSdb {
 	 * @param data string of JSON field data
 	 * @return number of rows updated (0 if failed, 1 if success)
 	 */
-	public int updateItem(int itemID, String newName, int catId, String data){
-		Log.v("DB.updateItemName","updating item itemId=" + itemID);
+	public int updateItem(int itemID, String name, int catId, String data){
+		Log.v("DB.updateItem","updating item itemId=" + itemID);
 		
-		if (hasNoChars(newName) || itemID<1)
+		if (hasNoChars(name) || itemID<1){
+			Log.e("db.updateItem","Invalid argument");
 			return 0;
-		
+		}
 		int affected=0;
 		
 		ContentValues updateValue = new ContentValues();
-		updateValue.put(ItemConst.NAME, newName);
+		updateValue.put(ItemConst.NAME, name);
 		updateValue.put(ItemConst.CAT_ID, catId);
 		updateValue.put(ItemConst.DATA, data);
 		
@@ -520,27 +515,18 @@ public class WSdb {
 	 */
 	public boolean deleteItem(int itemId){
 		int affected=0;
-		db.beginTransaction();
-		try{
-			// delete the item-tag associations
-			affected=db.delete(Item_TagConst.TBL_NAME, Item_TagConst.ITEM_ID +
-					  "=" + itemId, null);
-			Log.v("WSdb.deleteItem",
-					  "deleted " + affected + " item tag associations");
-			//delete the item
-			affected=db.delete(ItemConst.TBL_NAME, ItemConst.ID + "=" + itemId, 
-					null);
-			Log.v("WSdb.deleteTag",
-					  "deleted " + affected + " items");
-			db.setTransactionSuccessful();
-		} finally{
-			//if (db.inTransaction()){
-			db.endTransaction();
-			if (affected>0){
-			Log.v("WSdb.deleteCategory",
-					  "deleted " + affected + " category successfully");		
+		// delete the item-tag associations
+		affected=db.delete(Item_TagConst.TBL_NAME, 
+				 Item_TagConst.ITEM_ID + "=" + itemId, null);         
+		Log.v("WSdb.deleteItem",
+				  "deleted " + affected + " item tag associations");
+		//delete the item
+		affected=db.delete(ItemConst.TBL_NAME, ItemConst.ID + "=" + itemId, 
+				null);
+	
+		if (affected>0){
+			Log.v("WSdb.deleteItem", "deleted " + affected + " item");		
 			return true;
-			}
 		}
 		return false;	
 	}
@@ -553,22 +539,24 @@ public class WSdb {
 	 * @return true if category deleted, false otherwise
 	 */
 	public boolean deleteCategory(int catId){
-
-		// do not delete category if there are items associated with it		
-		Log.v("WSdb.deleteCategory",
-				  "deleting category" + catId);		
-		Cursor c = getItemsOfCategory(catId);
-		if (c.getCount()>0) return false;
+		Log.v("WSdb.deleteCategory","cat id=" + catId);	
 		
+		// do not delete category if there are items associated with it		
+		Cursor c = getItemsOfCategory(catId);
+		if (c.getCount()>0){
+			Log.e("db.deleteCategory", 
+			"cannot delete category if items of this category exist");
+			
+			return false;
+		}
+		
+		//delete the category
 		int affected = db.delete(CategoryConst.TBL_NAME,
 				       CategoryConst.ID + "=" + catId, null);		
 		
-		// if no rows deleted, return false
 		if (affected>0){
-			Log.v("WSdb.deleteCategory",
-					  "deleted " + affected + " category successfully");		
+			Log.v("WSdb.deleteCategory","deleted " + affected + " category");		
 			return true;
-
 		}else
 			return false;	
 	}
