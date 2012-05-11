@@ -43,6 +43,7 @@ public abstract class Item implements Serializable {
 	int id;
 	Context ctx;
 	Map<Field, String> values;
+	boolean added = false;
 
 	
 	protected Item(Context ctx){
@@ -185,6 +186,7 @@ public abstract class Item implements Serializable {
 				Log.e("Item.getItemsOfTag","Data string not properly formatted in DB!");
 			}
 			cat.addItem(i);
+			i.added = true;
 			out.add(i);
 		}
 		return out;

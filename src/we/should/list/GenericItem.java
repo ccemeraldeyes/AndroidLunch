@@ -43,15 +43,12 @@ public class GenericItem extends Item {
 	
 	
 	private final Category c;
-	private String cName = "";
-	private boolean added = false;
 	
 	
 	
 	protected GenericItem(Category c, Context ctx) {
 		super(ctx);
 		this.c = c;
-		this.cName = c.name;
 		values = new HashMap<Field, String>();
 		List<Field> fields = c.getFields();
 		for(Field i : fields){
@@ -155,6 +152,7 @@ public class GenericItem extends Item {
 		if(ctx != null){
 			WSdb db = new WSdb(ctx);
 			db.open();
+			saveTagsToDB(db);
 			if (this.id != 0) {
 				db.updateItem(this.id, this.getName(), 
 					this.c.id, dataToDB().toString());
@@ -162,7 +160,7 @@ public class GenericItem extends Item {
 				this.id = (int) db.insertItem(this.getName(), 
 					this.c.id, dataToDB().toString());
 			}
-			saveTagsToDB(db);
+			updateTagLinks(db);
 			db.close();
 		} else {
 			Log.w("GenericItem.save()", "Item not be saved to Database because context is null");
@@ -201,16 +199,20 @@ public class GenericItem extends Item {
 		for(Tag t : thisTags) {
 			int tagID;
 			if (!dbTags.contains(t)) {
-				tagID = (int) db.insertTag(t.toString());
-				t.setId(tagID);
-				
+				tagID = (int) db.insertTag(t.toString());				
 			} else {
 				tagID = dbTags.get(dbTags.indexOf(t)).getId();
 			}
-			long returnVal = db.insertItem_Tag(this.id, tagID);
+			t.setId(tagID);
+		}
+		values.put(Field.TAGS, tagsToJSON(thisTags).toString());
+	}
+	private void updateTagLinks(WSdb db){
+		Set<Tag> thisTags = this.getTags();
+		for(Tag t : thisTags){
+			db.insertItem_Tag(this.id, t.getId());
 		}
 	}
-	
 	private JSONArray tagsToJSON(Set<Tag> tags){
 		JSONArray newTags = new JSONArray();
 		for(Tag tag : tags){

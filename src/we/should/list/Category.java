@@ -51,6 +51,12 @@ public abstract class Category {
 	protected Category(String name, List<Field> fields, Context ctx){
 		this(name, ctx);
 		if (fields != null) this.fields = fields;
+		List<Field> defaults = Field.getDefaultFields();
+		for(Field f : defaults){ //Ensures that default fields are added
+			if(!this.fields.contains(f)){
+				this.fields.add(f); 
+			}
+		}
 		this.color = Category.DEFAULT_COLOR;
 	}
 	protected Category(String name, JSONArray a, Context ctx){
