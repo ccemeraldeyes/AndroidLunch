@@ -147,7 +147,7 @@ public abstract class Category {
 			 if (name.equals("Movies")){
 				 cat = new Movies(ctx);
 			 } else {
-				 JSONArray schemaList;
+				JSONArray schemaList;
 				try {
 					schemaList = new JSONArray(schema);
 					cat = new GenericCategory(name, schemaList, ctx);

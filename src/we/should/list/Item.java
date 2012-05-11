@@ -21,11 +21,13 @@
 package we.should.list;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -133,25 +135,56 @@ public abstract class Item {
 			throw new IllegalArgumentException("Context cannot be null!");
 		}
 		Set<Item> out = new HashSet<Item>();
+		Map<Integer, Category> cats = new HashMap<Integer, Category>();
 		WSdb db = new WSdb(ctx);
 		db.open();
 		Cursor items = db.getItemsOfTag(tag.getId());
+		Category cat;
+		Item i;
 		while(items.moveToNext()){
 			int id = items.getInt(0);
 			int catId = items.getInt(2);
-			String catName = db.getCategory(catId).getString(1);
-			Item i;
-			if(catName.equals("Movies")){ i = new MovieItem(catName, ctx);}
-			else { i = new GenericItem(catName, ctx); }
+			
+			if (!cats.containsKey(catId)) {
+				Cursor c = db.getCategory(catId);
+				c.moveToNext();
+				String name = c.getString(1);
+				String color = c.getString(2);
+				String schema = c.getString(3);
+				if (name.equals("Movies")) {
+					cat = new Movies(ctx);
+				} else {
+					JSONArray schemaList;
+					try {
+						schemaList = new JSONArray(schema);
+						cat = new GenericCategory(name, schemaList, ctx);
+					} catch (JSONException e) {
+						Log.e("Category.getCategories",
+								"Field Schema improperly formatted!", e);
+						return null;
+					}
+				}
+				cat.id = catId;
+				cat.color = color;
+				cats.put(catId, cat);
+			} else {
+				cat = cats.get(catId);
+			}
+			if (cat.getName().equals("Movies")) {
+				i = new MovieItem(cat, ctx);
+			} else {
+				i = new GenericItem(cat, ctx);
+			}
 			i.setID(id);
 			JSONObject data;
 			try { 
-				i.DBtoData(new JSONObject());
 				data = new JSONObject(items.getString(3));
 				i.DBtoData(data);
 			} catch (JSONException e) { 
 				Log.e("Item.getItemsOfTag","Data string not properly formatted in DB!");
 			}
+			cat.addItem(i);
+			out.add(i);
 		}
 		return out;
 	}

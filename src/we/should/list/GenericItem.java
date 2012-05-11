@@ -51,25 +51,25 @@ public class GenericItem extends Item {
 	protected GenericItem(Category c, Context ctx) {
 		super(ctx);
 		this.c = c;
-		if(c != null) this.cName = c.name;
+		this.cName = c.name;
 		values = new HashMap<Field, String>();
 		List<Field> fields = c.getFields();
 		for(Field i : fields){
-			values.put(i, null);
+			values.put(i, "");
 		}
 		checkRep();
-	}
-	protected GenericItem(String category, Context ctx) {
-		this((Category) null, ctx);
-		this.cName = category;
 	}
 	/**
 	 * asserts that the representation invariant is held.
 	 */
 	private void checkRep(){
-		if(added) assert(c.getItems().contains(this));
-		else assert(!c.getItems().contains(this));
-		assert(new HashSet<Field>(c.getFields()).equals(values.keySet()));
+		if (c!=null) {
+			if (added)
+				assert (c.getItems().contains(this));
+			else
+				assert (!c.getItems().contains(this));
+			assert (new HashSet<Field>(c.getFields()).equals(values.keySet()));
+		}
 	}
 	@Override
 	public Set<Address> getAddresses() {
@@ -156,10 +156,13 @@ public class GenericItem extends Item {
 			WSdb db = new WSdb(ctx);
 			db.open();
 			if (this.id != 0) {
-				db.deleteItem(this.id);
-			} 
-			this.id = (int) db.insertItem(this.getName(), 
+				db.updateItem(this.id, this.getName(), 
 					this.c.id, dataToDB().toString());
+			} else {
+				this.id = (int) db.insertItem(this.getName(), 
+					this.c.id, dataToDB().toString());
+			}
+			saveTagsToDB(db);
 			db.close();
 		} else {
 			Log.w("GenericItem.save()", "Item not be saved to Database because context is null");
@@ -187,29 +190,41 @@ public class GenericItem extends Item {
 	public void addTag(String s) {
 		Set<Tag> tags = this.getTags();
 		if (!tags.contains(new Tag(0,s))){
-			int tagID = 0;
-			if(ctx != null){
-				WSdb db = new WSdb(ctx);
-				db.open();
-				tagID = (int) db.insertTag(s);
-				db.insertItem_Tag(id, tagID);
-				db.close();
-			}
-			tags.add(new Tag(tagID, s));
-			JSONArray newTags = new JSONArray();
-			for(Tag tag : tags){
-				JSONObject tagString = new JSONObject();
-				try {
-					tagString.put(Tag.idKey, tag.getId());
-					tagString.put(Tag.tagKey, tag.toString());
-				} catch (JSONException e) {
-					Log.e("GenericItem.addTag", "JSON exception when attempting to add tag.");
-					return;
-				}
-				newTags.put(tagString);
-			}
+			tags.add(new Tag(0, s));
+			JSONArray newTags = tagsToJSON(tags);
 			values.put(Field.TAGS, newTags.toString());
 		}
+	}
+	private void saveTagsToDB(WSdb db){
+		Set<Tag> thisTags = this.getTags();
+		List<Tag> dbTags = Tag.getTags(ctx);
+		for(Tag t : thisTags) {
+			int tagID;
+			if (!dbTags.contains(t)) {
+				tagID = (int) db.insertTag(t.toString());
+				t.setId(tagID);
+				
+			} else {
+				tagID = dbTags.get(dbTags.indexOf(t)).getId();
+			}
+			long returnVal = db.insertItem_Tag(this.id, tagID);
+		}
+	}
+	
+	private JSONArray tagsToJSON(Set<Tag> tags){
+		JSONArray newTags = new JSONArray();
+		for(Tag tag : tags){
+			JSONObject tagString = new JSONObject();
+			try {
+				tagString.put(Tag.idKey, tag.getId());
+				tagString.put(Tag.tagKey, tag.toString());
+			} catch (JSONException e) {
+				Log.e("GenericItem.addTag", "JSON exception when attempting to add tag.");
+				return new JSONArray();
+			}
+			newTags.put(tagString);
+		}
+		return newTags;
 	}
 	@Override
 	public Category getCategory() {
