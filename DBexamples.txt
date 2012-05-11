@@ -81,8 +81,7 @@ private void example(){
 		Toast.makeText(this, "ID: " + c.getInt(0) + "\n" +
 						 "Name: " + c.getString(1) + "\n" +
 						 "CategoryID: " + c.getInt(2) + "\n" +
-						 "Mappable: " + c.getString(3) + "\n" +
-						 "Data: " + c.getString(4),
+						 "Data: " + c.getString(3),
 						 Toast.LENGTH_LONG).show();
 	}
 	

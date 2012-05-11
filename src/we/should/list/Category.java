@@ -130,7 +130,7 @@ public abstract class Category {
 	
 	/**
 	 * Parses the database and returns all categories that have been created
-	 * @return the list of created categories
+	 * @return the set of created categories
 	 * @throws JSONException 
 	 */
 	public static final Set<Category> getCategories(Context ctx) {

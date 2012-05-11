@@ -60,7 +60,7 @@ public class GenericCategory extends Category {
 					data = new JSONObject(cur.getString(3));
 					GenericItem nIt = new GenericItem(this, ctx);
 					nIt.DBtoData(data);
-					nIt.id = cur.getInt(0);
+					nIt.setID(cur.getInt(0));
 					if(!this.items.contains(nIt)) this.items.add(nIt);
 				} catch (JSONException e) {
 					Log.e("GenericCategory.getItems()", "Database data string improperly formatted");

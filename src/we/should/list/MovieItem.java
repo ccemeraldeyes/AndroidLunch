@@ -14,5 +14,8 @@ public class MovieItem extends GenericItem {
 	protected MovieItem(Category c, Context ctx) {
 		super(c, ctx);
 	}
+	protected MovieItem(String cName, Context ctx){
+		super(cName, ctx);
+	}
 
 }
