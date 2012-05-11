@@ -21,11 +21,12 @@
 package we.should.list;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Set;
 
 import android.content.Context;
 
-public abstract class Item {
+public abstract class Item implements Serializable {
 	
 	protected int id;
 	protected Context ctx;
