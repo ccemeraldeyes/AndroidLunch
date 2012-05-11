@@ -4,26 +4,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import we.should.search.Place;
+import we.should.search.PlaceRequest;
+
 import android.content.Context;
 import android.content.Intent;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
-import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
@@ -79,24 +83,92 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
         myLocationOverlay = new MyLocationOverlay(this, map);
         map.getOverlays().add(myLocationOverlay);
         //Getting current location.
-        lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE); // it is a string
-        Criteria crit = new Criteria();
-        towers = (lm.getBestProvider(crit, false)); //getting best provider.
-        Location location = lm.getLastKnownLocation(towers);
+        Location location = getDeviceLocation();
         if(location != null) {
-	        devX = (int) (location.getLatitude() * 1E6);
-	        devY = (int) (location.getLongitude() * 1E6);
-	        GeoPoint ourLocation = new GeoPoint(devX, devY);
-	        controller.animateTo(ourLocation);
-	        controller.setZoom(18);
-	        
+        	zoomLocation(location);
         } else {
         	Toast.makeText(WeShouldActivity.this, 
         			"Couldn''t get provider", Toast.LENGTH_SHORT).show();
         }
+        setUpBtnSearch();
         map.postInvalidate();
-
         
+    }
+    
+    
+    
+    private void setUpBtnSearch() {
+        Button btnSearch = (Button) findViewById(R.id.btnSearch);
+        btnSearch.setOnClickListener(new OnClickListener(){
+			public void onClick(View v) {
+				Location l = getDeviceLocation();
+				if(l != null) {
+					try {
+						List<Place> places = new PlaceRequest().performSearch();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					System.out.println();
+					//SearchSrv srv = new SearchSrv();
+					//setProgressBarIndeterminateVisibility(true);
+					//srv.execute(l);
+				}
+			}
+        	
+        });
+    }
+    
+//    private class SearchSrv extends AsyncTask<Location, Void, PlacesList>{
+//    	@Override
+//    	protected PlacesList doInBackground(Location... location) {
+//    		PlacesList pl = null;
+//    		location.toString();
+//    		Location l;
+//    		try {
+//    			l = location[0];
+//    			pl = new PlaceRequest(l).performSearch();
+//    		} catch (Exception e) {
+//    			e.printStackTrace();
+//    		}
+//    		return pl;
+//    	}
+//    	
+//    	@Override
+//    	protected void onPostExecute(PlacesList result) {
+//    		String text = "Result \n";
+//			if (result!=null){
+//				for(Place place: result.results){
+//					text = text + place.name +"\n";
+//				}
+//			}
+//			setProgressBarIndeterminateVisibility(false);
+//    	}
+//    }
+    
+    
+    
+    
+    /*
+     * if location is valid, make a pint and zoom user to that location.
+     * if the location isn't valid, it display error message with toast. 
+     */
+    private void zoomLocation(Location location) {
+        devX = (int) (location.getLatitude() * 1E6);
+        devY = (int) (location.getLongitude() * 1E6);
+        GeoPoint ourLocation = new GeoPoint(devX, devY);
+        controller.animateTo(ourLocation);
+        controller.setZoom(18);
+    }
+    
+    
+    /*
+     * @return the location of the device
+     */
+    private Location getDeviceLocation() {
+    	 lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE); // it is a string
+         Criteria crit = new Criteria();
+         towers = (lm.getBestProvider(crit, false)); //getting best provider.
+         return lm.getLastKnownLocation(towers);	
     }
 
 	@Override
@@ -135,7 +207,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
 	}
 
 	public void onLocationChanged(Location location) {
-		// TODO Auto-generated method stub
 		devX = (int) (location.getLatitude() * 1E6);
 		devY = (int) (location.getLongitude() * 1E6);
 		GeoPoint ourLocation = new GeoPoint(devX, devY);

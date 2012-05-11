@@ -8,6 +8,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:padding="5dp">
+
         <com.google.android.maps.MapView
 		    android:id="@+id/mapview"
 		    android:layout_width="fill_parent"
@@ -15,7 +16,12 @@
 		    android:clickable="true"
 		    android:layout_weight="1"
 	     	android:state_enabled="true"
-		    android:apiKey="0DoNDgNVMWMt9SQbYRPf0stllVK-L5wbl8773sA" />
+		    android:apiKey="0vP08l5PbglWjRr57dC3YMejBwVm1beO9_BtklA" />
+   		<Button
+            android:id="@+id/btnSearch"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Search" />
         <HorizontalScrollView
                 android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
@@ -37,6 +43,7 @@
                 android:id="@android:id/list"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent" />
+            
         </FrameLayout>
     </LinearLayout>
 </TabHost>
