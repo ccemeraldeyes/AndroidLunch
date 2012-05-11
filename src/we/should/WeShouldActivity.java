@@ -3,10 +3,14 @@ package we.should;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import we.should.database.WSdb;
 import we.should.list.Category;
+import we.should.list.Field;
+import we.should.list.GenericCategory;
 import we.should.list.Item;
+import we.should.list.Movies;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Criteria;
@@ -40,6 +44,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/** The key for creating categories. **/
 	private static final int NEW_CAT = 0;
 	
+	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
+	private final Category MOVIES = new Movies(this);
+
 	/** The TabHost that cycles between categories. **/
 	private TabHost mTabHost;
 	
@@ -99,7 +106,16 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
      */
 	private void updateTabs() {
 		mCategories = new HashMap<String, Category>();
-		for (Category cat : Category.getCategories(this)) {
+		Set<Category> categories = Category.getCategories(this);
+		if(!categories.contains(MOVIES)) { 
+			MOVIES.save();
+			categories.add(MOVIES);
+		}
+		if(!categories.contains(RESTAURANTS)) {
+			RESTAURANTS.save();
+			categories.add(RESTAURANTS);
+		}
+		for (Category cat : categories) {
 			mCategories.put(cat.getName(), cat);
 		}
 		
