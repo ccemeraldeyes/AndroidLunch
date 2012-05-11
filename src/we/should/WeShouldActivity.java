@@ -1,15 +1,14 @@
 package we.should;
 
-import java.util.ArrayList;
-import we.should.database.*;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import we.should.database.WSdb;
-
+import we.should.list.Category;
+import we.should.list.Item;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -25,7 +24,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
@@ -33,10 +31,21 @@ import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
-public class WeShouldActivity extends MapActivity implements LocationListener{
+
+public class WeShouldActivity extends MapActivity implements LocationListener {
+	
+	/** The key for the item in edit and view screens. **/
+	public static final String ITEM = "ITEM";
+	
+	/** The key for creating categories. **/
+	private static final int NEW_CAT = 0;
 	
 	/** The TabHost that cycles between categories. **/
 	private TabHost mTabHost;
+	
+	/** A map that maps the name of each category to its in-memory representation. **/
+	private Map<String, Category> mCategories;
+	
 	private MapView map;
 	private LocationManager lm;
 	private MapController controller;
@@ -54,34 +63,12 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
         map = (MapView) findViewById(R.id.mapview);
         map.setBuiltInZoomControls(true);       
         controller = map.getController();
+        
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         this.mTabHost.setup();
-        
+        updateTabs();        
 
         db = new WSdb(this);
-        
-        // Just spoof the tabs for the ZFR.  This would be dynamically loaded
-        // once we begin work on production code.
-        // pittsw: 4/20/12
-        TabHost.TabSpec spec;
-        TabPopulator tp = new TabPopulator();
-        spec = mTabHost.newTabSpec("restaurants").setIndicator("  Restaurants  ")
-        		.setContent(tp);
-        mTabHost.addTab(spec);
-        spec = mTabHost.newTabSpec("movies").setIndicator("  Movies  ")
-        		.setContent(tp);
-        mTabHost.addTab(spec);
-        spec = mTabHost.newTabSpec("other").setIndicator("  Other  ")
-        		.setContent(tp);
-        mTabHost.addTab(spec);
-        
-        for (int i = 0; i < 10; i++) {
-	        spec = mTabHost.newTabSpec("other").setIndicator("  Other " + i + "  ")
-	        		.setContent(tp);
-	        mTabHost.addTab(spec);
-        }
-
-        mTabHost.setCurrentTab(0);
         
         //Testing
         myLocationOverlay = new MyLocationOverlay(this, map);
@@ -106,6 +93,29 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
 
         
     }
+
+    /**
+     * Updates the tabs on startup or when categories change.
+     */
+	private void updateTabs() {
+		mCategories = new HashMap<String, Category>();
+		for (Category cat : Category.getCategories(this)) {
+			mCategories.put(cat.getName(), cat);
+		}
+		
+		TabHost.TabSpec spec;
+        if (mCategories.size() > 0) {
+            TabPopulator tp = new TabPopulator();
+	        for (String name : mCategories.keySet()) {
+		        spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ")
+		        		.setContent(tp);
+		        mTabHost.addTab(spec);
+		        mTabHost.setCurrentTab(0);
+	        }
+        } else {
+        	// Do something!?
+        }
+	}
 
 	@Override
 	protected void onPause() {
@@ -138,8 +148,16 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
 		case R.id.add_item:
 			intent = new Intent(this, EditScreen.class);
 			startActivity(intent);
+		case R.id.add_cat:
+			intent = new Intent(this, NewCategory.class);
+			startActivityForResult(intent, NEW_CAT);
 		}
 		return true;
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		updateTabs();
 	}
 
 	public void onLocationChanged(Location location) {
@@ -164,25 +182,27 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
 	}
 	
 	private class TabPopulator implements TabContentFactory {
-		
-		private final String[] DATA = {
-		    "Afghanistan", "Albania", "Algeria"
-		  };
 
 		public View createTabContent(String tag) {
 			ListView lv = new ListView(getApplicationContext());
 			
-			List<String> list = new ArrayList<String>(Arrays.asList(DATA));
-			list.add(0, tag);
-			lv.setAdapter(new ArrayAdapter<String>(getApplicationContext(),
-					      android.R.layout.simple_list_item_1, list));
+			String cleanedTag = tag.trim(); // because we use spaces for formatting
+			Category cat = mCategories.get(cleanedTag);
+			if (cat == null) {
+				throw new IllegalStateException("Category not found!?");
+			}
+			
+			final List<Item> itemsList = cat.getItems();
+			lv.setAdapter(new ArrayAdapter<Item>(getApplicationContext(),
+					      R.layout.item_row, itemsList));
 			
 			lv.setOnItemClickListener(new OnItemClickListener() {
 			    public void onItemClick(AdapterView<?> parent, View view,
 			        int position, long id) {
-			      // When clicked, show a toast with the TextView text
-			      Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
-			      startActivity(intent);
+			    	Item item = itemsList.get(position);
+					Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
+					intent.putExtra(ITEM, item);
+					startActivity(intent);
 			    }
 			  });
 			
