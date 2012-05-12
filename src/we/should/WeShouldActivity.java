@@ -114,29 +114,25 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private void updateTabs() {
 		mCategories = new HashMap<String, Category>();
 		Set<Category> categories = Category.getCategories(this);
-		if (categories.size() > 0) {
-				for (Category cat : categories) {
-				mCategories.put(cat.getName(), cat);
-			}
-		} else {
+		for (Category cat : categories) {
+			mCategories.put(cat.getName(), cat);
+		}
+		if (mCategories.size() == 0) {
 			mCategories.put(MOVIES.getName(), MOVIES);
 			mCategories.put(RESTAURANTS.getName(), RESTAURANTS);
 			MOVIES.save();
 			RESTAURANTS.save();
 		}
 		
+		mTabHost.clearAllTabs();
 		TabHost.TabSpec spec;
-        if (mCategories.size() > 0) {
-            TabPopulator tp = new TabPopulator();
-	        for (String name : mCategories.keySet()) {
-		        spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ")
-		        		.setContent(tp);
-		        mTabHost.addTab(spec);
-	        }
-	        mTabHost.setCurrentTab(0);
-        } else {
-        	// Do something!?
+        TabPopulator tp = new TabPopulator();
+        for (String name : mCategories.keySet()) {
+	        spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ")
+	        		.setContent(tp);
+	        mTabHost.addTab(spec);
         }
+        mTabHost.setCurrentTab(0);
 	}
 
 	@Override
@@ -171,9 +167,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		case R.id.add_item:
 			intent = new Intent(this, EditScreen.class);
 			startActivity(intent);
+			break;
 		case R.id.add_cat:
 			intent = new Intent(this, NewCategory.class);
 			startActivityForResult(intent, NEW_CAT);
+			break;
 		}
 		return true;
 	}
