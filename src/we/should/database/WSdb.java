@@ -4,8 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.*;
-
-
 import android.util.Log;
 
 /**
@@ -22,10 +20,8 @@ import android.util.Log;
 
 //TODO: InsertItem...make itemid,tagid a key or unique, sql will enforce
 //TODO: inserts return ID or 0 if fail... verify returns line#=ID
-//TODO: transactions, may not need them.
 //TODO: question... should I remove categoryID from update?
 //TODO: validate colorID? id > 0 or >=0???
-//TODO: updates throw exceptions... OK or catch?  if keep, add throws
 
 public class WSdb {
 	private SQLiteDatabase db; 
@@ -45,6 +41,7 @@ public class WSdb {
 									 ItemConst.DATABASE_VERSION);
 	}
 	
+	//TODO: need this?????
 	public SQLiteDatabase getDB(){
 		return this.db;
 	}
@@ -100,26 +97,23 @@ public class WSdb {
 	 * @param categoryId unique id of Item's category
 	 * @param data json code holding item schema & data
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
-	 * @exception ex caught SQLiteException if insert fails
+	 * @exception SQLiteConstraintException if insert violates constraints
+	 * @exception IllegalArgumentException if argument format invalid
 	 */
-	public long insertItem(String name, int categoryId, String data){
+	public long insertItem(String name, int categoryId, String data)
+			throws IllegalArgumentException, SQLiteConstraintException{
 		Log.v("db.insertItem",name + " " + categoryId + " " + data);
 		if (hasNoChars(name) || hasNoChars(data) || categoryId<1){
 			Log.e("db.insertItem","invalid argument - " + name + 
 					" or " + data + " or " + categoryId);
-			return -1;
+			throw new IllegalArgumentException();
 		}
-			
-		try{
-			ContentValues newTaskValue = new ContentValues();
-			newTaskValue.put(ItemConst.NAME, name);
-			newTaskValue.put(ItemConst.CAT_ID, categoryId);
-			newTaskValue.put(ItemConst.DATA, data);
-			return db.insert(ItemConst.TBL_NAME, null, newTaskValue);
-		} catch(SQLiteException ex) {
-			Log.e("Insert Item exception caught", ex.getMessage());
-			return -1;				
-		}
+		ContentValues newTaskValue = new ContentValues();
+		newTaskValue.put(ItemConst.NAME, name);
+		newTaskValue.put(ItemConst.CAT_ID, categoryId);
+		newTaskValue.put(ItemConst.DATA, data);
+		long row=db.insertOrThrow(ItemConst.TBL_NAME, null, newTaskValue);
+		return row;
 	}
 	
 
@@ -130,27 +124,26 @@ public class WSdb {
 	 * @param color key id of the color associated with this Category
 	 * @param schema string to identify category schema 
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
-	 * @exception ex caught SQLiteException if insert fails
-	 * @exception SQLConstraintException
+	 * @exception SQLiteConstraintException if insert violates constraints
+	 * @exception IllegalArgumentException if argument format invalid
 	 */
-	public long insertCategory(String name, int colorID, String schema){
-		//TODO: verify colorID
-		Log.v("InsertCategory", name + " " + colorID + " " + schema);
-		//check for null and empty strings
+	public long insertCategory(String name, int colorID, String schema)
+			throws IllegalArgumentException, SQLiteConstraintException{
+		
+		//TODO: verify colorID?
+		Log.v("InsertCategory", "arguments-- " + name + ", " + colorID + ", " + schema);
+		
+		//check arguments for null and empty strings
 		if (hasNoChars(name) || hasNoChars(schema)){
 			Log.e("db.insertCategory","argument name or schema empty");
-			return -1;
+			throw new IllegalArgumentException ();
 		}
-		try{
-			ContentValues newTaskValue = new ContentValues();
-			newTaskValue.put(CategoryConst.NAME, name);
-			newTaskValue.put(CategoryConst.COLOR, colorID);
-			newTaskValue.put(CategoryConst.SCHEMA, schema);
-			return db.insert(CategoryConst.TBL_NAME, null, newTaskValue);
-		} catch(SQLiteException ex) {
-			Log.e("InsertCategory exception caught", ex.getMessage());
-			return -1;				
-		}
+		ContentValues newTaskValue = new ContentValues();
+		newTaskValue.put(CategoryConst.NAME, name);
+		newTaskValue.put(CategoryConst.COLOR, colorID);
+		newTaskValue.put(CategoryConst.SCHEMA, schema);
+		
+		return db.insertOrThrow(CategoryConst.TBL_NAME, null, newTaskValue);
 	}
 	
 	
@@ -161,20 +154,20 @@ public class WSdb {
 	 * @return row ID of the newly inserted tag, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
 	 */
-	public long insertTag(String name){
+	public long insertTag(String name)
+			throws IllegalArgumentException, SQLiteConstraintException{
+		
 		Log.v("WSdb.insertTag","inserting tag" + name);
+		
+		// check argument for null or empty string
 		if(hasNoChars(name)){
 			Log.e("db.insertTag","argument (name) is empty");
-			return -1;
+			throw new IllegalArgumentException();
 		}
-		try{
-			ContentValues newTaskValue = new ContentValues();
-			newTaskValue.put(TagConst.NAME, name);
-			return db.insert(TagConst.TBL_NAME, null, newTaskValue);
-		} catch(SQLiteException ex) {
-			Log.e("InsertTag exception caught", ex.getMessage());
-			return -1;				
-		}
+		ContentValues newTaskValue = new ContentValues();
+		newTaskValue.put(TagConst.NAME, name);
+		
+		return db.insertOrThrow(TagConst.TBL_NAME, null, newTaskValue);
 	}
 	
 	
@@ -186,24 +179,21 @@ public class WSdb {
 	 * @return row ID of newly inserted row, or -1 if an error occurred
 	 * @exception ex caught SQLiteException if insert fails
 	 */
-	public long insertItem_Tag(int itemID, int tagID){
+	public long insertItem_Tag(int itemID, int tagID)
+			throws IllegalArgumentException, SQLiteConstraintException{
 		Log.v("WSdb.insertItem_Tag","inserting (item,tag)=(" + itemID + "," + tagID + ")");
-
+		//TODO: verify ids >0
 		//TODO: if I make itemid,tagid a key or unique, sql will enforce this
 		// check to see if item is already tagged with this tag
 		if(isItemTagged(itemID, tagID)){
 			Log.e("db.insertItem_Tag","This item_tag already exists");
-			return -1;
+			throw new SQLiteConstraintException();
 		}
-		try{
-			ContentValues newTaskValue = new ContentValues();
-			newTaskValue.put(Item_TagConst.ITEM_ID, itemID);
-			newTaskValue.put(Item_TagConst.TAG_ID, tagID);
-			return db.insert(Item_TagConst.TBL_NAME, null, newTaskValue);
-		} catch(SQLiteException ex) {
-			Log.e("InsertTag exception caught", ex.getMessage());
-			return -1;				
-		}
+		
+		ContentValues newTaskValue = new ContentValues();
+		newTaskValue.put(Item_TagConst.ITEM_ID, itemID);
+		newTaskValue.put(Item_TagConst.TAG_ID, tagID);
+		return db.insertOrThrow(Item_TagConst.TBL_NAME, null, newTaskValue);
 	}
 	
 	
@@ -432,14 +422,16 @@ public class WSdb {
 	 * @param schema JSON string defining category fields
 	 * @return number of rows updated (0 if failed, 1 if success)
 	 */
-	public boolean updateCategory(int catID, String name, int colorID, String schema){
-		Log.v("DB.updateCatColor","update category categoryId=" + 
+	public boolean updateCategory(int catID, String name, int colorID, String schema) 
+					throws IllegalArgumentException, SQLiteConstraintException{
+
+		Log.v("DB.updateCategory","update category categoryId=" + 
 		          catID);
 
 		
 		if (hasNoChars(name) || colorID < 1 || hasNoChars(schema)){
 			Log.e("db.updateCategory","Invalid Argument");
-			return false;
+			throw new IllegalArgumentException();
 		}	
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
@@ -447,11 +439,19 @@ public class WSdb {
 		updateValue.put(CategoryConst.COLOR, colorID);
 		updateValue.put(CategoryConst.SCHEMA, schema);
 		String whereClause=CategoryConst.ID + "=" + catID;
-		affected=db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
-		if (affected > 0) 
+		
+		db.beginTransaction();
+			affected=db.updateWithOnConflict(CategoryConst.TBL_NAME, updateValue, whereClause, null,SQLiteDatabase.CONFLICT_ROLLBACK);
+			Log.v("db.updateCategory","affected before setTransaction=" + affected);
+		if (affected > 0){
+			db.setTransactionSuccessful();
+			db.endTransaction();
 			return true;
-		else
+		}else{
+    		Log.e("db.updateCategory", "update failed & rolled back, check constraint exception");
+			db.endTransaction();
 			return false;
+		}
 	}
 	
 
@@ -461,22 +461,28 @@ public class WSdb {
 	 * @param tagID id of tag to update
 	 * @param newName new name of tag
 	 */
-	public boolean updateTag(int tagID, String newName){
+	public boolean updateTag(int tagID, String newName)
+			throws IllegalArgumentException, SQLiteConstraintException{
+
 		Log.v("DB.updateTag","update tagId=" + tagID);
 		
 		if (hasNoChars(newName) || tagID<1){
 			Log.e("db.updateTag","Invalid argument");
-			return false;
+			throw new IllegalArgumentException();
 		}
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(TagConst.NAME, newName);
 		String whereClause=TagConst.ID + "=" + tagID;
-		affected = db.update(TagConst.TBL_NAME, updateValue, whereClause, null);
-		if (affected > 0) 
+		db.beginTransaction();
+		affected = db.updateWithOnConflict(TagConst.TBL_NAME, updateValue, whereClause, null,SQLiteDatabase.CONFLICT_ROLLBACK);
+		if (affected > 0){
+			db.setTransactionSuccessful();
+			db.endTransaction();
 			return true;
-		else
-			return false;
+		}else{
+			db.endTransaction();
+			throw new SQLiteConstraintException();		}
 	}
 	
 	/**
@@ -488,12 +494,14 @@ public class WSdb {
 	 * @param data string of JSON field data
 	 * @return number of rows updated (0 if failed, 1 if success)
 	 */
-	public boolean updateItem(int itemID, String name, int catId, String data){
+	public boolean updateItem(int itemID, String name, int catId, String data)
+			throws IllegalArgumentException, SQLiteConstraintException{
+
 		Log.v("DB.updateItem","updating item itemId=" + itemID);
 		
 		if (hasNoChars(name) || itemID<1){
 			Log.e("db.updateItem","Invalid argument");
-			return false;
+			throw new IllegalArgumentException();
 		}
 		int affected=0;
 		
@@ -503,7 +511,7 @@ public class WSdb {
 		updateValue.put(ItemConst.DATA, data);
 		
 		String whereClause=ItemConst.ID + "=" + itemID;
-		affected = db.update(ItemConst.TBL_NAME, updateValue, whereClause, null);
+		affected = db.updateWithOnConflict(ItemConst.TBL_NAME, updateValue, whereClause, null,SQLiteDatabase.CONFLICT_ROLLBACK);
 		if (affected > 0) 
 			return true;
 		else
@@ -520,10 +528,10 @@ public class WSdb {
 	 *  
 	 * @param itemId id of item to be deleted
 	 * @return true on successful deletion, 
-	 *         false if transaction conflicts with referential 
-	 *         integrity and transaction rolled back
+	 *         false if no rows deleted
 	 */
-	public boolean deleteItem(int itemId){
+	public boolean deleteItem(int itemId)
+			throws SQLiteConstraintException{
 		int affected=0;
 		// delete the item-tag associations
 		affected=db.delete(Item_TagConst.TBL_NAME, 
@@ -548,7 +556,9 @@ public class WSdb {
 	 * @param catId id of the category to be deleted
 	 * @return true if category deleted, false otherwise
 	 */
-	public boolean deleteCategory(int catId){
+	public boolean deleteCategory(int catId)
+			throws SQLiteConstraintException{
+
 		Log.v("WSdb.deleteCategory","cat id=" + catId);	
 		
 		// do not delete category if there are items associated with it		
@@ -578,7 +588,9 @@ public class WSdb {
 	 * @param tagId id of tag to be deleted
 	 * @return true if tag deleted, false otherwise
 	 */
-	public boolean deleteTag(int tagId){
+	public boolean deleteTag(int tagId)
+			throws SQLiteConstraintException{
+
 		// delete the item-tag associations		
 		int affected = db.delete(Item_TagConst.TBL_NAME,
 				Item_TagConst.TAG_ID + "=" + tagId, null);		
@@ -602,7 +614,8 @@ public class WSdb {
 	 * @return true if successfully deleted, false otherwise
 	 */
 
-	public boolean deleteItemTagRel(int itemId, int tagId){
+	public boolean deleteItemTagRel(int itemId, int tagId)
+			throws SQLiteConstraintException{
 		int affected=0;
 		String where = Item_TagConst.ITEM_ID + "=" + itemId + " and " +
 		               Item_TagConst.TAG_ID + "=" + tagId;
