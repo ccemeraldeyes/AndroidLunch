@@ -50,7 +50,12 @@ public abstract class Category {
 	}
 	protected Category(String name, List<Field> fields, Context ctx){
 		this(name, ctx);
-		if (fields != null) this.fields = fields;
+		if (fields != null) this.fields = Field.getDefaultFields();
+		for(Field f : fields){ //Ensures that default fields are added
+			if(!this.fields.contains(f)){
+				this.fields.add(f); 
+			}
+		}
 		this.color = Category.DEFAULT_COLOR;
 	}
 	protected Category(String name, JSONArray a, Context ctx){
@@ -130,7 +135,7 @@ public abstract class Category {
 	
 	/**
 	 * Parses the database and returns all categories that have been created
-	 * @return the list of created categories
+	 * @return the set of created categories
 	 * @throws JSONException 
 	 */
 	public static final Set<Category> getCategories(Context ctx) {
@@ -147,12 +152,13 @@ public abstract class Category {
 			 if (name.equals("Movies")){
 				 cat = new Movies(ctx);
 			 } else {
-				 JSONArray schemaList;
+				JSONArray schemaList;
 				try {
 					schemaList = new JSONArray(schema);
 					cat = new GenericCategory(name, schemaList, ctx);
 				} catch (JSONException e) {
 					Log.e("Category.getCategories", "Field Schema improperly formatted!", e);
+					cat = new GenericCategory(name, new LinkedList<Field>(), ctx);
 				}
 			 }
 			 cat.id = id;

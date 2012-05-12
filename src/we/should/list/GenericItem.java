@@ -3,11 +3,9 @@ package we.should.list;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -39,10 +37,11 @@ import android.util.Log;
 
 
 
+@SuppressWarnings("serial")
 public class GenericItem extends Item {
+	
+	
 	private final Category c;
-	private Map<Field, String> values;
-	private boolean added = false;
 	
 	
 	
@@ -52,7 +51,7 @@ public class GenericItem extends Item {
 		values = new HashMap<Field, String>();
 		List<Field> fields = c.getFields();
 		for(Field i : fields){
-			values.put(i, null);
+			values.put(i, "");
 		}
 		checkRep();
 	}
@@ -60,9 +59,13 @@ public class GenericItem extends Item {
 	 * asserts that the representation invariant is held.
 	 */
 	private void checkRep(){
-		if(added) assert(c.getItems().contains(this));
-		else assert(!c.getItems().contains(this));
-		assert(new HashSet<Field>(c.getFields()).equals(values.keySet()));
+		if (c!=null) {
+			if (added)
+				assert (c.getItems().contains(this));
+			else
+				assert (!c.getItems().contains(this));
+			assert (new HashSet<Field>(c.getFields()).equals(values.keySet()));
+		}
 	}
 	@Override
 	public Set<Address> getAddresses() {
@@ -137,6 +140,10 @@ public class GenericItem extends Item {
 	@Override
 	public void save() {
 		checkRep();
+		if(this.c == null){
+			throw new IllegalStateException("This item was not created from a category factory" +
+					"and cannot be saved.");
+		}
 		if(!added) {
 			this.c.addItem(this);
 			this.added = true;
@@ -144,11 +151,15 @@ public class GenericItem extends Item {
 		if(ctx != null){
 			WSdb db = new WSdb(ctx);
 			db.open();
+			saveTagsToDB(db);
 			if (this.id != 0) {
-				db.deleteItem(this.id);
-			} 
-			this.id = (int) db.insertItem(this.getName(), 
+				db.updateItem(this.id, this.getName(), 
 					this.c.id, dataToDB().toString());
+			} else {
+				this.id = (int) db.insertItem(this.getName(), 
+					this.c.id, dataToDB().toString());
+			}
+			updateTagLinks(db);
 			db.close();
 		} else {
 			Log.w("GenericItem.save()", "Item not be saved to Database because context is null");
@@ -157,14 +168,15 @@ public class GenericItem extends Item {
 	}
 
 	@Override
-	public Set<String> getTags() {
-		String tags = this.get(Field.TAGS);
+	public Set<Tag> getTags() {
+		String tags = this.values.get(Field.TAGS);
 		if(tags == null) tags = "";
-		Set<String> result = new HashSet<String>();
+		Set<Tag> result = new HashSet<Tag>();
 		try {
 			JSONArray out = new JSONArray(tags);
 			for(int i = 0; i < out.length(); i++){
-				result.add(out.getString(i));
+				JSONObject tagString = out.getJSONObject(i);
+				result.add(new Tag(tagString.getInt(Tag.idKey), tagString.getString(Tag.tagKey)));
 			}
 		} catch (JSONException e) {
 			Log.e("GenericItem.getTags", "Tags string improperly formatted, returning empty set!");
@@ -173,22 +185,47 @@ public class GenericItem extends Item {
 	}
 	@Override
 	public void addTag(String s) {
-		Set<String> tags = this.getTags();
-		if (!tags.contains(s)){
-			if(ctx != null){
-				WSdb db = new WSdb(ctx);
-				db.open();
-				int tagID = (int) db.insertTag(s);
-				db.insertItem_Tag(id, tagID);
-				db.close();
-			}
-			tags.add(s);
-			JSONArray newTags = new JSONArray();
-			for(String tag : tags){
-				newTags.put(tag);
-			}
+		Set<Tag> tags = this.getTags();
+		if (!tags.contains(new Tag(0,s))){
+			tags.add(new Tag(0, s));
+			JSONArray newTags = tagsToJSON(tags);
 			values.put(Field.TAGS, newTags.toString());
 		}
+	}
+	private void saveTagsToDB(WSdb db){
+		Set<Tag> thisTags = this.getTags();
+		List<Tag> dbTags = Tag.getTags(ctx);
+		for(Tag t : thisTags) {
+			int tagID;
+			if (!dbTags.contains(t)) {
+				tagID = (int) db.insertTag(t.toString());				
+			} else {
+				tagID = dbTags.get(dbTags.indexOf(t)).getId();
+			}
+			t.setId(tagID);
+		}
+		values.put(Field.TAGS, tagsToJSON(thisTags).toString());
+	}
+	private void updateTagLinks(WSdb db){
+		Set<Tag> thisTags = this.getTags();
+		for(Tag t : thisTags){
+			db.insertItem_Tag(this.id, t.getId());
+		}
+	}
+	private JSONArray tagsToJSON(Set<Tag> tags){
+		JSONArray newTags = new JSONArray();
+		for(Tag tag : tags){
+			JSONObject tagString = new JSONObject();
+			try {
+				tagString.put(Tag.idKey, tag.getId());
+				tagString.put(Tag.tagKey, tag.toString());
+			} catch (JSONException e) {
+				Log.e("GenericItem.addTag", "JSON exception when attempting to add tag.");
+				return new JSONArray();
+			}
+			newTags.put(tagString);
+		}
+		return newTags;
 	}
 	@Override
 	public Category getCategory() {
@@ -205,22 +242,6 @@ public class GenericItem extends Item {
 			}
 		}
 		return out;
-	}
-	/**
-	 * Restores the values held in this item from a JSONObject DB entry
-	 * @param d
-	 * @throws JSONException
-	 * @modifies this.values
-	 */
-	protected void DBtoData(JSONObject d) throws JSONException{
-		@SuppressWarnings("unchecked")
-		Iterator<String> i = d.keys();
-		while(i.hasNext()){
-			String fieldString = i.next();
-			String value = d.getString(fieldString);
-			Field f = new Field(fieldString);
-			this.values.put(f, value);
-		}
 	}
 	public boolean equals(Object other){
 		if(other == this) return true;

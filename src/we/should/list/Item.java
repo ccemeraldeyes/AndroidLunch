@@ -21,14 +21,33 @@
 package we.should.list;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.io.Serializable;
 import java.util.Set;
 
-import android.content.Context;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public abstract class Item {
+import we.should.database.WSdb;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.util.Log;
+
+@SuppressWarnings("serial")
+public abstract class Item implements Serializable {
 	
-	protected int id;
-	protected Context ctx;
+	
+	
+	int id;
+	Context ctx;
+	Map<Field, String> values;
+	boolean added = false;
+
 	
 	protected Item(Context ctx){
 		this.ctx = ctx;
@@ -90,9 +109,10 @@ public abstract class Item {
 	public abstract void set(Field key, String value);
 	
 	/**
-	 * Adds this item to the category factory that created it, and saves to the database.
-	 * @param c specifies the context of the database. 
+	 * Adds this item to the category factory that created it, and saves to the database. 
+	 * If this item was not produced from a category factory this will throw an IllegalStateException.
 	 * @modifies this.C
+	 * @throws IllegalStateException
 	 */
 	public abstract void save();
 	
@@ -100,7 +120,7 @@ public abstract class Item {
 	 * Returns the set of tags assigned to this item
 	 * @return A Set of tag strings.
 	 */
-	public abstract Set<String> getTags();
+	public abstract Set<Tag> getTags();
 	
 	/**
 	 * Adds a tag string to this item. If s matches an
@@ -109,4 +129,94 @@ public abstract class Item {
 	 */
 	public abstract void addTag(String s);
 	
+	/**
+	 * Returns the set of Items that have the given tag
+	 * @param tag object to search for
+	 * @param ctx of the database
+	 * @return a set of all Items I s.t for all i in I, i.getTags().contains(tag). 
+	 */
+	public static Set<Item> getItemsOfTag(Tag tag, Context ctx){
+		if(ctx == null){
+			throw new IllegalArgumentException("Context cannot be null!");
+		}
+		Set<Item> out = new HashSet<Item>();
+		Map<Integer, Category> cats = new HashMap<Integer, Category>();
+		WSdb db = new WSdb(ctx);
+		db.open();
+		Cursor items = db.getItemsOfTag(tag.getId());
+		Category cat;
+		Item i;
+		while(items.moveToNext()){
+			int id = items.getInt(0);
+			int catId = items.getInt(2);
+			
+			if (!cats.containsKey(catId)) {
+				Cursor c = db.getCategory(catId);
+				c.moveToNext();
+				String name = c.getString(1);
+				String color = c.getString(2);
+				String schema = c.getString(3);
+				if (name.equals("Movies")) {
+					cat = new Movies(ctx);
+				} else {
+					JSONArray schemaList;
+					try {
+						schemaList = new JSONArray(schema);
+						cat = new GenericCategory(name, schemaList, ctx);
+					} catch (JSONException e) {
+						Log.e("Category.getCategories",
+								"Field Schema improperly formatted!", e);
+						return null;
+					}
+				}
+				cat.id = catId;
+				cat.color = color;
+				cats.put(catId, cat);
+			} else {
+				cat = cats.get(catId);
+			}
+			if (cat.getName().equals("Movies")) {
+				i = new MovieItem(cat, ctx);
+			} else {
+				i = new GenericItem(cat, ctx);
+			}
+			i.setID(id);
+			JSONObject data;
+			try { 
+				data = new JSONObject(items.getString(3));
+				i.DBtoData(data);
+			} catch (JSONException e) { 
+				Log.e("Item.getItemsOfTag","Data string not properly formatted in DB!");
+			}
+			cat.addItem(i);
+			i.added = true;
+			out.add(i);
+		}
+		return out;
+	}
+	/**
+	 * Sets the id of this item for DB lookup.
+	 * Should be set to the return value of a DB insert
+	 * call
+	 * @param i the row value in the database
+	 */
+	protected void setID(int i){
+		this.id = i;
+	}
+	/**
+	 * Restores the values held in this item from a JSONObject DB entry
+	 * @param d
+	 * @throws JSONException
+	 * @modifies this.values
+	 */
+	protected void DBtoData(JSONObject d) throws JSONException{
+		@SuppressWarnings("unchecked")
+		Iterator<String> i = d.keys();
+		while(i.hasNext()){
+			String fieldString = i.next();
+			String value = d.getString(fieldString);
+			Field f = new Field(fieldString);
+			this.values.put(f, value);
+		}
+	}
 }

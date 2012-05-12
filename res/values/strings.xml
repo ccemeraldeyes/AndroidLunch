@@ -4,5 +4,7 @@
     <string name="help">Help</string>
     <string name="help_text">Welcome to WeShould!  This is the help text!</string>
     <string name="add">Add a new item</string>
+    <string name="no_cat">No categories exist.  Please press the menu button and add a category.</string>
+    <string name="add_cat">Add category</string>
 
 </resources>
