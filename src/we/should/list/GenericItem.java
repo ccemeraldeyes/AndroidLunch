@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import we.should.database.WSdb;
 import android.content.Context;
+import android.database.sqlite.SQLiteConstraintException;
 import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
@@ -209,7 +210,9 @@ public class GenericItem extends Item {
 	private void updateTagLinks(WSdb db){
 		Set<Tag> thisTags = this.getTags();
 		for(Tag t : thisTags){
-			db.insertItem_Tag(this.id, t.getId());
+			if (!db.isItemTagged(this.id, t.getId())) {
+				db.insertItem_Tag(this.id, t.getId());
+			}
 		}
 	}
 	private JSONArray tagsToJSON(Set<Tag> tags){
