@@ -114,16 +114,15 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private void updateTabs() {
 		mCategories = new HashMap<String, Category>();
 		Set<Category> categories = Category.getCategories(this);
-		if(!categories.contains(MOVIES)) { 
+		if (categories.size() > 0) {
+				for (Category cat : categories) {
+				mCategories.put(cat.getName(), cat);
+			}
+		} else {
+			mCategories.put(MOVIES.getName(), MOVIES);
+			mCategories.put(RESTAURANTS.getName(), RESTAURANTS);
 			MOVIES.save();
-			categories.add(MOVIES);
-		}
-		if(!categories.contains(RESTAURANTS)) {
 			RESTAURANTS.save();
-			categories.add(RESTAURANTS);
-		}
-		for (Category cat : categories) {
-			mCategories.put(cat.getName(), cat);
 		}
 		
 		TabHost.TabSpec spec;
@@ -133,8 +132,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		        spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ")
 		        		.setContent(tp);
 		        mTabHost.addTab(spec);
-		        mTabHost.setCurrentTab(0);
 	        }
+	        mTabHost.setCurrentTab(0);
         } else {
         	// Do something!?
         }
@@ -344,18 +343,18 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	//Example of how to create drawable to pass into CustomPinPoint to draw on the map
 	private Drawable createCustomPin(PlaceType type) {
 	   switch(type) {
-	   		case UNIVERSITY:
-	   			return getResources().getDrawable(R.drawable.university);
-	   		case RESTAURANT:
-	   			return getResources().getDrawable(R.drawable.restaurant);
-	   		case MOVIE_RENTAL:
-	   			return getResources().getDrawable(R.drawable.movie_rental);
-	   		case MOVIE_THEATER:
-	   			return getResources().getDrawable(R.drawable.movie_theater);
-	   		case CAFE:
-	   			return getResources().getDrawable(R.drawable.coffee);
-	   		case BAR:
-	   			return getResources().getDrawable(R.drawable.bar);
+//	   		case UNIVERSITY:
+//	   			return getResources().getDrawable(R.drawable.university);
+//	   		case RESTAURANT:
+//	   			return getResources().getDrawable(R.drawable.restaurant);
+//	   		case MOVIE_RENTAL:
+//	   			return getResources().getDrawable(R.drawable.movie_rental);
+//	   		case MOVIE_THEATER:
+//	   			return getResources().getDrawable(R.drawable.movie_theater);
+//	   		case CAFE:
+//	   			return getResources().getDrawable(R.drawable.coffee);
+//	   		case BAR:
+//	   			return getResources().getDrawable(R.drawable.bar);
 	   		default:
 	   			return null;
 	   }

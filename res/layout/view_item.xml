@@ -9,18 +9,16 @@
         android:layout_height="wrap_content" >
 
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Spatula City"
             android:layout_weight="1"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
-            android:id="@+id/textView7"
+            android:id="@+id/category"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Restaurant"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <Button
@@ -33,12 +31,8 @@
 
     </LinearLayout>
 
-    <View
-        android:id="@+id/view1"
-        android:layout_width="fill_parent"
-        android:layout_height="2dip"
-        android:layout_gravity="center"
-        android:background="#888888" />
+    <include
+        layout="@layout/divider" />
 
     <TextView
         android:id="@+id/textView1"
@@ -80,12 +74,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <View
-        android:id="@+id/view1"
-        android:layout_width="fill_parent"
-        android:layout_height="2dip"
-        android:layout_gravity="center"
-        android:background="#888888" />
+    <include
+        layout="@layout/divider" />
+    
+    <TextView
+        android:id="@+id/comments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <include
+        layout="@layout/divider" />
 
     <TextView
         android:id="@+id/textView8"
@@ -95,18 +93,14 @@
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
-        android:id="@+id/textView9"
+        android:id="@+id/tags"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="falafel; open late; middle eastern"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <View
-        android:id="@+id/view1"
-        android:layout_width="fill_parent"
-        android:layout_height="2dip"
-        android:layout_gravity="center"
-        android:background="#888888" />
+    <include
+        layout="@layout/divider" />
 
     <Button
         android:id="@+id/edit"
