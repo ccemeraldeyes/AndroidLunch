@@ -1,14 +1,19 @@
 package we.should;
 
 import java.util.ArrayList;
+import we.should.database.*;
 import java.util.Arrays;
 import java.util.List;
 
+import we.should.search.CustomPinPoint;
 import we.should.search.Place;
 import we.should.search.PlaceRequest;
-
+import we.should.search.PlaceType;
+import we.should.database.WSdb;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -33,6 +38,8 @@ import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
+import com.google.android.maps.Overlay;
+import com.google.android.maps.OverlayItem;
 public class WeShouldActivity extends MapActivity implements LocationListener{
 	
 	/** The TabHost that cycles between categories. **/
@@ -42,7 +49,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
 	private MapController controller;
 	private String towers;
 	private int devX, devY;
+	private List<Overlay> overlayList;
 	private MyLocationOverlay myLocationOverlay;
+	protected WSdb db;
+	protected String DBFILE;
     
     /** Called when the activity is first created. */
     @Override
@@ -52,9 +62,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
         map = (MapView) findViewById(R.id.mapview);
         map.setBuiltInZoomControls(true);       
         controller = map.getController();
-        
+        overlayList = map.getOverlays();
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         this.mTabHost.setup();
+        
+
+        db = new WSdb(this);
+        //DBFILE = db.getDB().getPath();
         
         // Just spoof the tabs for the ZFR.  This would be dynamically loaded
         // once we begin work on production code.
@@ -103,49 +117,73 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
 			public void onClick(View v) {
 				Location l = getDeviceLocation();
 				if(l != null) {
-					try {
-						List<Place> places = new PlaceRequest().performSearch();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					System.out.println();
-					//SearchSrv srv = new SearchSrv();
-					//setProgressBarIndeterminateVisibility(true);
-					//srv.execute(l);
+//					try {
+//						List<Place> places = new PlaceRequest().searchByLocation(l, 5);
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//					}
+					SearchSrv srv = new SearchSrv();
+					setProgressBarIndeterminateVisibility(true);
+					srv.execute(l);
 				}
 			}
         	
         });
     }
     
-//    private class SearchSrv extends AsyncTask<Location, Void, PlacesList>{
-//    	@Override
-//    	protected PlacesList doInBackground(Location... location) {
-//    		PlacesList pl = null;
-//    		location.toString();
-//    		Location l;
-//    		try {
-//    			l = location[0];
-//    			pl = new PlaceRequest(l).performSearch();
-//    		} catch (Exception e) {
-//    			e.printStackTrace();
-//    		}
-//    		return pl;
-//    	}
-//    	
-//    	@Override
-//    	protected void onPostExecute(PlacesList result) {
-//    		String text = "Result \n";
-//			if (result!=null){
-//				for(Place place: result.results){
-//					text = text + place.name +"\n";
-//				}
-//			}
-//			setProgressBarIndeterminateVisibility(false);
-//    	}
-//    }
+    private class SearchSrv extends AsyncTask<Location, Void, List<Place>>{
+    	@Override
+    	protected List<Place> doInBackground(Location... location) {
+    		List<Place> places = null;
+    		Location l;
+    		try {
+    			l = location[0];
+    			places = new PlaceRequest().searchByLocation(l, "university");
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}
+    		return places;
+    	}
+    	
+    	@Override
+    	protected void onPostExecute(List<Place> result) {
+    		//Display Places selction GUI
+    		String text = "Result \n";
+			if (result!=null){
+				for(Place place: result){
+					Drawable customPin = createCustomPin(place.getBestType());
+					int placeLocationX = (int) (place.getLat() * 1E6);
+					int placeLocationY = (int) (place.getLng() * 1E6);
+			        GeoPoint placeLocation = new GeoPoint(placeLocationX, placeLocationY);
+			        OverlayItem overlayItem = new OverlayItem(placeLocation, place.getName(), place.getAddress());
+			        CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this);
+			        custom.insertPinpoint(overlayItem);
+			        overlayList.add(custom);
+					text = text + place.getName() +"\n";
+				}
+			}
+			setProgressBarIndeterminateVisibility(false);
+    	}
+    }
     
-    
+   private Drawable createCustomPin(PlaceType type) {
+	   switch(type) {
+	   		case UNIVERSITY:
+	   			return getResources().getDrawable(R.drawable.university);
+	   		case RESTAURANT:
+	   			return getResources().getDrawable(R.drawable.restaurant);
+	   		case MOVIE_RENTAL:
+	   			return getResources().getDrawable(R.drawable.movie_rental);
+	   		case MOVIE_THEATER:
+	   			return getResources().getDrawable(R.drawable.movie_theater);
+	   		case CAFE:
+	   			return getResources().getDrawable(R.drawable.coffee);
+	   		case BAR:
+	   			return getResources().getDrawable(R.drawable.bar);
+	   		default:
+	   			return null;
+	   }
+   }
     
     
     /*
@@ -253,5 +291,5 @@ public class WeShouldActivity extends MapActivity implements LocationListener{
 		}
 		
 	}
-    
+	
 }

@@ -17,7 +17,7 @@
 		    android:layout_weight="1"
 	     	android:state_enabled="true"
 		    android:apiKey="0vP08l5PbglWjRr57dC3YMejBwVm1beO9_BtklA" />
-   		<Button
+       <Button
             android:id="@+id/btnSearch"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

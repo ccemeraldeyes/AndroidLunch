@@ -16,6 +16,12 @@ import android.util.Log;
  * @author  Troy Schuring - UW CSE403 SP12
  */
 
+//TODO: inserts return ID or 0 if fail.
+//TODO: display error causes to user?
+//TODO: updates vs inserts, return failed values (update ret 0 or 1 insert ret -1 or row)
+//TODO: update return bool? as is... 0 fail, 1 success
+//TODO: transactions
+
 public class WSdb {
 	private SQLiteDatabase db; 
 	private final Context context;
@@ -32,6 +38,10 @@ public class WSdb {
 		context=c;
 		dbhelper = new DBHelper(context, ItemConst.DATABASE_NAME, null, 
 									 ItemConst.DATABASE_VERSION);
+	}
+	
+	public SQLiteDatabase getDB(){
+		return this.db;
 	}
 	
 	
@@ -77,6 +87,7 @@ public class WSdb {
 	 *                      Insert Methods
 	 ***************************************************************/
 	
+	
 	/**
 	 * Insert an Item into the database
 	 * 
@@ -87,7 +98,8 @@ public class WSdb {
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
 	 */
-	public long insertItem(String name, int categoryId, boolean mappable, String data){
+	public long insertItem(String name, int categoryId, String data){
+		Log.v("db.insertItem",name + " " + categoryId + " " + data);
 		if (hasNoChars(name) || hasNoChars(data) || categoryId<1)
 			return -1;
 		try{
@@ -95,7 +107,6 @@ public class WSdb {
 			ContentValues newTaskValue = new ContentValues();
 			newTaskValue.put(ItemConst.NAME, name);
 			newTaskValue.put(ItemConst.CAT_ID, categoryId);
-			newTaskValue.put(ItemConst.MAPPABLE, mappable);
 			newTaskValue.put(ItemConst.DATA, data);
 			return db.insert(ItemConst.TBL_NAME, null, newTaskValue);
 		} catch(SQLiteException ex) {
@@ -109,29 +120,23 @@ public class WSdb {
 	 * Insert a category into the database
 	 * 
 	 * @param name of category being entered
-	 * @param color 6 digit RGB value of color to identify category
+	 * @param color key id of the color associated with this Category
 	 * @param schema string to identify category schema 
 	 * @return row ID of the newly inserted row, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
 	 * @exception SQLConstraintException
 	 */
-	public long insertCategory(String name, String color, String schema){
-		
+	public long insertCategory(String name, int colorID, String schema){
+		Log.v("InsertCategory", name + " " + colorID + " " + schema);
 		//check for null and empty strings
-		if (hasNoChars(name) || hasNoChars(color) || hasNoChars(schema))
+		if (hasNoChars(name) || colorID < 1 || hasNoChars(schema))
 			return -1;
-		
-		// validate color hex value
-		if (!isHexString(color) || color.length()!=6){ 
-			Log.e("WSdb.insertCategory", "color not a hex value");
-			return -1;
-		}
 		
 		try{
 			Log.v("WSdb.insertCategory","Inserting category");
 			ContentValues newTaskValue = new ContentValues();
 			newTaskValue.put(CategoryConst.NAME, name);
-			newTaskValue.put(CategoryConst.COLOR, color);
+			newTaskValue.put(CategoryConst.COLOR, colorID);
 			newTaskValue.put(CategoryConst.SCHEMA, schema);
 			return db.insert(CategoryConst.TBL_NAME, null, newTaskValue);
 		} catch(SQLiteException ex) {
@@ -140,12 +145,42 @@ public class WSdb {
 		}
 	}
 	
+	/**
+	 * insert a color
+	 * 
+	 * @param name string name of color
+	 * @param rgb 6-digit hexidecimal rgb value
+	 * @param drawable link to map pin with this color
+	 * @return row ID of the newly inserted color, or -1 if an error occurred 
+	 */
+	public long insertColor(String name, String rgb, String drawable){
+		Log.v("InsertColor", name + " " + rgb + " " + drawable);
+		if(hasNoChars(name)) //|| rgb.matches(expr))
+			return -1;
+		
+		// validate color hex value
+		if (!isHexString(rgb) || rgb.length()!=6){ 
+			Log.e("WSdb.insertCategory", "color not a hex value");
+			return -1;
+		}
+		
+		try{
+			ContentValues newTaskValue = new ContentValues();
+			newTaskValue.put(ColorConst.NAME,name);
+			newTaskValue.put(ColorConst.RGB,rgb);
+			newTaskValue.put(ColorConst.DRAWABLE,drawable);
+			return db.insert(ColorConst.TBL_NAME, null, newTaskValue);
+		} catch(SQLiteException ex){
+			Log.v("InsertColor exception caught", ex.getMessage());
+			return -1;				
+		}
+	}
 	
 	/**
 	 * Insert a Tag into the database
 	 * 
 	 * @param name of Tag
-	 * @return row ID of the newly inserted row, or -1 if an error occurred 
+	 * @return row ID of the newly inserted tag, or -1 if an error occurred 
 	 * @exception ex caught SQLiteException if insert fails
 	 */
 	public long insertTag(String name){
@@ -172,6 +207,11 @@ public class WSdb {
 	 * @exception ex caught SQLiteException if insert fails
 	 */
 	public long insertItem_Tag(int itemID, int tagID){
+		//TODO: if I make itemid,tagid a key, sql will enforce this
+		// check to see if item is already tagged with this tag
+		if(isItemTagged(itemID, tagID))
+			return -1;
+		
 		try{
 			Log.v("WSdb.insertTag","inserting tag");
 			ContentValues newTaskValue = new ContentValues();
@@ -221,14 +261,14 @@ public class WSdb {
 	/**
 	 * Get the list of all items ordered by name
 	 * 
-	 * @return cursor to ordered list of items
+	 * @return cursor to list of all items ordered by id (default)
 	 * 
 	 * SQL query
-	 * select * from item order by name
+	 * select * from item
 	 */
 	public Cursor getAllItems(){
 		return db.query(ItemConst.TBL_NAME, null, null,null, null,
-						null, "name");
+						null, null);
 	}
 	
 	/**
@@ -245,33 +285,17 @@ public class WSdb {
 						null, null);
 	}
 	
-	
 	/**
-	 * Get the tag with id=<code>tagId</code>
+	 * Get the list of all categories ordered by id
 	 * 
-	 * @return cursor to the tag
+	 * @return cursor to list of all categories ordered by id (default)
 	 * 
 	 * SQL query
-	 * select * from tag where tagid=[given id]
-	 */
-	public Cursor getTag(int tagId){
-		String where = TagConst.ID + "=" + tagId;
-		return db.query(TagConst.TBL_NAME, null , where, null, null,
-						null, null);
-	}
-	
-	
-	/**
-	 * Get the list of all categories ordered by name
-	 * 
-	 * @return cursor to ordered list of categories
-	 * 
-	 * SQL query
-	 * select * from category order by name
+	 * select * from category
 	 */
 	public Cursor getAllCategories(){
 		return db.query(CategoryConst.TBL_NAME, null, null,
-				null, null, null, "name");
+				null, null, null, null);
 	}
 	
 	/**
@@ -291,19 +315,31 @@ public class WSdb {
 	
 	
 	/**
-	 * Get the list of all tags ordered by name
+	 * Get the list of all tags ordered by id
 	 * 
 	 * @return cursor to ordered list of tags
 	 * 
 	 * SQL query
-	 * select * from tag order by name
+	 * select * from tag
 	 */
 	public Cursor getAllTags(){
 		return db.query(TagConst.TBL_NAME, null, null, null, null,
-						null, "name");
+						null, null);
 	}
 	
-	
+	/**
+	 * Get the tag with id=<code>tagId</code>
+	 * 
+	 * @return cursor to the tag
+	 * 
+	 * SQL query
+	 * select * from tag where tagid=[given id]
+	 */
+	public Cursor getTag(int tagId){
+		String where = TagConst.ID + "=" + tagId;
+		return db.query(TagConst.TBL_NAME, null , where, null, null,
+						null, null);
+	}
 	/**
 	 * Get every item with tag <code>tagId</code>
 	 * 
@@ -360,7 +396,7 @@ public class WSdb {
 	/**
 	 * get all items of the category with id=<code>catId</code>
 	 * 
-	 * @param catId id if the category
+	 * @param catId id of the category
 	 * @return cursor to all items in this category
 	 * 
 	 * select * from item where cat_id=[given id]
@@ -371,6 +407,27 @@ public class WSdb {
 						null, null, null);
 	}
 	
+	/**
+	 * get a list of all colors ordered by id
+	 * 
+	 * @return Cursor to list of all colors
+	 */
+	public Cursor getAllColors(){
+		return db.query(ColorConst.TBL_NAME, null, null, null, null, 
+						null, null);
+	}
+	
+	/**
+	 * get the color with the given <code>colorId</code>
+	 * 
+	 * @param colorId key id of the color
+	 * @return cursor to the list containing search results
+	 */
+	public Cursor getColor(int colorId){
+		String where = colorId + "=" + ColorConst.ID;
+		return db.query(ColorConst.TBL_NAME, null, where, null, null, 
+						null, null);
+	}
 	
 	//TODO: great for testing, should remove for release
 	/**
@@ -386,6 +443,27 @@ public class WSdb {
 	}
 	
 	
+	/**
+	 * check to see if a given item has a given tag
+	 * 
+	 * @param itemId key id of item 
+	 * @param tagId key id of tag
+	 * @return true if this item is associated with this tag, 
+	 *         false otherwise
+	 */
+	public boolean isItemTagged(int itemId, int tagId){
+		String where = (itemId + "=" + Item_TagConst.ITEM_ID +
+				" and " + tagId + "=" + Item_TagConst.TAG_ID);
+		
+		Cursor c = db.query(Item_TagConst.TBL_NAME, null, where, null,
+						null, null, null);
+	
+		if (c.getCount() > 0)
+			return true; // item tag exists already
+		else
+			return false;
+	}
+	
 	
 	
 	/****************************************************************
@@ -393,60 +471,44 @@ public class WSdb {
 	 *                      Rename, Move
 	 ***************************************************************/
 	
+	//TODO: look at possible exceptions to catch
+	
 	/**
-	 * Change the color of a Category
+	 * update all category fields other than key id to given values
 	 * 
 	 * @param catID id of category to update
-	 * @param color new color of category
+	 * @param name string name of category
+	 * @param colorID id of new color of category
+	 * @param schema JSON string defining category fields
 	 * @return number of rows updated (0 if failed, 1 if success)
 	 */
-	public int updateCategoryColor(int catID, String color){
-		Log.v("DB.updateCatColor","change color of categoryId=" + 
-		          catID + " to #" +  color);
-		
-		if (!isHexString(color) || color.length()!=6 || catID<1)
+	public int updateCategory(int catID, String name, int colorID, String schema){
+		Log.v("DB.updateCatColor","update category categoryId=" + 
+		          catID);
+
+		if (hasNoChars(name) || colorID < 1 || hasNoChars(schema))
 			return 0;
 		
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
-		updateValue.put(CategoryConst.COLOR, color);
+		updateValue.put(CategoryConst.NAME, name);
+		updateValue.put(CategoryConst.COLOR, colorID);
+		updateValue.put(CategoryConst.SCHEMA, schema);
 		String whereClause=CategoryConst.ID + "=" + catID;
 		affected=db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
 		return affected;
 		
 	}
 	
-	
-	/** Change the name of a Category
-	 * 
-	 * @param catID id of category to update
-	 * @param newName new name of category
-	 */
-	public int updateCategoryName(int catID, String newName){
-		Log.v("DB.updateCatName","change name of categoryId=" + 
-		          catID + " to " +  newName);
-		
-		if (hasNoChars(newName) || catID<1)
-			return 0;
-		
-		int affected=0;
-		ContentValues updateValue = new ContentValues();
-		updateValue.put(CategoryConst.NAME, newName);
-		String whereClause=CategoryConst.ID + "=" + catID;
-		affected=db.update(CategoryConst.TBL_NAME, updateValue, whereClause, null);
-		
-		return affected;
-	}
-	
-	
+
 	/**
 	 * Change the name of a Tag
 	 * 
 	 * @param tagID id of tag to update
 	 * @param newName new name of tag
 	 */
-	public int updateTagName(int tagID, String newName){
-		Log.v("DB.updateTagName","change name of tagId=" + 
+	public int updateTag(int tagID, String newName){
+		Log.v("DB.updateTag","change name of tagId=" + 
 		          tagID + " to " +  newName);
 		
 		if (hasNoChars(newName) || tagID<1)
@@ -461,33 +523,59 @@ public class WSdb {
 	}
 	
 	/**
-	 * Change the name of an item
+	 * Update all fields of an item other than the key id 
 	 * 
 	 * @param itemID id of item to update
 	 * @param newName new name of item
+	 * @param catId id of category item belongs to
+	 * @param data string of JSON field data
+	 * @return number of rows updated (0 if failed, 1 if success)
 	 */
-	public int updateItemName(int itemID, String newName){
-		Log.v("DB.updateItemName","change name of itemId=" + 
-		          itemID + " to " +  newName);
+	public int updateItem(int itemID, String newName, int catId, String data){
+		Log.v("DB.updateItemName","updating item itemId=" + itemID);
 		
 		if (hasNoChars(newName) || itemID<1)
 			return 0;
 		
 		int affected=0;
+		
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(ItemConst.NAME, newName);
+		updateValue.put(ItemConst.CAT_ID, catId);
+		updateValue.put(ItemConst.DATA, data);
+		
 		String whereClause=ItemConst.ID + "=" + itemID;
-		affected=db.update(ItemConst.TBL_NAME, updateValue, whereClause, null);
+		affected = db.update(ItemConst.TBL_NAME, updateValue, whereClause, null);
 		return affected;
 	}
 	
+	
+	public int updateColor(int colorID, String name, String rgb, String drawable){
+		if(hasNoChars(name) || hasNoChars(drawable))
+			return -1;
+		
+		// validate color hex value
+		if (!isHexString(rgb) || rgb.length()!=6){ 
+			Log.e("WSdb.insertCategory", "color not a hex value");
+			return -1;
+		}
+		
+		int affected=0;
+		ContentValues updateValue = new ContentValues();
+		updateValue.put(ColorConst.NAME, name);
+		updateValue.put(ColorConst.RGB, rgb);
+		updateValue.put(ColorConst.DRAWABLE, drawable);
+		String whereClause = colorID + "=" + ColorConst.ID;
+		affected=db.update(ColorConst.TBL_NAME, updateValue, whereClause, null);
+		return affected;
+	}
 	
 	
 	/****************************************************************
 	 *                          Deletes
 	 ***************************************************************/
 	
-	
+	//TODO: clean up and figure out transactions
 	/**
 	 * Deletes an item and item-tag associations
 	 *  
@@ -497,22 +585,30 @@ public class WSdb {
 	 *         integrity and transaction rolled back
 	 */
 	public boolean deleteItem(int itemId){
-		
+		int affected=0;
 		db.beginTransaction();
 		try{
 			// delete the item-tag associations
-			db.delete(Item_TagConst.TBL_NAME, Item_TagConst.ITEM_ID +
+			affected=db.delete(Item_TagConst.TBL_NAME, Item_TagConst.ITEM_ID +
 					  "=" + itemId, null);
+			Log.v("WSdb.deleteItem",
+					  "deleted " + affected + " item tag associations");
 			//delete the item
-			db.delete(ItemConst.TBL_NAME, ItemConst.ID + "=" + itemId, 
+			affected=db.delete(ItemConst.TBL_NAME, ItemConst.ID + "=" + itemId, 
 					null);
+			Log.v("WSdb.deleteTag",
+					  "deleted " + affected + " items");
+			db.setTransactionSuccessful();
 		} finally{
-			if (db.inTransaction())
-				db.endTransaction();
-			else
-				return false;
+			//if (db.inTransaction()){
+			db.endTransaction();
+			if (affected>0){
+			Log.v("WSdb.deleteCategory",
+					  "deleted " + affected + " category successfully");		
+			return true;
+			}
 		}
-		return true;
+		return false;	
 	}
 	
 	
@@ -524,6 +620,8 @@ public class WSdb {
 	 */
 	public boolean deleteCategory(int catId){
 		// do not delete category if there are items associated with it		
+		Log.v("WSdb.deleteCategory",
+				  "deleting category" + catId);		
 		Cursor c = getItemsOfCategory(catId);
 		if (c.getCount()>0) return false;
 		
@@ -531,9 +629,11 @@ public class WSdb {
 				       CategoryConst.ID + "=" + catId, null);		
 		
 		// if no rows deleted, return false
-		if (affected>0)
+		if (affected>0){
+			Log.v("WSdb.deleteCategory",
+					  "deleted " + affected + " category successfully");		
 			return true;
-		else
+		}else
 			return false;	
 	}
 	
@@ -580,7 +680,32 @@ public class WSdb {
 			return false;
 	}
 	
-	
+	/**
+	 * Delete the color with key id=<code>colorId</code>
+	 * 
+	 * @param colorId key id of color to delete
+	 * @return true if deleted, false otherwise
+	 */
+	public boolean deleteColor(int colorId){
+		int affected=0;
+		
+		Cursor c=getAllColors();
+		
+		while(c.moveToNext()){
+			if (c.getInt(0)==colorId){
+				Log.e("db.deleteColor", "Cannot delete: Category " + c.getString(1) + " is using this color.");
+				return false;
+			}
+		}
+		String where = ColorConst.ID + "=" + colorId;	
+		affected=db.delete(ColorConst.TBL_NAME, where, null);
+		
+		if (affected > 0)			
+			return true;		
+		else			
+			return false;
+	}
+
 	/****************************************************************
 	 *                          Testing
 	 *         Rebuild database and fill with test data
@@ -593,7 +718,6 @@ public class WSdb {
 		dbhelper.dropAllTables(db);
 		dbhelper.createTables(db);
 	}
-	
 	
 	/**
 	 * Drops tables, re-creates them and fills with sample data
@@ -611,10 +735,11 @@ public class WSdb {
 	public void fillTables(){
 		try {
 			Log.v("WSdb.fillTables","enter test data");
-	        insertCategory("Cat 1", "123456", "schema for cat 1");
-	        insertCategory("cat 2", "654321", "schema for cat 2");
-		    insertItem("Itemname1", 2, true, "DATA here");
-	        insertItem("Itemname2", 1, false, "DATA2 here");    
+			insertColor("color1", "001122", "link to color1");
+	        insertCategory("Cat 1", 1, "schema for cat 1");
+	        insertCategory("cat 2", 1, "schema for cat 2");
+		    insertItem("Itemname1", 2, "DATA here");
+	        insertItem("Itemname2", 1, "DATA2 here");    
 	        insertTag("tag1");
 	        insertTag("tag2");
 	        insertItem_Tag(1,2);
