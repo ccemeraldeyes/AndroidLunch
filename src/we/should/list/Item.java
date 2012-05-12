@@ -172,6 +172,7 @@ public abstract class Item implements Serializable {
 				cat.id = catId;
 				cat.color = color;
 				cats.put(catId, cat);
+				c.close(); // TS
 			} else {
 				cat = cats.get(catId);
 			}
@@ -192,6 +193,7 @@ public abstract class Item implements Serializable {
 			i.added = true;
 			out.add(i);
 		}
+		items.close(); // TS
 		return out;
 	}
 	/**

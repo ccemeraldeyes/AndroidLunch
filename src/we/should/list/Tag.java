@@ -62,6 +62,8 @@ public class Tag {
 			int id = tags.getInt(0);
 			out.add(new Tag(id, tag));
 		}
+		tags.close(); //TS
+		db.close(); //TS
 		return out;	
 	}
 	/**

@@ -102,7 +102,10 @@ public class WSdb {
 	 */
 	public long insertItem(String name, int categoryId, String data)
 			throws IllegalArgumentException, SQLiteConstraintException{
+		
 		Log.v("db.insertItem",name + " " + categoryId + " " + data);
+		
+		// check arguments for valid format
 		if (hasNoChars(name) || hasNoChars(data) || categoryId<1){
 			Log.e("db.insertItem","invalid argument - " + name + 
 					" or " + data + " or " + categoryId);
@@ -112,8 +115,7 @@ public class WSdb {
 		newTaskValue.put(ItemConst.NAME, name);
 		newTaskValue.put(ItemConst.CAT_ID, categoryId);
 		newTaskValue.put(ItemConst.DATA, data);
-		long row=db.insertOrThrow(ItemConst.TBL_NAME, null, newTaskValue);
-		return row;
+		return db.insertOrThrow(ItemConst.TBL_NAME, null, newTaskValue);	
 	}
 	
 
@@ -123,7 +125,7 @@ public class WSdb {
 	 * @param name of category being entered
 	 * @param color key id of the color associated with this Category
 	 * @param schema string to identify category schema 
-	 * @return row ID of the newly inserted row, or -1 if an error occurred 
+	 * @return row ID of the newly inserted row
 	 * @exception SQLiteConstraintException if insert violates constraints
 	 * @exception IllegalArgumentException if argument format invalid
 	 */
@@ -151,8 +153,9 @@ public class WSdb {
 	 * Insert a Tag into the database
 	 * 
 	 * @param name of Tag
-	 * @return row ID of the newly inserted tag, or -1 if an error occurred 
-	 * @exception ex caught SQLiteException if insert fails
+	 * @return row ID of the newly inserted tag
+	 * @exception SQLiteConstraintException if insert violates constraints
+	 * @exception IllegalArgumentException if argument format invalid
 	 */
 	public long insertTag(String name)
 			throws IllegalArgumentException, SQLiteConstraintException{
@@ -176,13 +179,19 @@ public class WSdb {
 	 * 
 	 * @param itemID key id of item to be tagged
 	 * @param tagID key id of tag to be placed on item
-	 * @return row ID of newly inserted row, or -1 if an error occurred
-	 * @exception ex caught SQLiteException if insert fails
+	 * @return row ID of newly inserted row
+	 * @exception SQLiteConstraintException if insert violates constraints
+	 * @exception IllegalArgumentException if argument format invalid
 	 */
 	public long insertItem_Tag(int itemID, int tagID)
 			throws IllegalArgumentException, SQLiteConstraintException{
 		Log.v("WSdb.insertItem_Tag","inserting (item,tag)=(" + itemID + "," + tagID + ")");
-		//TODO: verify ids >0
+		
+		if (itemID < 1 || tagID < 1){
+			Log.e("db.insertItem_Tag","invalid id argument");
+			throw new IllegalArgumentException();
+		}
+		
 		//TODO: if I make itemid,tagid a key or unique, sql will enforce this
 		// check to see if item is already tagged with this tag
 		if(isItemTagged(itemID, tagID)){
@@ -411,8 +420,6 @@ public class WSdb {
 	 *                      Rename, Move
 	 ***************************************************************/
 	
-	//TODO: look at possible exceptions to catch
-	
 	/**
 	 * update all category fields other than key id to given values
 	 * 
@@ -420,7 +427,9 @@ public class WSdb {
 	 * @param name string name of category
 	 * @param colorID id of new color of category
 	 * @param schema JSON string defining category fields
-	 * @return number of rows updated (0 if failed, 1 if success)
+	 * @return true if update is successful, false or exception otherwise
+	 * @exception SQLiteConstraintException if insert violates constraints
+	 * @exception IllegalArgumentException if argument format invalid
 	 */
 	public boolean updateCategory(int catID, String name, int colorID, String schema) 
 					throws IllegalArgumentException, SQLiteConstraintException{
@@ -428,7 +437,7 @@ public class WSdb {
 		Log.v("DB.updateCategory","update category categoryId=" + 
 		          catID);
 
-		
+		// check arguments for valid format
 		if (hasNoChars(name) || colorID < 1 || hasNoChars(schema)){
 			Log.e("db.updateCategory","Invalid Argument");
 			throw new IllegalArgumentException();
@@ -441,8 +450,8 @@ public class WSdb {
 		String whereClause=CategoryConst.ID + "=" + catID;
 		
 		db.beginTransaction();
-			affected=db.updateWithOnConflict(CategoryConst.TBL_NAME, updateValue, whereClause, null,SQLiteDatabase.CONFLICT_ROLLBACK);
-			Log.v("db.updateCategory","affected before setTransaction=" + affected);
+		affected=db.updateWithOnConflict(CategoryConst.TBL_NAME, updateValue, whereClause, null,SQLiteDatabase.CONFLICT_ROLLBACK);
+		
 		if (affected > 0){
 			db.setTransactionSuccessful();
 			db.endTransaction();

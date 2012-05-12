@@ -165,6 +165,7 @@ public abstract class Category {
 			 cat.color = color;
 			 out.add(cat);
 		}
+		c.close(); // added by Troy
 		db.close();
 		return out;
 	}
