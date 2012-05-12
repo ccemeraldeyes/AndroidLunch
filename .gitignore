@@ -3,4 +3,6 @@ bin/
 gen/
 doc/
 javadoc/
+*.DS_Store
+
 
