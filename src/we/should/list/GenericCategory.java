@@ -24,6 +24,7 @@ import android.util.Log;
  * }
  */
 public class GenericCategory extends Category {
+
 	private List<Item> items; 
 	private boolean sync = false;
 	

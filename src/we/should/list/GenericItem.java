@@ -35,16 +35,10 @@ import android.util.Log;
  * 
  */
 
-
-
-@SuppressWarnings("serial")
 public class GenericItem extends Item {
 	
-	
 	private final Category c;
-	
-	
-	
+		
 	protected GenericItem(Category c, Context ctx) {
 		super(ctx);
 		this.c = c;

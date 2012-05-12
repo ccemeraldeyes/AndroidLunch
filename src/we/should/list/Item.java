@@ -38,11 +38,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
-@SuppressWarnings("serial")
-public abstract class Item implements Serializable {
-	
-	
-	
+public abstract class Item {
+		
 	int id;
 	Context ctx;
 	Map<Field, String> values;

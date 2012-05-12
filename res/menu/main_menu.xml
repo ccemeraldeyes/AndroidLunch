@@ -8,5 +8,9 @@
           android:title="@string/add_cat" />
     <item android:id="@+id/add_item"
           android:icon="@drawable/ic_launcher"
-          android:title="@string/add" />
+          android:title="@string/add" >
+          <menu>
+              
+          </menu>
+    </item>
 </menu>

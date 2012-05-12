@@ -11,7 +11,6 @@ import we.should.list.Field;
 import we.should.list.GenericCategory;
 import we.should.list.Item;
 import we.should.list.Movies;
-import we.should.search.CustomPinPoint;
 import we.should.search.DetailPlace;
 import we.should.search.Place;
 import we.should.search.PlaceRequest;
@@ -29,6 +28,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -46,11 +46,13 @@ import com.google.android.maps.Overlay;
 
 public class WeShouldActivity extends MapActivity implements LocationListener {
 	
-	/** The key for the item in edit and view screens. **/
-	public static final String ITEM = "ITEM";
+	/** Bundle keys. **/
+	public static final String CATEGORY = "CATEGORY";
+	public static final String INDEX = "INDEX";
 	
-	/** The key for creating categories. **/
+	/** Activity keys. **/
 	private static final int NEW_CAT = 0;
+	private static final int NEW_ITEM = 1;
 	
 	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
@@ -60,6 +62,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	
 	/** A map that maps the name of each category to its in-memory representation. **/
 	private Map<String, Category> mCategories;
+	
+	/** A mapping from id's to categorys, used for submenu creation. **/
+	private Map<Integer, Category> mMenuIDs;
 	
 	private MapView map;
 	private LocationManager lm;
@@ -154,7 +159,17 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
-		return true;
+		
+		// Now populate the custom submenu
+		SubMenu addMenu = menu.findItem(R.id.add_item).getSubMenu();
+		mMenuIDs = new HashMap<Integer, Category>();
+		int i = Menu.FIRST;
+		for (String s : mCategories.keySet()) {
+			addMenu.add(R.id.add_item, i, i, s);
+			mMenuIDs.put(i, mCategories.get(s));
+			i++;
+		}
+		return super.onCreateOptionsMenu(menu);
 	}
 	
 	@Override
@@ -164,14 +179,19 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			Intent intent = new Intent(this, HelpScreen.class);
 			startActivity(intent);
 			break;
-		case R.id.add_item:
-			intent = new Intent(this, EditScreen.class);
-			startActivity(intent);
-			break;
 		case R.id.add_cat:
 			intent = new Intent(this, NewCategory.class);
 			startActivityForResult(intent, NEW_CAT);
 			break;
+		}
+		
+		// It's probably in the submenu
+		Category cat = mMenuIDs.get(item.getItemId());
+		if (cat != null) {
+			Intent intent = new Intent(this, EditScreen.class);
+			intent.putExtra(CATEGORY, cat.getName());
+			intent.putExtra(INDEX, -1);
+			startActivityForResult(intent, NEW_ITEM);
 		}
 		return true;
 	}
@@ -219,7 +239,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			        int position, long id) {
 			    	Item item = itemsList.get(position);
 					Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
-					intent.putExtra(ITEM, item);
+					intent.putExtra(CATEGORY, item.getCategory().getName());
+					intent.putExtra(INDEX, position);
 					startActivity(intent);
 			    }
 			  });
