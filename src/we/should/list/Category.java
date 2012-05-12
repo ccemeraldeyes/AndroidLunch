@@ -50,9 +50,8 @@ public abstract class Category {
 	}
 	protected Category(String name, List<Field> fields, Context ctx){
 		this(name, ctx);
-		if (fields != null) this.fields = fields;
-		List<Field> defaults = Field.getDefaultFields();
-		for(Field f : defaults){ //Ensures that default fields are added
+		if (fields != null) this.fields = Field.getDefaultFields();
+		for(Field f : fields){ //Ensures that default fields are added
 			if(!this.fields.contains(f)){
 				this.fields.add(f); 
 			}
@@ -159,6 +158,7 @@ public abstract class Category {
 					cat = new GenericCategory(name, schemaList, ctx);
 				} catch (JSONException e) {
 					Log.e("Category.getCategories", "Field Schema improperly formatted!", e);
+					cat = new GenericCategory(name, new LinkedList<Field>(), ctx);
 				}
 			 }
 			 cat.id = id;
