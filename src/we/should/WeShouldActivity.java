@@ -46,6 +46,10 @@ import com.google.android.maps.Overlay;
 
 public class WeShouldActivity extends MapActivity implements LocationListener {
 	
+	/** Preference keys. **/
+	public static final String PREFS = "we.should.PREFS";
+	public static final String ACCOUNT_NAME = "we.should.ACCOUNT_NAME";
+	
 	/** Bundle keys. **/
 	public static final String CATEGORY = "CATEGORY";
 	public static final String INDEX = "INDEX";
