@@ -47,7 +47,8 @@
         
         <activity
             android:name=".EditScreen"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustPan" >
         </activity>
         
         <activity

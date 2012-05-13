@@ -51,7 +51,7 @@ public abstract class Category {
 	}
 	protected Category(String name, List<Field> fields, Context ctx){
 		this(name, ctx);
-		if (fields != null) this.fields = Field.getDefaultFields();
+		if (fields == null) this.fields = Field.getDefaultFields();
 		for(Field f : fields){ //Ensures that default fields are added
 			if(!this.fields.contains(f)){
 				this.fields.add(f); 

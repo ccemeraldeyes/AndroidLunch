@@ -19,15 +19,13 @@ public class ItemAdapter extends ArrayAdapter<Item> {
 	
 	private List<Item> mData;
 
-	public ItemAdapter(Context context, int layoutResourceId,
-			List<Item> data) {
-		super(context, layoutResourceId, data);
-		mLayoutResourceId = layoutResourceId;
+	public ItemAdapter(Context context, List<Item> data) {
+		super(context, R.layout.item_row, data);
+		mLayoutResourceId = R.layout.item_row;
 		mContext = context;
 		mData = data;
 	}
 
-	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View row = convertView;

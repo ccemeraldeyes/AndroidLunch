@@ -233,7 +233,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			}
 			
 			final List<Item> itemsList = cat.getItems();
-			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, R.layout.item_row, itemsList));
+			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
 			lv.setOnItemClickListener(new OnItemClickListener() {
 			    public void onItemClick(AdapterView<?> parent, View view,
 			        int position, long id) {
