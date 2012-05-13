@@ -1,10 +1,12 @@
 package we.should;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import we.should.list.FieldType;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +32,14 @@ public class FieldAdapter extends ArrayAdapter<FieldAdapter.ProtoField> {
 		for (ProtoField pff : data) {
 			add(pff);
 		}
+	}
+	
+	public List<ProtoField> getAll() {
+		List<ProtoField> fields = new ArrayList<ProtoField>();
+		for (int i = 0; i < getCount(); i++) {
+			fields.add(getItem(i));
+		}
+		return fields;
 	}
 
 
