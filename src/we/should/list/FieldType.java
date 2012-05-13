@@ -1,5 +1,8 @@
 package we.should.list;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Representation of possible ways to render a field.
@@ -14,5 +17,13 @@ public enum FieldType {
 
 	public static FieldType get(int type) {
 		return FieldType.values()[type];
+	}
+	
+	public static List<String> getTypes() {
+		List<String> ret = new ArrayList<String>();
+		for (FieldType ft : FieldType.values()) {
+			ret.add(ft.toString());
+		}
+		return ret;
 	}
 }
