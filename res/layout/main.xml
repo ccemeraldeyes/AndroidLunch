@@ -21,7 +21,7 @@
 				android:layout_height="wrap_content"
 				android:fillViewport="true"
 				android:scrollbars="none" >
-	        <TabWidget
+	        <we.should.TabWidgetFix
 	            android:id="@android:id/tabs"
 	            android:layout_width="wrap_content"
 	            android:layout_height="32dp"

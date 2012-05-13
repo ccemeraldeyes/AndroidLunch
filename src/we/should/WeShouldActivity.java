@@ -90,7 +90,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         overlayList = map.getOverlays();
         
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
-        this.mTabHost.setup();
         updateTabs();        
 
         db = new WSdb(this);
@@ -130,7 +129,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			MOVIES.save();
 			RESTAURANTS.save();
 		}
-		
+
+        mTabHost.setup();
 		mTabHost.clearAllTabs();
 		TabHost.TabSpec spec;
         TabPopulator tp = new TabPopulator();
@@ -139,7 +139,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	        		.setContent(tp);
 	        mTabHost.addTab(spec);
         }
-        mTabHost.setCurrentTab(0);
 	}
 
 	@Override
