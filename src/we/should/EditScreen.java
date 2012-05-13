@@ -36,13 +36,7 @@ public class EditScreen extends Activity {
 		
 		Bundle extras = getIntent().getExtras();
 		String catName = (String) extras.get(WeShouldActivity.CATEGORY);
-		Category cat = null;
-		for (Category c : Category.getCategories(this)) {
-			if (c.getName().equals(catName)) {
-				cat = c;
-				break;
-			}
-		}
+		Category cat = Category.getCategory(catName, this);
 		
 		int index = extras.getInt(WeShouldActivity.INDEX);		
 		if (index == -1) {

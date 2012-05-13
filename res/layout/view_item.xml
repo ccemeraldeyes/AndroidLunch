@@ -43,23 +43,6 @@
 
     <include
         layout="@layout/divider" />
-
-    <TextView
-        android:id="@+id/textView8"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tags"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <TextView
-        android:id="@+id/tags"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="falafel; open late; middle eastern"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <include
-        layout="@layout/divider" />
 
     <Button
         android:id="@+id/edit"

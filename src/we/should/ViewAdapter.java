@@ -15,12 +15,12 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 /**
- * EditAdapter adapts a field into an editable view for use in the edit screen.
+ * ViewAdapters handle displaying the generic fields for ViewScreen.
  * 
  * @author Will
  */
 
-public class EditAdapter extends ArrayAdapter<Field> {
+public class ViewAdapter extends ArrayAdapter<Field> {
 	
 	private LayoutInflater mInflater;
 	
@@ -28,7 +28,7 @@ public class EditAdapter extends ArrayAdapter<Field> {
 	
 	private Map<Field, String> mData;
 
-	public EditAdapter(Context context, List<Field> fields, Map<Field, String> data) {
+	public ViewAdapter(Context context, List<Field> fields, Map<Field, String> data) {
 		super(context, R.layout.edit_row_textline);
 		mInflater = ((Activity) context).getLayoutInflater();
 		mFields = fields;
@@ -61,6 +61,11 @@ public class EditAdapter extends ArrayAdapter<Field> {
 	}
 	
 	@Override
+	public boolean isEnabled(int position) {
+		return false;
+	}
+	
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ViewHolder holder = null;
 		int type = getItemViewType(position);
@@ -70,16 +75,12 @@ public class EditAdapter extends ArrayAdapter<Field> {
 			holder = new ViewHolder();
 			switch (enumType) {
 			case TextField:
-				convertView = mInflater.inflate(R.layout.edit_row_textline, null);
-				break;
 			case MultilineTextField:
-				convertView = mInflater.inflate(R.layout.edit_row_multiline, null);
+			case PhoneNumber:
+				convertView = mInflater.inflate(R.layout.view_row_text, null);
 				break;
 			case Rating:
-				convertView = mInflater.inflate(R.layout.edit_row_rating, null);
-				break;
-			case PhoneNumber:
-				convertView = mInflater.inflate(R.layout.edit_row_phone, null);
+				convertView = mInflater.inflate(R.layout.view_row_rating, null);
 				break;
 			default:
 				throw new IllegalStateException("Do not know how to handle enum" + enumType);
@@ -101,15 +102,6 @@ public class EditAdapter extends ArrayAdapter<Field> {
 		case MultilineTextField:
 		case PhoneNumber:
 			((TextView) view).setText(mData.get(field));
-			view.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-
-				public void onFocusChange(View view, boolean hasFocus) {
-					if (!hasFocus) {
-						mData.put(field, ((TextView) view).getText().toString());
-					}
-				}
-				
-			});
 			break;
 		case Rating:
 			if (mData.get(field).equals("")) {
@@ -117,14 +109,6 @@ public class EditAdapter extends ArrayAdapter<Field> {
 			} else {
 				((RatingBar) view).setRating(Float.parseFloat(mData.get(field)));
 			}
-			((RatingBar) view).setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-
-				public void onRatingChanged(RatingBar ratingBar, float rating,
-						boolean fromUser) {
-					mData.put(field, ((RatingBar) ratingBar).getRating() + "");
-				}
-				
-			});
 			break;
 		}
 	}

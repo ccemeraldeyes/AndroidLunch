@@ -51,8 +51,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	public static final String INDEX = "INDEX";
 	
 	/** Activity keys. **/
-	private static final int NEW_CAT = 0;
-	private static final int NEW_ITEM = 1;
+	public static final int NEW_CAT = 0;
+	public static final int NEW_ITEM = 1;
+	public static final int VIEW_ITEM = 2;
+	public static final int EDIT_ITEM = 3;
 	
 	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
@@ -241,7 +243,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
 					intent.putExtra(CATEGORY, item.getCategory().getName());
 					intent.putExtra(INDEX, position);
-					startActivity(intent);
+					startActivityForResult(intent, VIEW_ITEM);
 			    }
 			  });
 			

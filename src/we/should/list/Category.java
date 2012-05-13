@@ -185,5 +185,21 @@ public abstract class Category {
 		return out;
 	}
 	
-
+	/**
+	 * Returns the Category with the given name.
+	 * 
+	 * @param name The name of the Category
+	 * @param ctx A context to interface with the database
+	 * @return The Category if one exists, or null if one doesn't
+	 */
+	public static Category getCategory(String name, Context ctx) {
+		Category cat = null;
+		for (Category c : Category.getCategories(ctx)) {
+			if (c.getName().equals(name)) {
+				cat = c;
+				break;
+			}
+		}
+		return cat;
+	}
 }
