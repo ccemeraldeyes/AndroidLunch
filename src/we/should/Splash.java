@@ -29,8 +29,7 @@ public class Splash extends Activity {
 	/** The log in button. **/
 	private Button mLogin;
 	
-	// Lawrence Comment
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
