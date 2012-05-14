@@ -14,7 +14,6 @@ import we.should.list.Movies;
 import we.should.search.DetailPlace;
 import we.should.search.Place;
 import we.should.search.PlaceRequest;
-import we.should.search.PlaceType;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -79,7 +78,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private int devX, devY;
 	private MyLocationOverlay myLocationOverlay;
 	private List<Overlay> overlayList;
-
+	
+	
 	protected WSdb db;
 	protected String DBFILE;
     
@@ -297,7 +297,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		String text = "Result \n";
 			if (result!=null){
 				for(Place place: result){//loop through the place
-					
 					//I was drawing the places with pin on the map earlier on. 
 					//this is how it is done, just want to leave it here in case there is use later.
 //					Drawable customPin = createCustomPin(place.getBestType());
@@ -357,8 +356,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		if(result != null) {
     			//UI thread, update user's view and store to database.
     			String text = "Result \n";
-    			if (result!=null){
-    			}
+    			
     			setProgressBarIndeterminateVisibility(false);
     		}
     	}
@@ -366,8 +364,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	
 	
 	//Example of how to create drawable to pass into CustomPinPoint to draw on the map
-	private Drawable createCustomPin(PlaceType type) {
-	   switch(type) {
+//	private Drawable createCustomPin(PlaceType type) {
+//	   switch(type) {
 //	   		case UNIVERSITY:
 //	   			return getResources().getDrawable(R.drawable.university);
 //	   		case RESTAURANT:
@@ -380,10 +378,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 //	   			return getResources().getDrawable(R.drawable.coffee);
 //	   		case BAR:
 //	   			return getResources().getDrawable(R.drawable.bar);
-	   		default:
-	   			return null;
-	   }
-	}
+//	   		default:
+//	   			return null;
+//	   }
+//	}
 	
 	/*
 	 * @return the location of the device

@@ -28,7 +28,6 @@ public class PlaceRequest {
 	 * 
 	 * Currently it will search for any Place with type University or Restaurant, or Movie_rental, or movie_theater, or cafe, or bar.
 	 */
-	public static String[] searchTypes = new String[]{"university", "restaurant", "movie_rental", "movie_theater", "cafe", "bar"};
 	private static String keyString = "APIKEY HERE";
 	private static final String PLACES_SEARCH_URL =  "https://maps.googleapis.com/maps/api/place/search/json?";
 	private static final String PLACES_DETAIL_SEARCH = "https://maps.googleapis.com/maps/api/place/details/json?";
@@ -51,7 +50,7 @@ public class PlaceRequest {
 			throw new IllegalArgumentException("Location is null");
 		}
 		Log.v(LOG_KEY, "Start SearchByLocation");
-		String url = buildURLForGooglePlaces(l, 50000, searchname);
+		String url = buildURLForGooglePlaces(l, searchname);
 		try {		
 			JSONObject obj = executeQuery(url);
 			//make sure status is okay before we get the results
@@ -127,17 +126,17 @@ public class PlaceRequest {
 	 * 
 	 * @return url for the searchByLocation query
 	 */
-    private String buildURLForGooglePlaces(Location myLocation, int meters, String searchName){
-    	String types = searchTypes[0];
-    	for(int i = 1; i < searchTypes.length; i++) {
-    		types += "%7C" + searchTypes[i];
-    	}
+    private String buildURLForGooglePlaces(Location myLocation, String searchName){
+//    	String types = searchTypes[0];
+//    	for(int i = 1; i < searchTypes.length; i++) {
+//    		types += "%7C" + searchTypes[i];
+//    	}
         String baseUrl = PLACES_SEARCH_URL;
         String lat = String.valueOf(myLocation.getLatitude());
         String lon = String.valueOf(myLocation.getLongitude());
         String url = baseUrl + "location=" + lat + "," + lon + "&" +
-                     "radius=" + meters + "&" + "sensor=false" +
-                     "&" + "types=" + types + "&" + "name=" + searchName +
+                     "rankby=distance" + "&" + "sensor=false" +
+                     "&" + "name=" + searchName +
                      "&" + "key=" + keyString;
         return url;
     }
