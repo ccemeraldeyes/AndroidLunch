@@ -84,14 +84,12 @@ public class EditScreen extends Activity {
 					int count) {}
 			
 		});
-		mName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+		mName.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-			public void onItemSelected(AdapterView<?> parent, View view,
+			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				fillFields((Place) mName.getAdapter().getItem(position));
 			}
-
-			public void onNothingSelected(AdapterView<?> parent) {}
 			
 		});
 		
@@ -124,6 +122,9 @@ public class EditScreen extends Activity {
 	private void setupList() {
 		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		if (location == null) {
+			return;
+		}
 		List<Place> places;
 		try {
 			places = (new PlaceRequest()).searchByLocation(location, mName.getText().toString());
@@ -153,13 +154,13 @@ public class EditScreen extends Activity {
 		for (Field f : mData.keySet()) {
 			mItem.set(f, mData.get(f));
 		}
+		mItem.set(Field.NAME, mName.getText().toString());
 		
 		if (mItem.getName() == null || mItem.getName().equals("")) {
 			Toast.makeText(this, "Please enter a name.", Toast.LENGTH_SHORT).show();
 			return;
 		}
 		
-		mItem.set(Field.NAME, mName.getText().toString());
 		mItem.save();
 		finish();
 	}
