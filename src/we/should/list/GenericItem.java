@@ -97,6 +97,18 @@ public class GenericItem extends Item {
 	@Override
 	public void delete() {
 		c.removeItem(this);
+		if(this.id != 0){
+			if(this.ctx != null){
+				WSdb db = new WSdb(ctx);
+				db.open();
+				db.deleteItem(this.id);
+				db.close();
+			} else {
+				Log.w("Item.save()", "This item has no context. Item cannot be deleted from database.");
+			}
+		} else {
+			Log.w("Item.save()", "This item has not been saved. Item cannot be deleted to database.");
+		}
 	}
 
 	@Override
