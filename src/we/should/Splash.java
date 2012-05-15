@@ -16,6 +16,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import we.should.communication.GetReferralsService;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -79,8 +80,14 @@ public class Splash extends Activity {
 	private void logIn() {
 		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(WeShouldActivity.ACCOUNT_NAME, (String) mAccountsSpinner.getSelectedItem());
+		String accountName = (String) mAccountsSpinner.getSelectedItem();
+		editor.putString(WeShouldActivity.ACCOUNT_NAME, accountName);
 		editor.commit();
+		
+		Intent service = new Intent(this, GetReferralsService.class);
+		service.putExtra(WeShouldActivity.ACCOUNT_NAME, accountName);
+		startService(service);
+		
 		Intent openStartingPoint = new Intent("we.should.MAIN");
 		startActivity(openStartingPoint);
 	}

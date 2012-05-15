@@ -60,6 +60,19 @@
             android:label="@string/app_name" >
         </activity>
         
+        <activity
+            android:name="we.should.communication.ApproveReferral"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+	        android:taskAffinity=""
+	        android:excludeFromRecents="true">
+        </activity>
+        
+        <service
+            android:name="we.should.communication.GetReferralsService"
+            android:label="@string/app_name" >
+	   </service>
+	   
     </application>
 
 </manifest>
