@@ -1,10 +1,20 @@
 package we.should;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -102,5 +112,40 @@ public class Splash extends Activity {
 		finish();
 	}
 
+	
+	protected boolean checkReferrals(){
+		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+		Account[] accounts = AccountManager.get(getBaseContext()).getAccounts();
+		String emails = "";
+		for (Account account : accounts) {
+		    if (emailPattern.matcher(account.name).matches()) {
+		        emails += account.name+",";
+		    }
+		}
+		
+		// Create a new HttpClient and Post Header
+		HttpClient httpclient = new DefaultHttpClient();
+		HttpPost httppost = new HttpPost("http://23.23.237.174/check-referrals");
+
+		try {
+		    // Add your data
+		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+		    nameValuePairs.add(new BasicNameValuePair("user_email_list", emails));
+		    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+		    // Execute HTTP Post Request
+		    HttpResponse response = httpclient.execute(httppost);
+		    
+		    //TODO: check for new referrals. maybe just save new items but flag them?
+
+		} catch (ClientProtocolException e) {
+		    // TODO Auto-generated catch block
+		} catch (IOException e) {
+		    // TODO Auto-generated catch block
+		}
+		
+		return false;
+	
+	}
 	
 }
