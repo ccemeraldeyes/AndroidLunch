@@ -167,7 +167,6 @@ public abstract class Item {
 		while(items.moveToNext()){
 			int id = items.getInt(0);
 			int catId = items.getInt(2);
-			
 			if (!cats.containsKey(catId)) {
 				Cursor c = db.getCategory(catId);
 				c.moveToNext();
@@ -211,7 +210,8 @@ public abstract class Item {
 			i.added = true;
 			out.add(i);
 		}
-		items.close(); // TS
+		items.close();
+		db.close();
 		return out;
 	}
 	/**
