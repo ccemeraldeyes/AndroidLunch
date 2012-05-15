@@ -195,7 +195,7 @@ public class GenericItem extends Item {
 		for(Tag t : thisTags) {
 			int tagID;
 			if (!dbTags.contains(t)) {
-				tagID = (int) db.insertTag(t.toString());				
+				tagID = (int) db.insertTag(t.toString(), "abc123");//TODO: tags include colors				
 			} else {
 				tagID = dbTags.get(dbTags.indexOf(t)).getId();
 			}

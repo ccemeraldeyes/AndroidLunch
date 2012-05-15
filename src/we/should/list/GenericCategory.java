@@ -101,10 +101,10 @@ public class GenericCategory extends Category {
 			WSdb db = new WSdb(ctx);
 			db.open();
 			if (this.id == 0) {
-				this.id = (int) db.insertCategory(this.name, this.color.hashCode(),
+				this.id = (int) db.insertCategory(this.name, this.color,
 						fieldsToDB().toString());
 			} else {
-				db.updateCategory(this.id, this.name, this.color.hashCode(), fieldsToDB().toString());
+				db.updateCategory(this.id, this.name, this.color, fieldsToDB().toString());
 				//TODO:Manage color ids
 			}
 			db.close();
