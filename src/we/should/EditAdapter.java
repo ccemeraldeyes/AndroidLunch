@@ -35,6 +35,15 @@ public class EditAdapter extends ArrayAdapter<Field> {
 		mData = data;
 	}
 	
+	public void setFields(Map<Field, String> data) {
+		for (Field f : data.keySet()) {
+			if (mData.containsKey(f)) {
+				mData.put(f, data.get(f));
+			}
+		}
+		notifyDataSetChanged();
+	}
+	
 	@Override
 	public int getItemViewType(int position) {
 		return mFields.get(position).getType().ordinal();
