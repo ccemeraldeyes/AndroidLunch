@@ -127,10 +127,6 @@ public class PlaceRequest {
 	 * @return url for the searchByLocation query
 	 */
     private String buildURLForGooglePlaces(Location myLocation, String searchName){
-//    	String types = searchTypes[0];
-//    	for(int i = 1; i < searchTypes.length; i++) {
-//    		types += "%7C" + searchTypes[i];
-//    	}
         String baseUrl = PLACES_SEARCH_URL;
         String lat = String.valueOf(myLocation.getLatitude());
         String lon = String.valueOf(myLocation.getLongitude());
