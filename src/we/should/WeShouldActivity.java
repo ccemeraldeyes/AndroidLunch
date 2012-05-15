@@ -12,9 +12,6 @@ import we.should.list.GenericCategory;
 import we.should.list.Item;
 import we.should.list.Movies;
 import we.should.search.CustomPinPoint;
-import we.should.search.DetailPlace;
-import we.should.search.Place;
-import we.should.search.PlaceRequest;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -23,9 +20,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -108,13 +103,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         	Toast.makeText(WeShouldActivity.this, 
         			"Couldn''t get provider", Toast.LENGTH_SHORT).show();
         }
-        map.postInvalidate();
-
-        //Testing SearchLocation and SearchDetailPlace - Lawrence
-//        SearchLocationSrv srv = new SearchLocationSrv(location, "university");
-//		setProgressBarIndeterminateVisibility(true);
-//		srv.execute();
-//        
+        map.postInvalidate();    
     }
 
     protected void updatePins(String name) {
@@ -272,133 +261,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		}
 		
 	}
-	
-	
-	//
-	//SearchLocationSrv is an AsyncTask that help you do the query by Name
-	//According to Google Place API, it will return all place that contain the exact given Name
-	//
-	//Google Place API only allow you to search Places within 50000 meters (30 miles), so place
-	//with name that is further than that will not be detected.
-	//
-	//This query will return a List of Place, but Place only have coordinate, if you want
-	//further detail on one place, you must do another query.
-	//
-	private class SearchLocationSrv extends AsyncTask<Void, Void, List<Place>>{
-		private String searchName;
-		private Location l;
-		public SearchLocationSrv(Location l, String searchname) {
-			this.searchName = searchname;
-			this.l = l;
-		}
-		
-		
-		//This execute method return null if the query search fail.
-    	@Override
-    	protected List<Place> doInBackground(Void... params) {
-    		List<Place> places = null;
-    		try {
-    			//search by Location and searchName
-    			places = new PlaceRequest().searchByLocation(l, searchName); 
-    		} catch (Exception e) {
-    			Log.v(PlaceRequest.LOG_KEY, "SearchLocationSrvRequest fail");
-    			e.printStackTrace();
-    		}
-    		return places;
-    	}
-    	
-    	@Override
-    	protected void onPostExecute(List<Place> result) {
-    		//UI Thread to update the GUI.
-    		//Display Places selction GUI
-    		String text = "Result \n";
-			if (result!=null){
-				for(Place place: result){//loop through the place
-					//I was drawing the places with pin on the map earlier on. 
-					//this is how it is done, just want to leave it here in case there is use later.
-//					Drawable customPin = createCustomPin(place.getBestType());
-//					int placeLocationX = (int) (place.getLat() * 1E6);
-//					int placeLocationY = (int) (place.getLng() * 1E6);
-//			        GeoPoint placeLocation = new GeoPoint(placeLocationX, placeLocationY);
-//			        OverlayItem overlayItem = new OverlayItem(placeLocation, place.getName(), place.getVicinity());
-//			        CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this);
-//			        custom.insertPinpoint(overlayItem);
-//			        overlayList.add(custom);
-					text = text + place.getName() +"\n";
-				}
-			}
-//			Testing SearchPlaceDetailSrv
-//			SearchPlaceDetailSrv request = new SearchPlaceDetailSrv(result.get(0));
-//			request.execute();
-			
-			setProgressBarIndeterminateVisibility(false);
-    	}
-    }
-	
-	
-	//
-	//SearchPlaceDetailSrv is an AsynTask that query on a certain place for more detail
-	//It attempt to get a Detail Place includes the address, phone number, website, etc.
-	//Look at DetailPlace to see what extra data does it support.
-	//
-	//In its constructor, it take a reference String.  referenceString can be get
-	//by Place object, return values of SearchLocationSrv query.
-	//
-	private class SearchPlaceDetailSrv extends AsyncTask<Void, Void, DetailPlace>{
-		private String reference;
-		
-		
-		public SearchPlaceDetailSrv(String reference) {
-			this.reference = reference;
-		}
-		
-		//This method return null when there is any exception.
-		//return a DetailPlace Object otherwise.
-    	@Override
-    	protected DetailPlace doInBackground(Void... params) {
-    		DetailPlace detailplace = null;
-    		try {
-    			//doing the query
-    			detailplace = new PlaceRequest().searchPlaceDetail(reference);
-    		} catch (Exception e) {
-    			Log.v(PlaceRequest.LOG_KEY, "SearchLocationSrvRequest fail");
-    			e.printStackTrace();
-    		}
-    	
-    		return detailplace;
-    	}
-    	
-    	@Override
-    	protected void onPostExecute(DetailPlace result) {	
-    		if(result != null) {
-    			//UI thread, update user's view and store to database.
-    			String text = "Result \n";
-    			
-    			setProgressBarIndeterminateVisibility(false);
-    		}
-    	}
-    }
-	
-	
-	//Example of how to create drawable to pass into CustomPinPoint to draw on the map
-//	private Drawable createCustomPin(PlaceType type) {
-//	   switch(type) {
-//	   		case UNIVERSITY:
-//	   			return getResources().getDrawable(R.drawable.university);
-//	   		case RESTAURANT:
-//	   			return getResources().getDrawable(R.drawable.restaurant);
-//	   		case MOVIE_RENTAL:
-//	   			return getResources().getDrawable(R.drawable.movie_rental);
-//	   		case MOVIE_THEATER:
-//	   			return getResources().getDrawable(R.drawable.movie_theater);
-//	   		case CAFE:
-//	   			return getResources().getDrawable(R.drawable.coffee);
-//	   		case BAR:
-//	   			return getResources().getDrawable(R.drawable.bar);
-//	   		default:
-//	   			return null;
-//	   }
-//	}
 	
 	/*
 	 * @return the location of the device
