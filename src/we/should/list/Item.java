@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.io.Serializable;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -55,6 +54,22 @@ public abstract class Item {
 	 */
 	public abstract Set<android.location.Address> getAddresses();
 	
+	/**
+	 * Adds an address to this item. Processes the string and translates
+	 * to a lat and long.
+	 * @param add string representation of an address
+	 * @return true if lookup is successful, false otherwise
+	 * @modifies this.addresses if lookup is successful
+	 */
+	public abstract boolean addAddress(String add);
+	
+	/**
+	 * Adds a pre-validated address to this
+	 * @param add Address object representation of an address
+	 * @return add.hasLatitude && add.hasLongitude
+	 * @modifies this.addresses if add.hasLatitude && add.hasLongitude
+	 */
+	public abstract boolean addAddress(android.location.Address add);
 	/**
 	 * 
 	 * @return the comment field of this. If the comment has not been
