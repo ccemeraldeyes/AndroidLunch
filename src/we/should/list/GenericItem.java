@@ -65,22 +65,25 @@ public class GenericItem extends Item {
 	public Set<Address> getAddresses() {
 		List<Address> out = new LinkedList<Address>();
 		boolean err = (ctx == null);
-		if (!err) {
-			Geocoder g = new Geocoder(ctx, Locale.US);
-			String address = this.get(Field.ADDRESS);
-			try {
-				out = g.getFromLocationName(address, 1);
-			} catch (IOException e) {
-				Log.w("GenericItem.getAdresses", "Server error. Could not fetch geo data.");
-				err = true;
+		String address = this.values.get(Field.ADDRESS);
+		if (address != null) {
+			if (!err) {
+				Geocoder g = new Geocoder(ctx, Locale.US);
+				try {
+					out = g.getFromLocationName(address, 1);
+				} catch (IOException e) {
+					Log.w("GenericItem.getAdresses",
+							"Server error. Could not fetch geo data.");
+					err = true;
+				}
 			}
-		} 
-		if(err) {
-			String addStr = this.get(Field.ADDRESS);
-			Address a = new Address(Locale.US);
-			a.setAddressLine(0, addStr);
-			out.add(a);
-			Log.w("GenericItem.getAdresses", "Context is null, so no geo data can be loaded.");
+			if (err) {
+				Address a = new Address(Locale.US);
+				a.setAddressLine(0, address);
+				out.add(a);
+				Log.w("GenericItem.getAdresses",
+						"Context is null, so no geo data can be loaded.");
+			}
 		}
 		return new HashSet<Address>(out);
 
