@@ -1,6 +1,7 @@
 package we.should;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,6 +55,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	
 	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
+	private final Category REFERRALS = new GenericCategory("Referrals", new LinkedList<Field>(), this);
 
 	/** The TabHost that cycles between categories. **/
 	private TabHost mTabHost;

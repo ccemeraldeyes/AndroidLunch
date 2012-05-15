@@ -32,7 +32,7 @@ public abstract class Category {
 	protected final String name;	
 	protected Context ctx = null;
 	protected int id;
-	protected String color; //test value
+	protected String color = DEFAULT_COLOR; //test value
 	protected List<Field> fields;
 
 	

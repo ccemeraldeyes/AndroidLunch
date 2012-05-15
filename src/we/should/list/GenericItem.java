@@ -37,13 +37,13 @@ import android.util.Log;
 
 public class GenericItem extends Item {
 	
-	private final Category c;
+	protected Category c;
 		
 	protected GenericItem(Category c, Context ctx) {
 		super(ctx);
 		this.c = c;
 		values = new HashMap<Field, String>();
-		List<Field> fields = c.getFields();
+		List<Field> fields = this.getFields();
 		for(Field i : fields){
 			values.put(i, "");
 		}
@@ -58,7 +58,7 @@ public class GenericItem extends Item {
 				assert (c.getItems().contains(this));
 			else
 				assert (!c.getItems().contains(this));
-			assert (new HashSet<Field>(c.getFields()).equals(values.keySet()));
+			assert (new HashSet<Field>(this.getFields()).equals(values.keySet()));
 		}
 	}
 	@Override
@@ -104,7 +104,7 @@ public class GenericItem extends Item {
 		if(key.equals(Field.TAGS)){
 			throw new IllegalArgumentException("Use the getTags() method to access the tags of this.");
 		}
-		if(c.getFields().contains(key)) {
+		if(this.getFields().contains(key)) {
 			return values.get(key);
 		} else {
 			throw new IllegalArgumentException(key.toString() + " is not a field of the " + c.getName() + " category.");
@@ -126,7 +126,7 @@ public class GenericItem extends Item {
 		if(key.equals(Field.TAGS)){
 			throw new IllegalArgumentException(Field.TAGS + " cannot be set with this method!");
 		}
-		if(c.getFields().contains(key)){
+		if(this.getFields().contains(key)){
 			values.put(key, value);
 		} else {
 			throw new IllegalArgumentException(key.toString() + " is not a field of the " + c.getName() + " category.");
@@ -145,7 +145,11 @@ public class GenericItem extends Item {
 			this.c.addItem(this);
 			this.added = true;
 		}
-		if(ctx != null){
+		if(ctx == null) {
+			Log.w("GenericItem.save()", "Item not be saved to database because context is null");
+		} else if(this.c.id == 0) {
+			Log.w("GenericItem.save()", "Item cannot be saved to Databse, because its category hasn't been saved to the database");
+		} else {
 			WSdb db = new WSdb(ctx);
 			db.open();
 			saveTagsToDB(db);
@@ -158,8 +162,6 @@ public class GenericItem extends Item {
 			}
 			updateTagLinks(db);
 			db.close();
-		} else {
-			Log.w("GenericItem.save()", "Item not be saved to Database because context is null");
 		}
 		checkRep();
 	}
@@ -250,6 +252,10 @@ public class GenericItem extends Item {
 	}
 	public String toString(){
 		return this.getName();
+	}
+	@Override
+	public List<Field> getFields() {
+		return this.c.getFields();
 	}
 
 }

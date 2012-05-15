@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import we.should.database.WSdb;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.util.Log;
 
 /**
@@ -101,8 +102,13 @@ public class GenericCategory extends Category {
 			WSdb db = new WSdb(ctx);
 			db.open();
 			if (this.id == 0) {
-				this.id = (int) db.insertCategory(this.name, this.color.hashCode(),
-						fieldsToDB().toString());
+				try {
+					this.id = (int) db.insertCategory(this.name, this.color.hashCode(),
+							fieldsToDB().toString());
+				} catch (SQLiteConstraintException e) {
+					e.printStackTrace();
+					throw new IllegalArgumentException("Invalid Category Parameters!");
+				}
 			} else {
 				db.updateCategory(this.id, this.name, this.color.hashCode(), fieldsToDB().toString());
 				//TODO:Manage color ids

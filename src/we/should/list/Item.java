@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -85,8 +86,14 @@ public abstract class Item {
 	/**
 	 * Returns the category of this item
 	 * @return the category object associated with this item.
-	 */
+	 */	
 	public abstract Category getCategory();
+	/**
+	 * Returns the fields that this item has
+	 * @return a list of Field objects.
+	 */
+	public abstract List<Field> getFields();
+
 	/**
 	 * Returns the value contained in the given field, only if the given field is
 	 * part of this items category, otherwise throws illegal argument exception.
