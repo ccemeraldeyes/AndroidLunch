@@ -9,6 +9,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Name" />
+    
+    <AutoCompleteTextView
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:completionThreshold="7" />
 
     <include
         layout="@layout/divider" />
@@ -19,15 +31,5 @@
         android:layout_height="0px"
         android:layout_weight="1"
         android:descendantFocusability="beforeDescendants" />
-
-    <include
-        layout="@layout/divider" />
-
-
-    <Button
-        android:id="@+id/save"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Save" />
 
 </LinearLayout>
