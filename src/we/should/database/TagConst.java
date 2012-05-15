@@ -11,6 +11,7 @@ public class TagConst {
 	public static final String 	DATABASE_NAME="WeShould.db",// filename on device
 								TBL_NAME="tag",				// table name
 								ID="id",					// unique id
-								NAME="name";				// tag name
+								NAME="name",				// tag name
+								COLOR="color";
 }
 

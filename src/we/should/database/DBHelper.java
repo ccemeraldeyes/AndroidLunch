@@ -19,7 +19,7 @@ public class DBHelper extends SQLiteOpenHelper{
 	                CategoryConst.TBL_NAME + " (" +
                     CategoryConst.ID + " integer primary key autoincrement, " +
 	                CategoryConst.NAME + " text UNIQUE not null, " +
-                    CategoryConst.COLOR + " integer not null, " +
+                    CategoryConst.COLOR + " text not null, " +
 	                CategoryConst.SCHEMA + " schema text not null);";	
 	
 	private static final String CREATE_TABLE_ITEM="create table " +			
@@ -40,7 +40,8 @@ public class DBHelper extends SQLiteOpenHelper{
 	private static final String CREATE_TABLE_TAG="create table " + 
 					TagConst.TBL_NAME + " ("+ 
 					TagConst.ID + " integer primary key autoincrement, " + 
-					TagConst.NAME + " text UNIQUE not null);";	
+					TagConst.NAME + " text UNIQUE not null, " +
+					TagConst.COLOR + " text not null);";	
 	
 	
 	

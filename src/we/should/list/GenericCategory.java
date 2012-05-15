@@ -103,14 +103,14 @@ public class GenericCategory extends Category {
 			db.open();
 			if (this.id == 0) {
 				try {
-					this.id = (int) db.insertCategory(this.name, this.color.hashCode(),
+					this.id = (int) db.insertCategory(this.name, this.color,
 							fieldsToDB().toString());
 				} catch (SQLiteConstraintException e) {
 					e.printStackTrace();
 					throw new IllegalArgumentException("Invalid Category Parameters!");
 				}
 			} else {
-				db.updateCategory(this.id, this.name, this.color.hashCode(), fieldsToDB().toString());
+				db.updateCategory(this.id, this.name, this.color, fieldsToDB().toString());
 				//TODO:Manage color ids
 			}
 			db.close();
