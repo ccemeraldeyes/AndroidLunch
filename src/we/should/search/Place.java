@@ -120,7 +120,7 @@ public class Place {
 	
 	@Override
 	public String toString() {
-		return "Place{name=" + getName() + ",rating=" + getRating() + "}";
+		return getName();
 	}
 
 }

@@ -46,7 +46,7 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 			
 			placeRow = new PlaceRow();
 			placeRow.name = (TextView) row.findViewById(R.id.name);
-			placeRow.rating = (TextView) row.findViewById(R.id.comment);
+			placeRow.rating = (TextView) row.findViewById(R.id.rating);
 			row.setTag(placeRow);
 		} else {
 			placeRow = (PlaceRow) row.getTag();
@@ -75,7 +75,9 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 			FilterResults filterResults = new FilterResults();
 			List<Place> list = new ArrayList<Place>();
 			if (constraint == null) {
-				constraint = "";
+				filterResults.values = mPlaces;
+				filterResults.count = mPlaces.size();
+				return filterResults;
 			}
 			String query = constraint.toString().toLowerCase();
 			for (Place p : mPlaces) {
@@ -91,8 +93,13 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 		@Override
 		protected void publishResults(CharSequence constraint,
 				FilterResults results) {
-			// TODO Auto-generated method stub
-			
+			clear();
+			@SuppressWarnings("unchecked")
+			List<Place> list = (List<Place>) results.values;
+			for (Place p : list) {
+				add(p);
+			}
+			notifyDataSetChanged();
 		}
 		
 	}

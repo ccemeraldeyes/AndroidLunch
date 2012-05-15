@@ -84,14 +84,12 @@ public class EditScreen extends Activity {
 					int count) {}
 			
 		});
-		mName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+		mName.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-			public void onItemSelected(AdapterView<?> parent, View view,
+			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				fillFields((Place) mName.getAdapter().getItem(position));
 			}
-
-			public void onNothingSelected(AdapterView<?> parent) {}
 			
 		});
 		
@@ -124,6 +122,9 @@ public class EditScreen extends Activity {
 	private void setupList() {
 		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		if (location == null) {
+			return;
+		}
 		List<Place> places;
 		try {
 			places = (new PlaceRequest()).searchByLocation(location, mName.getText().toString());
