@@ -80,25 +80,16 @@ public class NewCategory extends Activity {
 		List<ProtoField> protoFields = mAdapter.getAll();
 		Set<String> names = new HashSet<String>();
 		
-		int duration = Toast.LENGTH_SHORT;
+		int duration = Toast.LENGTH_LONG;
 		boolean saveable = true;
 		for (ProtoField pf : protoFields) {
 			if (names.contains(pf.name)) {
 				saveable = false;
 				Toast.makeText(this, "Duplicate name: " + pf.name, duration).show();
 			}
-			names.add(pf.name);
-			if (pf.name.equalsIgnoreCase(Field.NAME.getName())) {
+			if (Field.getReservedNames().contains(pf.name.toLowerCase())) {
 				saveable = false;
-				Toast.makeText(this, "Cannot have a field named '" + pf.name + "'", duration).show();
-			}
-			if (pf.name.equalsIgnoreCase(Field.PHONENUMBER.getName())) {
-				saveable = false;
-				Toast.makeText(this, "Cannot have a field named '" + pf.name + "'", duration).show();
-			}
-			if (pf.name.equalsIgnoreCase(Field.ADDRESS.getName())) {
-				saveable = false;
-				Toast.makeText(this, "Cannot have a field named '" + pf.name + "'", duration).show();
+				Toast.makeText(this, "Field name " + pf.name + " is reserved.", duration).show();
 			}
 		}
 		

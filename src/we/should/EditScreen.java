@@ -37,7 +37,10 @@ public class EditScreen extends Activity {
 	private AutoCompleteTextView mName;
 	
 	/** The list of fields. **/
-	private EditAdapter mFieldListView;
+	private List<Field> mFields;
+	
+	/** The listview holding the fields. **/
+	private ListView mFieldListView;
 	
 	/** The data associated with each field. **/
 	private Map<Field, String> mData;
@@ -93,11 +96,10 @@ public class EditScreen extends Activity {
 			
 		});
 		
-		ListView lv = (ListView) findViewById(R.id.fieldList);
-		List<Field> fields = new ArrayList<Field>(mItem.getCategory().getFields());
-		fields.remove(Field.NAME);
-		mFieldListView = new EditAdapter(this, fields, mData);
-		lv.setAdapter(mFieldListView);
+		mFieldListView = (ListView) findViewById(R.id.fieldList);
+		mFields = new ArrayList<Field>(mItem.getCategory().getFields());
+		mFields.remove(Field.NAME);
+		mFieldListView.setAdapter(new EditAdapter(this, mFields, mData));
 	}
 	
 	@Override
@@ -140,11 +142,14 @@ public class EditScreen extends Activity {
 	 */
 	private void fillFields(Place place) {
 		DetailPlace detailPlace = (new PlaceRequest()).searchPlaceDetail(place.getReference());
-		Map<Field, String> fields = new HashMap<Field, String>();
-		fields.put(Field.PHONENUMBER, detailPlace.getLocalPhoneNumber());
-		fields.put(Field.WEBSITE, detailPlace.getWebSite());
-		fields.put(Field.ADDRESS, detailPlace.getAddress());
-		mFieldListView.setFields(fields);
+		Map<Field, String> fieldMap = detailPlace.asFieldMap();
+		for (Field f : fieldMap.keySet()) {
+			if (fieldMap.get(f) != null && !fieldMap.get(f).equals("")) {
+				mData.put(f, fieldMap.get(f));
+			}
+		}
+
+		mFieldListView.setAdapter(new EditAdapter(this, mFields, mData));
 	}
 	
 	/**
