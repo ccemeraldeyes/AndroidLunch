@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -18,6 +17,8 @@ import we.should.list.Field;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import we.should.list.Category;
+import we.should.list.Item;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Patterns;
@@ -26,6 +27,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class ReferDialog extends Activity {
+	
+	/** The item we're sending. **/
+	private Item mItem;
 	
 	/** The emails. **/
 	private EditText mEmails;
@@ -38,6 +42,17 @@ public class ReferDialog extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.refer);
 		
+		Bundle extras = getIntent().getExtras();
+		String catName = (String) extras.get(WeShouldActivity.CATEGORY);
+		Category cat = Category.getCategory(catName, this);
+		
+		int index = extras.getInt(WeShouldActivity.INDEX);		
+		if (index == -1) {
+			mItem = cat.newItem();
+		} else {
+			mItem = cat.getItems().get(index);
+		}
+		
 		mEmails = (EditText) findViewById(R.id.emails);
 		
 		mSend = (Button) findViewById(R.id.send);
@@ -47,7 +62,7 @@ public class ReferDialog extends Activity {
 //				for (String email : mEmails.getText().toString().split(",")) {
 //					emails.add(email.trim());
 //				}
-				send(mEmails.getText().toString());
+				send(mEmails.getText().toString(), mItem);
 				finish();
 			}
 		});
@@ -55,8 +70,9 @@ public class ReferDialog extends Activity {
 	
 	/**
 	 * Handles the sending of items.
+	 * @param item 
 	 */
-	private void send(String emails) {
+	private void send(String emails, Item item) {
 		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
 		Account[] accounts = AccountManager.get(getBaseContext()).getAccounts();
 		String email = "";
@@ -66,6 +82,7 @@ public class ReferDialog extends Activity {
 		        break;
 		    }
 		}
+		
 		
 		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();

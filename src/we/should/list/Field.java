@@ -13,6 +13,7 @@ import we.should.list.FieldType;
 public class Field {
 	
 	public static final Field NAME = new Field("name", FieldType.TextField);
+	public static final Field WEBSITE = new Field("url", FieldType.TextField);
 	public static final Field PHONENUMBER = new Field("phone number", FieldType.PhoneNumber);
 	public static final Field ADDRESS = new Field("address", FieldType.MultilineTextField);
 	public static final Field RATING = new Field("rating", FieldType.Rating);
@@ -78,6 +79,7 @@ public class Field {
 	public static List<Field> getDefaultFields(){
 		List<Field> out = new LinkedList<Field>();
 		out.add(NAME);
+		out.add(WEBSITE);
 		out.add(PHONENUMBER);
 		out.add(ADDRESS);
 		out.add(RATING);
@@ -91,6 +93,7 @@ public class Field {
 	public static List<Field> getMovieFields(){
 		List<Field> out = new LinkedList<Field>();
 		out.add(NAME);
+		out.add(WEBSITE);
 		out.add(RATING);
 		out.add(COMMENT);
 		return out;

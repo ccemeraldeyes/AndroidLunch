@@ -74,8 +74,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private int devX, devY;
 	private MyLocationOverlay myLocationOverlay;
 	private List<Overlay> overlayList;
-	
-	
 	protected WSdb db;
 	protected String DBFILE;
     

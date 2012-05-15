@@ -1,5 +1,6 @@
 package we.should;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,14 +22,26 @@ import we.should.list.Field;
 import we.should.list.Item;
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import we.should.search.DetailPlace;
+import we.should.search.Place;
+import we.should.search.PlaceRequest;
 import android.app.Activity;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+
 import android.util.Patterns;
+
+import android.text.Editable;
+import android.text.TextWatcher;
+
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,8 +51,11 @@ public class EditScreen extends Activity {
 	/** The item that we're editing. **/
 	private Item mItem;
 	
+	/** The name of the item. **/
+	private AutoCompleteTextView mName;
+	
 	/** The list of fields. **/
-	private ListView mFieldListView;
+	private EditAdapter mFieldListView;
 	
 	/** The data associated with each field. **/
 	private Map<Field, String> mData;
@@ -67,10 +83,41 @@ public class EditScreen extends Activity {
 		for (Field f : cat.getFields()) {
 			mData.put(f, mItem.get(f));
 		}
+		mData.remove(Field.NAME);
 		
-		mFieldListView = (ListView) findViewById(R.id.fieldList);
-		List<Field> fields = mItem.getCategory().getFields();
-		mFieldListView.setAdapter(new EditAdapter(this, fields, mData));
+		mName = (AutoCompleteTextView) findViewById(R.id.name);
+		mName.setText(mItem.getName());
+		mName.addTextChangedListener(new TextWatcher() {
+
+			public void afterTextChanged(Editable s) {
+				if (s.length() == (mName.getThreshold() - 1)) {
+					setupList();
+				}
+			}
+
+			public void beforeTextChanged(CharSequence s, int start,
+					int count, int after) {}
+
+			public void onTextChanged(CharSequence s, int start, int before,
+					int count) {}
+			
+		});
+		mName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+				fillFields((Place) mName.getAdapter().getItem(position));
+			}
+
+			public void onNothingSelected(AdapterView<?> parent) {}
+			
+		});
+		
+		ListView lv = (ListView) findViewById(R.id.fieldList);
+		List<Field> fields = new ArrayList<Field>(mItem.getCategory().getFields());
+		fields.remove(Field.NAME);
+		mFieldListView = new EditAdapter(this, fields, mData);
+		lv.setAdapter(mFieldListView);
 	}
 	
 	@Override
@@ -90,6 +137,34 @@ public class EditScreen extends Activity {
 	}
 	
 	/**
+	 * Set up the autocomplete list.
+	 */
+	private void setupList() {
+		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		List<Place> places;
+		try {
+			places = (new PlaceRequest()).searchByLocation(location, mName.getText().toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
+		mName.setAdapter(new PlaceAdapter(this, places));
+	}
+	
+	/**
+	 * Fills in any fields from the selected place.
+	 */
+	private void fillFields(Place place) {
+		DetailPlace detailPlace = (new PlaceRequest()).searchPlaceDetail(place.getReference());
+		Map<Field, String> fields = new HashMap<Field, String>();
+		fields.put(Field.PHONENUMBER, detailPlace.getLocalPhoneNumber());
+		fields.put(Field.WEBSITE, detailPlace.getWebSite());
+		fields.put(Field.ADDRESS, detailPlace.getAddress());
+		mFieldListView.setFields(fields);
+	}
+	
+	/**
 	 * Save the data then exit.
 	 */
 	private void save() {
@@ -102,6 +177,7 @@ public class EditScreen extends Activity {
 			return;
 		}
 		
+		mItem.set(Field.NAME, mName.getText().toString());
 		mItem.save();
 		
 		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+

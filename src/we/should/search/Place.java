@@ -117,5 +117,10 @@ public class Place {
 	public String getVicinity() {
 		return vicinity;
 	}
+	
+	@Override
+	public String toString() {
+		return "Place{name=" + getName() + ",rating=" + getRating() + "}";
+	}
 
 }

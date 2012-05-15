@@ -28,7 +28,7 @@ public class PlaceRequest {
 	 * 
 	 * Currently it will search for any Place with type University or Restaurant, or Movie_rental, or movie_theater, or cafe, or bar.
 	 */
-	private static String keyString = "APIKEY HERE";
+	private static String keyString = "AIzaSyDb2H4C8ztSgKJtlxx5jheMHjV_vIrIxAA";
 	private static final String PLACES_SEARCH_URL =  "https://maps.googleapis.com/maps/api/place/search/json?";
 	private static final String PLACES_DETAIL_SEARCH = "https://maps.googleapis.com/maps/api/place/details/json?";
 	public static final String LOG_KEY = "WeShould.search";
@@ -116,11 +116,10 @@ public class PlaceRequest {
 	}
 	
 
-	/* 
+	/** 
 	 * Build the url for the searchByLocation query
 	 * 
 	 * @param myLocation - given the location to search
-	 * @param meters - the radius to search within, maximum is 50000
 	 * @param searchName - the name to filter the results 
 	 * searchName is filter such that only places contains the exactly searchName in its name will be return
 	 * 
