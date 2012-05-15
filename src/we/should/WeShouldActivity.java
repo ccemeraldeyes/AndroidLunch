@@ -11,13 +11,14 @@ import we.should.list.Field;
 import we.should.list.GenericCategory;
 import we.should.list.Item;
 import we.should.list.Movies;
+import we.should.search.CustomPinPoint;
 import we.should.search.DetailPlace;
 import we.should.search.Place;
 import we.should.search.PlaceRequest;
-import we.should.search.PlaceType;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -43,6 +44,7 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
+import com.google.android.maps.OverlayItem;
 
 public class WeShouldActivity extends MapActivity implements LocationListener {
 	
@@ -65,7 +67,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	
 	/** A mapping from id's to categorys, used for submenu creation. **/
 	private Map<Integer, Category> mMenuIDs;
-	
 	private MapView map;
 	private LocationManager lm;
 	private MapController controller;
@@ -73,7 +74,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private int devX, devY;
 	private MyLocationOverlay myLocationOverlay;
 	private List<Overlay> overlayList;
-
+	
+	
 	protected WSdb db;
 	protected String DBFILE;
     
@@ -89,9 +91,14 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         updateTabs();        
-
+        this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+			
+			public void onTabChanged(String tabId) {
+				updatePins(tabId.trim());
+				
+			}
+		});
         db = new WSdb(this);
-        
         //Testing
         myLocationOverlay = new MyLocationOverlay(this, map);
         map.getOverlays().add(myLocationOverlay);
@@ -112,7 +119,24 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 //        
     }
 
-    /**
+    protected void updatePins(String name) {
+    	List<Item> items = mCategories.get(name).getItems();
+		Drawable customPin = getResources().getDrawable(R.drawable.restaurant); //default for now.
+    	for (Item item : items) {
+    		Set<Address> addrs = item.getAddresses();
+    		for(Address addr : addrs) {
+    			int locX = (int) (addr.getLatitude() * 1E6);
+    			int locY = (int) (addr.getLongitude() * 1E6);
+    			GeoPoint placeLocation = new GeoPoint(locX, locY);
+    			OverlayItem overlayItem = new OverlayItem(placeLocation, item.getName(), item.get(Field.ADDRESS));
+    			CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this);
+    			custom.insertPinpoint(overlayItem);
+    			overlayList.add(custom);
+    		}
+    	}
+	}
+
+	/**
      * Updates the tabs on startup or when categories change.
      */
 	private void updateTabs() {
@@ -137,6 +161,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	        		.setContent(tp);
 	        mTabHost.addTab(spec);
         }
+        updatePins(mTabHost.getCurrentTabTag().trim());
 	}
 
 	@Override
@@ -291,7 +316,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		String text = "Result \n";
 			if (result!=null){
 				for(Place place: result){//loop through the place
-					
 					//I was drawing the places with pin on the map earlier on. 
 					//this is how it is done, just want to leave it here in case there is use later.
 //					Drawable customPin = createCustomPin(place.getBestType());
@@ -351,8 +375,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		if(result != null) {
     			//UI thread, update user's view and store to database.
     			String text = "Result \n";
-    			if (result!=null){
-    			}
+    			
     			setProgressBarIndeterminateVisibility(false);
     		}
     	}
@@ -360,8 +383,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	
 	
 	//Example of how to create drawable to pass into CustomPinPoint to draw on the map
-	private Drawable createCustomPin(PlaceType type) {
-	   switch(type) {
+//	private Drawable createCustomPin(PlaceType type) {
+//	   switch(type) {
 //	   		case UNIVERSITY:
 //	   			return getResources().getDrawable(R.drawable.university);
 //	   		case RESTAURANT:
@@ -374,10 +397,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 //	   			return getResources().getDrawable(R.drawable.coffee);
 //	   		case BAR:
 //	   			return getResources().getDrawable(R.drawable.bar);
-	   		default:
-	   			return null;
-	   }
-	}
+//	   		default:
+//	   			return null;
+//	   }
+//	}
 	
 	/*
 	 * @return the location of the device
