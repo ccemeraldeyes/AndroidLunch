@@ -180,15 +180,15 @@ public class EditScreen extends Activity {
 		mItem.set(Field.NAME, mName.getText().toString());
 		mItem.save();
 		
-		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-		Account[] accounts = AccountManager.get(getBaseContext()).getAccounts();
-		String email = "";
-		for (Account account : accounts) {
-		    if (emailPattern.matcher(account.name).matches()) {
-		        email = account.name;
-		        break;
-		    }
-		}
+//		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+//		Account[] accounts = AccountManager.get(getBaseContext()).getAccounts();
+//		String email = "";
+//		for (Account account : accounts) {
+//		    if (emailPattern.matcher(account.name).matches()) {
+//		        email = account.name;
+//		        break;
+//		    }
+//		}
 		
 		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();
@@ -197,7 +197,7 @@ public class EditScreen extends Activity {
 		try {
 		    // Add your data
 		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-		    nameValuePairs.add(new BasicNameValuePair("user_email", email));
+		    nameValuePairs.add(new BasicNameValuePair("user_email", WeShouldActivity.ACCOUNT_NAME));
 			for (Field f : mData.keySet()) {
 				nameValuePairs.add(new BasicNameValuePair(f.getName(), mData.get(f)));
 			}

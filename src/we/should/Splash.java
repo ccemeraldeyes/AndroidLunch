@@ -114,14 +114,14 @@ public class Splash extends Activity {
 
 	
 	protected boolean checkReferrals(){
-		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-		Account[] accounts = AccountManager.get(getBaseContext()).getAccounts();
-		String emails = "";
-		for (Account account : accounts) {
-		    if (emailPattern.matcher(account.name).matches()) {
-		        emails += account.name+",";
-		    }
-		}
+//		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+//		Account[] accounts = AccountManager.get(getBaseContext()).getAccounts();
+//		String emails = "";
+//		for (Account account : accounts) {
+//		    if (emailPattern.matcher(account.name).matches()) {
+//		        emails += account.name+",";
+//		    }
+//		}
 		
 		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();
@@ -130,13 +130,15 @@ public class Splash extends Activity {
 		try {
 		    // Add your data
 		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-		    nameValuePairs.add(new BasicNameValuePair("user_email_list", emails));
+		    nameValuePairs.add(new BasicNameValuePair("user_email", WeShouldActivity.ACCOUNT_NAME));
 		    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
 		    // Execute HTTP Post Request
 		    HttpResponse response = httpclient.execute(httppost);
 		    
 		    //TODO: check for new referrals. maybe just save new items but flag them?
+		    //then present them for approval to user
+		    //redirect to new page before main
 
 		} catch (ClientProtocolException e) {
 		    // TODO Auto-generated catch block
