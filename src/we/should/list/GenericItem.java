@@ -64,8 +64,8 @@ public class GenericItem extends Item {
 	@Override
 	public Set<Address> getAddresses() {
 		List<Address> out = new LinkedList<Address>();
-		boolean err = ctx == null;
-		if (ctx != null) {
+		boolean err = (ctx == null);
+		if (!err) {
 			Geocoder g = new Geocoder(ctx, Locale.US);
 			String address = this.get(Field.ADDRESS);
 			try {

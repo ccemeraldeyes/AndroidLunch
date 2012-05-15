@@ -11,18 +11,15 @@ import we.should.list.Field;
 import we.should.list.GenericCategory;
 import we.should.list.Item;
 import we.should.list.Movies;
-import we.should.search.DetailPlace;
-import we.should.search.Place;
-import we.should.search.PlaceRequest;
-import we.should.search.PlaceType;
+import we.should.search.CustomPinPoint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -43,6 +40,7 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
+import com.google.android.maps.OverlayItem;
 
 public class WeShouldActivity extends MapActivity implements LocationListener {
 	
@@ -53,12 +51,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/** Bundle keys. **/
 	public static final String CATEGORY = "CATEGORY";
 	public static final String INDEX = "INDEX";
-	
-	/** Activity keys. **/
-	public static final int NEW_CAT = 0;
-	public static final int NEW_ITEM = 1;
-	public static final int VIEW_ITEM = 2;
-	public static final int EDIT_ITEM = 3;
 	
 	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
@@ -71,7 +63,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	
 	/** A mapping from id's to categorys, used for submenu creation. **/
 	private Map<Integer, Category> mMenuIDs;
-	
 	private MapView map;
 	private LocationManager lm;
 	private MapController controller;
@@ -79,7 +70,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private int devX, devY;
 	private MyLocationOverlay myLocationOverlay;
 	private List<Overlay> overlayList;
-
 	protected WSdb db;
 	protected String DBFILE;
     
@@ -95,9 +85,14 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         updateTabs();        
-
+        this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+			
+			public void onTabChanged(String tabId) {
+				updatePins(tabId.trim());
+				
+			}
+		});
         db = new WSdb(this);
-        
         //Testing
         myLocationOverlay = new MyLocationOverlay(this, map);
         map.getOverlays().add(myLocationOverlay);
@@ -109,16 +104,32 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         	Toast.makeText(WeShouldActivity.this, 
         			"Couldn''t get provider", Toast.LENGTH_SHORT).show();
         }
-        map.postInvalidate();
-
-        //Testing SearchLocation and SearchDetailPlace - Lawrence
-//        SearchLocationSrv srv = new SearchLocationSrv(location, "university");
-//		setProgressBarIndeterminateVisibility(true);
-//		srv.execute();
-//        
+        map.postInvalidate();    
     }
 
-    /**
+    protected void updatePins(String name) {
+    	List<Item> items = mCategories.get(name).getItems();
+		Drawable customPin = getResources().getDrawable(R.drawable.restaurant); //default for now.
+    	for (Item item : items) {
+    		Set<Address> addrs = item.getAddresses();
+    		for(Address addr : addrs) {
+    			try {
+    				int locX = (int) (addr.getLatitude() * 1E6);
+    				int locY = (int) (addr.getLongitude() * 1E6);
+        			GeoPoint placeLocation = new GeoPoint(locX, locY);
+        			OverlayItem overlayItem = new OverlayItem(placeLocation, item.getName(), item.get(Field.ADDRESS));
+        			CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this);
+        			custom.insertPinpoint(overlayItem);
+        			overlayList.add(custom);
+    			} catch (IllegalStateException ex) {
+    				Log.v("UPDATEMAPVIEW", item.getName() + "'s address doesn't have lat or lng value");
+    			}
+
+    		}
+    	}
+	}
+
+	/**
      * Updates the tabs on startup or when categories change.
      */
 	private void updateTabs() {
@@ -143,6 +154,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	        		.setContent(tp);
 	        mTabHost.addTab(spec);
         }
+        updatePins(mTabHost.getCurrentTabTag().trim());
 	}
 
 	@Override
@@ -175,7 +187,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			mMenuIDs.put(i, mCategories.get(s));
 			i++;
 		}
-		return super.onCreateOptionsMenu(menu);
+		return super.onPrepareOptionsMenu(menu);
 	}
 	
 	@Override
@@ -187,7 +199,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			break;
 		case R.id.add_cat:
 			intent = new Intent(this, NewCategory.class);
-			startActivityForResult(intent, NEW_CAT);
+			startActivityForResult(intent, ActivityKey.NEW_CAT.ordinal());
 			break;
 		}
 		
@@ -197,7 +209,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			Intent intent = new Intent(this, EditScreen.class);
 			intent.putExtra(CATEGORY, cat.getName());
 			intent.putExtra(INDEX, -1);
-			startActivityForResult(intent, NEW_ITEM);
+			startActivityForResult(intent, ActivityKey.NEW_ITEM.ordinal());
 		}
 		return true;
 	}
@@ -247,142 +259,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
 					intent.putExtra(CATEGORY, item.getCategory().getName());
 					intent.putExtra(INDEX, position);
-					startActivityForResult(intent, VIEW_ITEM);
+					startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 			    }
 			  });
 			
 			return lv;
 		}
 		
-	}
-	
-	
-	//
-	//SearchLocationSrv is an AsyncTask that help you do the query by Name
-	//According to Google Place API, it will return all place that contain the exact given Name
-	//
-	//Google Place API only allow you to search Places within 50000 meters (30 miles), so place
-	//with name that is further than that will not be detected.
-	//
-	//This query will return a List of Place, but Place only have coordinate, if you want
-	//further detail on one place, you must do another query.
-	//
-	private class SearchLocationSrv extends AsyncTask<Void, Void, List<Place>>{
-		private String searchName;
-		private Location l;
-		public SearchLocationSrv(Location l, String searchname) {
-			this.searchName = searchname;
-			this.l = l;
-		}
-		
-		
-		//This execute method return null if the query search fail.
-    	@Override
-    	protected List<Place> doInBackground(Void... params) {
-    		List<Place> places = null;
-    		try {
-    			//search by Location and searchName
-    			places = new PlaceRequest().searchByLocation(l, searchName); 
-    		} catch (Exception e) {
-    			Log.v(PlaceRequest.LOG_KEY, "SearchLocationSrvRequest fail");
-    			e.printStackTrace();
-    		}
-    		return places;
-    	}
-    	
-    	@Override
-    	protected void onPostExecute(List<Place> result) {
-    		//UI Thread to update the GUI.
-    		//Display Places selction GUI
-    		String text = "Result \n";
-			if (result!=null){
-				for(Place place: result){//loop through the place
-					
-					//I was drawing the places with pin on the map earlier on. 
-					//this is how it is done, just want to leave it here in case there is use later.
-//					Drawable customPin = createCustomPin(place.getBestType());
-//					int placeLocationX = (int) (place.getLat() * 1E6);
-//					int placeLocationY = (int) (place.getLng() * 1E6);
-//			        GeoPoint placeLocation = new GeoPoint(placeLocationX, placeLocationY);
-//			        OverlayItem overlayItem = new OverlayItem(placeLocation, place.getName(), place.getVicinity());
-//			        CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this);
-//			        custom.insertPinpoint(overlayItem);
-//			        overlayList.add(custom);
-					text = text + place.getName() +"\n";
-				}
-			}
-//			Testing SearchPlaceDetailSrv
-//			SearchPlaceDetailSrv request = new SearchPlaceDetailSrv(result.get(0));
-//			request.execute();
-			
-			setProgressBarIndeterminateVisibility(false);
-    	}
-    }
-	
-	
-	//
-	//SearchPlaceDetailSrv is an AsynTask that query on a certain place for more detail
-	//It attempt to get a Detail Place includes the address, phone number, website, etc.
-	//Look at DetailPlace to see what extra data does it support.
-	//
-	//In its constructor, it take a reference String.  referenceString can be get
-	//by Place object, return values of SearchLocationSrv query.
-	//
-	private class SearchPlaceDetailSrv extends AsyncTask<Void, Void, DetailPlace>{
-		private String reference;
-		
-		
-		public SearchPlaceDetailSrv(String reference) {
-			this.reference = reference;
-		}
-		
-		//This method return null when there is any exception.
-		//return a DetailPlace Object otherwise.
-    	@Override
-    	protected DetailPlace doInBackground(Void... params) {
-    		DetailPlace detailplace = null;
-    		try {
-    			//doing the query
-    			detailplace = new PlaceRequest().searchPlaceDetail(reference);
-    		} catch (Exception e) {
-    			Log.v(PlaceRequest.LOG_KEY, "SearchLocationSrvRequest fail");
-    			e.printStackTrace();
-    		}
-    	
-    		return detailplace;
-    	}
-    	
-    	@Override
-    	protected void onPostExecute(DetailPlace result) {	
-    		if(result != null) {
-    			//UI thread, update user's view and store to database.
-    			String text = "Result \n";
-    			if (result!=null){
-    			}
-    			setProgressBarIndeterminateVisibility(false);
-    		}
-    	}
-    }
-	
-	
-	//Example of how to create drawable to pass into CustomPinPoint to draw on the map
-	private Drawable createCustomPin(PlaceType type) {
-	   switch(type) {
-//	   		case UNIVERSITY:
-//	   			return getResources().getDrawable(R.drawable.university);
-//	   		case RESTAURANT:
-//	   			return getResources().getDrawable(R.drawable.restaurant);
-//	   		case MOVIE_RENTAL:
-//	   			return getResources().getDrawable(R.drawable.movie_rental);
-//	   		case MOVIE_THEATER:
-//	   			return getResources().getDrawable(R.drawable.movie_theater);
-//	   		case CAFE:
-//	   			return getResources().getDrawable(R.drawable.coffee);
-//	   		case BAR:
-//	   			return getResources().getDrawable(R.drawable.bar);
-	   		default:
-	   			return null;
-	   }
 	}
 	
 	/*

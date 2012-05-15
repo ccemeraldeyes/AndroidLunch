@@ -32,7 +32,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import we.should.database.WSdb;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;

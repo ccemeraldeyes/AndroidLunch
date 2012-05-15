@@ -1,8 +1,4 @@
 package we.should.search;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -20,30 +16,21 @@ import android.util.Log;
 public class Place {
 	private double latitude, longitude, rating;
 	private String icon, id, name, vicinity, reference;
-	private List<PlaceType> types;
-	private PlaceType bestType;
 	boolean isValid;
 	//This is the filter list of the Place
 	//We are looking for places, but because there are chance that a place contains multiple types
 	//this filter list will have the place in order.  For example [University, Cafe, Bar], 
 	//it will choose University as the bestType because it is first index in the filter
-	private static PlaceType[] filterList = new PlaceType[]{PlaceType.UNIVERSITY, 
-		PlaceType.RESTAURANT, PlaceType.MOVIE_RENTAL, PlaceType.MOVIE_THEATER, PlaceType.CAFE, PlaceType.BAR};
-
+	//private static PlaceType[] filterList = new PlaceType[]{PlaceType.UNIVERSITY, 
+	//	PlaceType.RESTAURANT, PlaceType.MOVIE_RENTAL, PlaceType.MOVIE_THEATER, PlaceType.CAFE, PlaceType.BAR};
 	public Place(JSONObject obj) {
 		try {
 			getLocation(obj);
-			getTypes(obj);
 			icon = obj.getString("icon");
 			id = obj.getString("id");
 			name = obj.getString("name");
 			vicinity  = obj.getString("vicinity");
 			reference = obj.getString("reference");
-			if(types.contains(PlaceType.RESTAURANT)) {
-				rating = obj.getDouble("rating");
-			} else {
-				rating = 0;
-			}
 			isValid = true;
 		} catch (JSONException e) {
 			Log.v(PlaceRequest.LOG_KEY, "fail to parse to Place");
@@ -60,20 +47,6 @@ public class Place {
 	 */
 	public boolean isValid() {
 		return isValid;
-	}
-	
-	//Getting the Type off the JSONobject
-	private void getTypes(JSONObject obj) throws JSONException {
-		types = new ArrayList<PlaceType>();
-		JSONArray list = obj.getJSONArray("types");
-		for(int i = 0; i < list.length(); i++) {
-			for(int j = 0; j < PlaceRequest.searchTypes.length; j++) {
-				//make sure the type is in our search request before we create the PlaceType Item
-				if(list.getString(i).equals(PlaceRequest.searchTypes[j]))
-					types.add(PlaceType.createPlaceType(list.getString(i)));
-			}
-		}
-		bestType = filterType();
 	}
 	
 	//Getting the location off the JSONObject
@@ -97,21 +70,7 @@ public class Place {
 	public String getName() {
 		return name;
 	}
-	
-	/**
-	 * @return - all the types that matches the place
-	 */
-	public List<PlaceType> getAllTypes() {
-		return types;
-	}
-	
-	/**
-	 * @return -String the best type associate with the place
-	 */
-	public PlaceType getBestType() {
-		return bestType;
-	}
-	
+
 	/**
 	 * @return double - represent the rating if it is a restaurant
 	 *                - if place doesn't have rating, it will return 0
@@ -155,13 +114,9 @@ public class Place {
 		return vicinity;
 	}
 	
-	//Filter the PlaceType and find the bestType it has
-	private PlaceType filterType() {
-		for(int i = 0; i < filterList.length; i++) {
-			if(types.contains(filterList[i])) {
-				return filterList[i];
-			}
-		}
-		return null;
+	@Override
+	public String toString() {
+		return getName();
 	}
+
 }

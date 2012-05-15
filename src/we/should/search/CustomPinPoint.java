@@ -14,18 +14,17 @@ import com.google.android.maps.OverlayItem;
  * will be useful when we add the pin later.
  * @author Lawrence
  */
-public class CustomPinPoint extends ItemizedOverlay{
+public class CustomPinPoint extends ItemizedOverlay<OverlayItem>{
 	private List<OverlayItem> pinpoints = new ArrayList<OverlayItem>();
-	private Context c;
+	//private Context c;
 	
 	public CustomPinPoint(Drawable d) {
-		//drawing the Drawable to the map
 		super(boundCenter(d));
 	}
 
 	public CustomPinPoint(Drawable m, Context context) {
 		this(m);
-		c = context;
+		//c = context;
 	}
 	
 	@Override
@@ -33,6 +32,12 @@ public class CustomPinPoint extends ItemizedOverlay{
 		return pinpoints.get(i);
 	}
 	
+	@Override
+	protected boolean onTap(int index) { 
+		//OverlayItem overlay = pinpoints.get(index);
+		return super.onTap(index);
+	}
+
 	@Override
 	public int size() {
 		return pinpoints.size();

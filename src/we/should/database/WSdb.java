@@ -3,7 +3,9 @@ package we.should.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.*;
+import android.database.sqlite.SQLiteConstraintException;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
 /**
@@ -122,7 +124,7 @@ public class WSdb {
 	/**
 	 * Insert a category into the database
 	 * 
-	 * @param name of category being entered
+	 * @param name of category being entered - maximum length 32 characters
 	 * @param color key id of the color associated with this Category
 	 * @param schema string to identify category schema 
 	 * @return row ID of the newly inserted row
@@ -136,8 +138,8 @@ public class WSdb {
 		Log.v("InsertCategory", "arguments-- " + name + ", " + colorID + ", " + schema);
 		
 		//check arguments for null and empty strings
-		if (hasNoChars(name) || hasNoChars(schema)){
-			Log.e("db.insertCategory","argument name or schema empty");
+		if (hasNoChars(name) || name.length() > 32 || hasNoChars(schema)){
+			Log.e("db.insertCategory","argument format error");
 			throw new IllegalArgumentException ();
 		}
 		ContentValues newTaskValue = new ContentValues();
@@ -152,7 +154,7 @@ public class WSdb {
 	/**
 	 * Insert a Tag into the database
 	 * 
-	 * @param name of Tag
+	 * @param name of Tag - maximum length 32 characters
 	 * @return row ID of the newly inserted tag
 	 * @exception SQLiteConstraintException if insert violates constraints
 	 * @exception IllegalArgumentException if argument format invalid
@@ -163,8 +165,8 @@ public class WSdb {
 		Log.v("WSdb.insertTag","inserting tag" + name);
 		
 		// check argument for null or empty string
-		if(hasNoChars(name)){
-			Log.e("db.insertTag","argument (name) is empty");
+		if(hasNoChars(name) || name.length() > 32){
+			Log.e("db.insertTag","argument (name) is empty or greter than 32 characters");
 			throw new IllegalArgumentException();
 		}
 		ContentValues newTaskValue = new ContentValues();
@@ -195,7 +197,7 @@ public class WSdb {
 		//TODO: if I make itemid,tagid a key or unique, sql will enforce this
 		// check to see if item is already tagged with this tag
 		if(isItemTagged(itemID, tagID)){
-			//Log.e("db.insertItem_Tag","This item_tag already exists");
+			Log.e("db.insertItem_Tag","This item_tag already exists");
 			throw new SQLiteConstraintException("This item-tag pair already exists!");
 		}
 		
@@ -408,10 +410,13 @@ public class WSdb {
 		Cursor c = db.query(Item_TagConst.TBL_NAME, null, where, null,
 						null, null, null);
 	
-		if (c.getCount() > 0)
+		if (c.getCount() > 0){
+			c.close();
 			return true; // item tag exists already
-		else
+		}else{
+			c.close();
 			return false;
+		}
 	}
 	
 		
@@ -424,7 +429,7 @@ public class WSdb {
 	 * update all category fields other than key id to given values
 	 * 
 	 * @param catID id of category to update
-	 * @param name string name of category
+	 * @param name string name of category - maximum length of 32 characters
 	 * @param colorID id of new color of category
 	 * @param schema JSON string defining category fields
 	 * @return true if update is successful, false or exception otherwise
@@ -438,8 +443,8 @@ public class WSdb {
 		          catID);
 
 		// check arguments for valid format
-		if (hasNoChars(name) || colorID < 1 || hasNoChars(schema)){
-			Log.e("db.updateCategory","Invalid Argument");
+		if (hasNoChars(name) || name.length() > 32 || colorID < 1 || hasNoChars(schema)){
+			Log.e("db.updateCategory","Invalid Argument format");
 			throw new IllegalArgumentException();
 		}	
 		int affected=0;
@@ -468,14 +473,14 @@ public class WSdb {
 	 * Change the name of a Tag
 	 * 
 	 * @param tagID id of tag to update
-	 * @param newName new name of tag
+	 * @param newName new name of tag - maximum length of 32 characters
 	 */
 	public boolean updateTag(int tagID, String newName)
 			throws IllegalArgumentException, SQLiteConstraintException{
 
 		Log.v("DB.updateTag","update tagId=" + tagID);
 		
-		if (hasNoChars(newName) || tagID<1){
+		if (hasNoChars(newName) || newName.length() > 32 || tagID<1){
 			Log.e("db.updateTag","Invalid argument");
 			throw new IllegalArgumentException();
 		}
@@ -575,10 +580,10 @@ public class WSdb {
 		if (c.getCount()>0){
 			Log.e("db.deleteCategory", 
 			"cannot delete category if items of this category exist");
-			
+			c.close();
 			return false;
 		}
-		
+		c.close();
 		//delete the category
 		int affected = db.delete(CategoryConst.TBL_NAME,
 				       CategoryConst.ID + "=" + catId, null);		

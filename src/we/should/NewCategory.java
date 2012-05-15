@@ -11,10 +11,10 @@ import we.should.list.Field;
 import we.should.list.FieldType;
 import we.should.list.GenericCategory;
 import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -33,12 +33,6 @@ public class NewCategory extends Activity {
 	
 	/** The array adapter that backs the list view. **/
 	private FieldAdapter mAdapter;
-	
-	/** The add field button. **/
-	private Button mAddField;
-	
-	/** The save button. **/
-	private Button mSave;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -54,24 +48,26 @@ public class NewCategory extends Activity {
         mAdapter = new FieldAdapter(this, new ArrayList<ProtoField>());
         ListView lv = (ListView) findViewById(R.id.fieldList);
         lv.setAdapter(mAdapter);
-        
-        mAddField = (Button) findViewById(R.id.add);
-        mAddField.setOnClickListener(new View.OnClickListener() {
-
-			public void onClick(View view) {
-				mAdapter.add(new ProtoField());
-			}
-        	
-        });
-        
-        mSave = (Button) findViewById(R.id.save);
-        mSave.setOnClickListener(new View.OnClickListener() {
-
-			public void onClick(View v) {
-				NewCategory.this.save();
-			}
-        	
-        });
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.add_cat_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.save:
+			save();
+			break;
+		case R.id.add:
+			mAdapter.add(new ProtoField());
+			break;
+		}
+		return true;
 	}
 
 	/**
@@ -81,25 +77,16 @@ public class NewCategory extends Activity {
 		List<ProtoField> protoFields = mAdapter.getAll();
 		Set<String> names = new HashSet<String>();
 		
-		int duration = Toast.LENGTH_SHORT;
+		int duration = Toast.LENGTH_LONG;
 		boolean saveable = true;
 		for (ProtoField pf : protoFields) {
 			if (names.contains(pf.name)) {
 				saveable = false;
 				Toast.makeText(this, "Duplicate name: " + pf.name, duration).show();
 			}
-			names.add(pf.name);
-			if (pf.name.equalsIgnoreCase(Field.NAME.getName())) {
+			if (Field.getReservedNames().contains(pf.name.toLowerCase())) {
 				saveable = false;
-				Toast.makeText(this, "Cannot have a field named '" + pf.name + "'", duration).show();
-			}
-			if (pf.name.equalsIgnoreCase(Field.PHONENUMBER.getName())) {
-				saveable = false;
-				Toast.makeText(this, "Cannot have a field named '" + pf.name + "'", duration).show();
-			}
-			if (pf.name.equalsIgnoreCase(Field.ADDRESS.getName())) {
-				saveable = false;
-				Toast.makeText(this, "Cannot have a field named '" + pf.name + "'", duration).show();
+				Toast.makeText(this, "Field name " + pf.name + " is reserved.", duration).show();
 			}
 		}
 		
