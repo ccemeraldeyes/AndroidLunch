@@ -1,9 +1,10 @@
 package we.should.search;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import android.location.Location;
-import android.util.Log;
+
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
@@ -13,6 +14,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.location.Location;
+import android.util.Log;
 
 /**
  * PlaceRequest is the object use for querying on Google Place API.
@@ -107,9 +111,9 @@ public class PlaceRequest {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	private JSONObject executeQuery(String url) throws JSONException, ClientProtocolException, IOException {
+	private JSONObject executeQuery(String url) throws JSONException, ClientProtocolException, IOException, URISyntaxException {
 		HttpClient httpclient = new DefaultHttpClient();
-		HttpGet request = new HttpGet(url);
+		HttpGet request = new HttpGet(new URI(url));
 		ResponseHandler<String> handler = new BasicResponseHandler();
 		String result = httpclient.execute(request, handler);
 		return new JSONObject (result);

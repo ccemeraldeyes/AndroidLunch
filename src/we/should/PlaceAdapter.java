@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class PlaceAdapter extends ArrayAdapter<Place> {
 	
@@ -25,7 +26,7 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 	private List<Place> mPlaces;
 
 	public PlaceAdapter(Context context, List<Place> places) {
-		super(context, sLayoutResourceId, places);
+		super(context, sLayoutResourceId, new ArrayList<Place>(places));
 		mContext = context;
 		mPlaces = places;
 	}
@@ -59,7 +60,6 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 		} else {
 			placeRow.rating.setText("");
 		}
-		
 		return row;
 	}
 	

@@ -75,8 +75,8 @@ public class EditScreen extends Activity {
 		mName.addTextChangedListener(new TextWatcher() {
 
 			public void afterTextChanged(Editable s) {
-				if (s.length() == (mName.getThreshold() - 1)) {
-					setupList();
+				if (s.length() == mName.getThreshold() - 1) {
+					setupList(s.toString());
 				}
 			}
 
@@ -121,7 +121,7 @@ public class EditScreen extends Activity {
 	/**
 	 * Set up the autocomplete list.
 	 */
-	private void setupList() {
+	private void setupList(String constraint) {
 		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		if (location == null) {
@@ -129,7 +129,7 @@ public class EditScreen extends Activity {
 		}
 		List<Place> places;
 		try {
-			places = (new PlaceRequest()).searchByLocation(location, mName.getText().toString());
+			places = (new PlaceRequest()).searchByLocation(location, constraint);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
