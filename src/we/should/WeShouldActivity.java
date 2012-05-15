@@ -21,6 +21,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -112,13 +113,18 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	for (Item item : items) {
     		Set<Address> addrs = item.getAddresses();
     		for(Address addr : addrs) {
-    			int locX = (int) (addr.getLatitude() * 1E6);
-    			int locY = (int) (addr.getLongitude() * 1E6);
-    			GeoPoint placeLocation = new GeoPoint(locX, locY);
-    			OverlayItem overlayItem = new OverlayItem(placeLocation, item.getName(), item.get(Field.ADDRESS));
-    			CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this);
-    			custom.insertPinpoint(overlayItem);
-    			overlayList.add(custom);
+    			try {
+    				int locX = (int) (addr.getLatitude() * 1E6);
+    				int locY = (int) (addr.getLongitude() * 1E6);
+        			GeoPoint placeLocation = new GeoPoint(locX, locY);
+        			OverlayItem overlayItem = new OverlayItem(placeLocation, item.getName(), item.get(Field.ADDRESS));
+        			CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this);
+        			custom.insertPinpoint(overlayItem);
+        			overlayList.add(custom);
+    			} catch (IllegalStateException ex) {
+    				Log.v("UPDATEMAPVIEW", item.getName() + "'s address doesn't have lat or lng value");
+    			}
+
     		}
     	}
 	}
