@@ -1,8 +1,10 @@
 package we.should.search;
-import org.json.JSONException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONObject;
 
-import android.util.Log;
+import we.should.list.Field;
 
 
 /**
@@ -17,19 +19,15 @@ import android.util.Log;
  */
 public class DetailPlace extends Place{
 	private String phoneNumber, website, url, address, international_phoneNumber;
+	
 	public DetailPlace(JSONObject obj) {
 		super(obj);
-		try {
-			phoneNumber = obj.getString("formatted_phone_number");
-			website = obj.getString("website");
-			url = obj.getString("url");
-			address = obj.getString("formatted_address");
-			international_phoneNumber = obj.getString("international_phone_number");
-			isValid = true;
-		} catch (JSONException e) {
-			Log.v(PlaceRequest.LOG_KEY, "fail to parse to DetailPlace");
-			isValid = false;
-		}	
+		phoneNumber = obj.optString("formatted_phone_number", null);
+		website = obj.optString("website", null);
+		url = obj.optString("url", null);
+		address = obj.optString("formatted_address", null);
+		international_phoneNumber = obj.optString("international_phone_number", null);
+		isValid = true;
 	}
 	
 	/**
@@ -67,5 +65,17 @@ public class DetailPlace extends Place{
 	 */
 	public String getAddress() {
 		return address;
-	}	
+	}
+
+	/**
+	 * Returns the fields of this DetailPlace as a field map.
+	 * @return see above you loony
+	 */
+	public Map<Field, String> asFieldMap() {
+		Map<Field, String> map = new HashMap<Field, String>();
+		map.put(Field.ADDRESS, getAddress());
+		map.put(Field.WEBSITE, getWebSite());
+		map.put(Field.PHONENUMBER, getLocalPhoneNumber());
+		return map;
+	}
 }

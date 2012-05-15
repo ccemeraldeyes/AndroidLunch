@@ -1,5 +1,6 @@
 package we.should;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,19 +30,10 @@ public class EditAdapter extends ArrayAdapter<Field> {
 	private Map<Field, String> mData;
 
 	public EditAdapter(Context context, List<Field> fields, Map<Field, String> data) {
-		super(context, R.layout.edit_row_textline);
+		super(context, R.layout.edit_row_textline, new ArrayList<Field>(fields));
 		mInflater = ((Activity) context).getLayoutInflater();
 		mFields = fields;
 		mData = data;
-	}
-	
-	public void setFields(Map<Field, String> data) {
-		for (Field f : data.keySet()) {
-			if (mData.containsKey(f)) {
-				mData.put(f, data.get(f));
-			}
-		}
-		notifyDataSetChanged();
 	}
 	
 	@Override
@@ -52,21 +44,6 @@ public class EditAdapter extends ArrayAdapter<Field> {
 	@Override
 	public int getViewTypeCount() {
 		return FieldType.size;
-	}
-	
-	@Override
-	public int getCount() {
-		return mFields.size();
-	}
-	
-	@Override
-	public Field getItem(int position) {
-		return mFields.get(position);
-	}
-	
-	@Override
-	public long getItemId(int position) {
-		return position;
 	}
 	
 	@Override
