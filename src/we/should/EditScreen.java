@@ -24,6 +24,9 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Patterns;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -40,9 +43,6 @@ public class EditScreen extends Activity {
 	
 	/** The data associated with each field. **/
 	private Map<Field, String> mData;
-	
-	/** The save button. **/
-	private Button mSave;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -71,13 +71,22 @@ public class EditScreen extends Activity {
 		mFieldListView = (ListView) findViewById(R.id.fieldList);
 		List<Field> fields = mItem.getCategory().getFields();
 		mFieldListView.setAdapter(new EditAdapter(this, fields, mData));
-		
-		mSave = (Button) findViewById(R.id.save);
-		mSave.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				EditScreen.this.save();
-			}
-		});
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.edit_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.save:
+			save();
+		}
+		return true;
 	}
 	
 	/**

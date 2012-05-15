@@ -34,6 +34,14 @@ public class CustomPinPoint extends ItemizedOverlay{
 	}
 	
 	@Override
+	protected boolean onTap(int index) {
+		OverlayItem overlay = pinpoints.get(index);
+		
+		
+		return super.onTap(index);
+	}
+
+	@Override
 	public int size() {
 		return pinpoints.size();
 	}
