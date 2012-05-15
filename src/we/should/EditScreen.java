@@ -128,6 +128,9 @@ public class EditScreen extends Activity {
 	 * Set up the autocomplete list.
 	 */
 	private void setupList(String constraint) {
+		if (!mItem.getFields().contains(Field.ADDRESS)) {
+			return;
+		}
 		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		if (location == null) {
