@@ -143,8 +143,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		if (mCategories.size() == 0) {
 			mCategories.put(MOVIES.getName(), MOVIES);
 			mCategories.put(RESTAURANTS.getName(), RESTAURANTS);
+			mCategories.put(REFERRALS.getName(), REFERRALS);
 			MOVIES.save();
 			RESTAURANTS.save();
+			REFERRALS.save();
 		}
 
         mTabHost.setup();
