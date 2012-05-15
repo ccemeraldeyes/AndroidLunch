@@ -39,10 +39,11 @@ public abstract class Category {
 	/**
 	 * Creates a new abstract Category with the given name.
 	 * @param name - name of this category
+	 *
 	 */
 	protected Category(String name, Context ctx){
 		if(name == null) this.name = "";
-		else this.name = name;
+		else this.name = name.substring(0, 31).trim();//enforces length
 		this.fields = new LinkedList<Field>();
 		this.color = Category.DEFAULT_COLOR;
 		this.ctx = ctx;

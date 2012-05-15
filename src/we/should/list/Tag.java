@@ -26,7 +26,7 @@ public class Tag {
 	 */
 	public Tag(int id, String tag, String color){
 		this.id = id;
-		this.tag = tag;
+		this.tag = tag.substring(0,31).trim();
 		this.color = color;
 	}
 	/**
