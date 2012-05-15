@@ -13,9 +13,11 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.URLUtil;
 import android.widget.ArrayAdapter;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * ViewAdapters handle displaying the generic fields for ViewScreen.
@@ -121,8 +123,14 @@ public class ViewAdapter extends ArrayAdapter<Field> {
 			convertView.setOnClickListener(new View.OnClickListener() {
 				/** Go to the web site. **/
 				public void onClick(View v) {
+					String url = ((TextView) finalHolder.value).getText().toString();
+					if (!URLUtil.isValidUrl(url)) {
+						Toast.makeText(mContext, url + " is not a valid URL",
+								Toast.LENGTH_LONG).show();
+						return;
+					}
 					Intent intent = new Intent(Intent.ACTION_VIEW);
-					intent.setData(Uri.parse(((TextView) finalHolder.value).getText().toString()));
+					intent.setData(Uri.parse(url));
 					mContext.startActivity(intent);
 				}
 			});
