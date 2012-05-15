@@ -7,6 +7,9 @@ import we.should.list.Field;
 import we.should.list.FieldType;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,14 +25,21 @@ import android.widget.TextView;
 
 public class ViewAdapter extends ArrayAdapter<Field> {
 	
+	/** The context to use for our actionable views. **/
+	private Context mContext;
+	
+	/** The inflater to use. **/
 	private LayoutInflater mInflater;
 	
+	/** The fields contained in this Item. **/
 	private List<Field> mFields;
 	
+	/** The raw data of the item. **/
 	private Map<Field, String> mData;
 
 	public ViewAdapter(Context context, List<Field> fields, Map<Field, String> data) {
 		super(context, R.layout.edit_row_textline);
+		mContext = context;
 		mInflater = ((Activity) context).getLayoutInflater();
 		mFields = fields;
 		mData = data;
@@ -67,6 +77,7 @@ public class ViewAdapter extends ArrayAdapter<Field> {
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		Field field = mFields.get(position);
 		ViewHolder holder = null;
 		int type = getItemViewType(position);
 		FieldType enumType = FieldType.get(type);
@@ -92,7 +103,30 @@ public class ViewAdapter extends ArrayAdapter<Field> {
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
-		holder.name.setText(mFields.get(position).getName());
+		holder.name.setText(field.getName());
+		
+		final ViewHolder finalHolder = holder;
+		if (field.equals(Field.PHONENUMBER)) {
+			((TextView) finalHolder.value).setTextColor(Color.BLUE);
+			convertView.setOnClickListener(new View.OnClickListener() {
+				/** Call the phone number. **/
+				public void onClick(View arg0) {
+					String phoneNumber = "tel:" + ((TextView) finalHolder.value).getText();
+					Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(phoneNumber));
+					mContext.startActivity(intent);
+				}
+			});
+		} else if (field.equals(Field.WEBSITE)) {
+			((TextView) finalHolder.value).setTextColor(Color.BLUE);
+			convertView.setOnClickListener(new View.OnClickListener() {
+				/** Go to the web site. **/
+				public void onClick(View v) {
+					Intent intent = new Intent(Intent.ACTION_VIEW);
+					intent.setData(Uri.parse(((TextView) finalHolder.value).getText().toString()));
+					mContext.startActivity(intent);
+				}
+			});
+		}
 		return convertView;
 	}
 	

@@ -21,14 +21,6 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
-        <Button
-            android:id="@+id/call"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="16dip"
-            android:layout_height="16dip"
-            android:layout_marginLeft="4dip"
-            android:background="@drawable/phone_mockup" />
-
     </LinearLayout>
 
     <include
