@@ -11,6 +11,9 @@ import we.should.list.Item;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -24,6 +27,12 @@ import android.widget.TextView;
  */
 
 public class ViewScreen extends Activity {
+	
+	/** Intent key. **/
+	private static final int REFER = 0;
+	
+	/** The category of the item we're viewing. **/
+	private Category mCategory;
 	
 	/** The index of the item we're viewing. **/
 	private int mIndex;
@@ -39,9 +48,6 @@ public class ViewScreen extends Activity {
 	
 	/** The data to display. **/
 	private Map<Field, String> mData;
-	
-	/** The edit button. **/
-	private Button mEdit;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,30 +56,44 @@ public class ViewScreen extends Activity {
 
         Bundle extras = getIntent().getExtras();
 		final String catName = (String) extras.get(WeShouldActivity.CATEGORY);
-		Category cat = Category.getCategory(catName, this);
+		mCategory = Category.getCategory(catName, this);
 		
 		((TextView) findViewById(R.id.category)).setText(catName);
 		
 		mIndex = extras.getInt(WeShouldActivity.INDEX);
-		mItem = cat.getItems().get(mIndex);
+		mItem = mCategory.getItems().get(mIndex);
 
         mCall = (Button) findViewById(R.id.call);
         update();
-        
-        mEdit = (Button) findViewById(R.id.edit);
-        mEdit.setOnClickListener(new View.OnClickListener() {
-        	public void onClick(View v) {
-        		Intent intent = new Intent(getApplicationContext(), EditScreen.class);
-        		intent.putExtra(WeShouldActivity.CATEGORY, catName);
-        		intent.putExtra(WeShouldActivity.INDEX, mIndex);
-        		startActivityForResult(intent, WeShouldActivity.EDIT_ITEM);
-        	}
-        });
     }
 	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		update();
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.view_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.refer:
+    		Intent intent = new Intent(getApplicationContext(), ReferDialog.class);
+    		startActivityForResult(intent, REFER);
+			break;
+		case R.id.edit:
+    		intent = new Intent(getApplicationContext(), EditScreen.class);
+    		intent.putExtra(WeShouldActivity.CATEGORY, mCategory.getName());
+    		intent.putExtra(WeShouldActivity.INDEX, mIndex);
+    		startActivityForResult(intent, ActivityKey.EDIT_ITEM.ordinal());
+			break;
+		}
+		return true;
 	}
 	
 	/**
