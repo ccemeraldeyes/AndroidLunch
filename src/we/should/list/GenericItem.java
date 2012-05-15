@@ -175,7 +175,7 @@ public class GenericItem extends Item {
 			JSONArray out = new JSONArray(tags);
 			for(int i = 0; i < out.length(); i++){
 				JSONObject tagString = out.getJSONObject(i);
-				result.add(new Tag(tagString.getInt(Tag.idKey), tagString.getString(Tag.tagKey)));
+				result.add(new Tag(tagString));
 			}
 		} catch (JSONException e) {
 			Log.e("GenericItem.getTags", "Tags string improperly formatted, returning empty set!");
@@ -183,10 +183,10 @@ public class GenericItem extends Item {
 		return result;
 	}
 	@Override
-	public void addTag(String s) {
+	public void addTag(String tag, String color) {
 		Set<Tag> tags = this.getTags();
-		if (!tags.contains(new Tag(0,s))){
-			tags.add(new Tag(0, s));
+		if (!tags.contains(new Tag(0,tag, color))){
+			tags.add(new Tag(0, tag, color));
 			JSONArray newTags = tagsToJSON(tags);
 			values.put(Field.TAGS, newTags.toString());
 		}
@@ -216,10 +216,9 @@ public class GenericItem extends Item {
 	private JSONArray tagsToJSON(Set<Tag> tags){
 		JSONArray newTags = new JSONArray();
 		for(Tag tag : tags){
-			JSONObject tagString = new JSONObject();
+			JSONObject tagString;
 			try {
-				tagString.put(Tag.idKey, tag.getId());
-				tagString.put(Tag.tagKey, tag.toString());
+				tagString = tag.toJSON();
 			} catch (JSONException e) {
 				Log.e("GenericItem.addTag", "JSON exception when attempting to add tag.");
 				return new JSONArray();

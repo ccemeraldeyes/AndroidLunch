@@ -3,6 +3,9 @@ package we.should.list;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import we.should.database.WSdb;
 import android.content.Context;
 import android.database.Cursor;
@@ -10,18 +13,35 @@ import android.database.Cursor;
 public class Tag {
 	protected static String idKey = "id";
 	protected static String tagKey = "tag";
+	protected static String colorKey = "color";
 	
 	private int id;
 	private String tag;
+	private String color;
 	
 	/**
 	 * Creates a new tag object with the given name and DB id
 	 * @param id
 	 * @param tag
 	 */
-	public Tag(int id, String tag){
+	public Tag(int id, String tag, String color){
 		this.id = id;
 		this.tag = tag;
+		this.color = color;
+	}
+	/**
+	 * 
+	 * @param o
+	 */
+	protected Tag(JSONObject o){
+		try {
+			this.id = o.getInt(idKey);
+			this.color = o.getString(colorKey);
+			this.tag = o.getString(tagKey);
+		} catch (JSONException e) {
+			throw new IllegalArgumentException("JSON object parameter improperlly formed!");
+		}
+		
 	}
 	/**
 	 * Returns the name of this tag
@@ -58,9 +78,10 @@ public class Tag {
 		db.open();
 		Cursor tags = db.getAllTags();
 		while(tags.moveToNext()){
+			String color = tags.getString(2);
 			String tag = tags.getString(1);
 			int id = tags.getInt(0);
-			out.add(new Tag(id, tag));
+			out.add(new Tag(id, tag, color));
 		}
 		tags.close(); //TS
 		db.close(); //TS
@@ -79,5 +100,14 @@ public class Tag {
 	public int hashCode(){
 		return this.tag.hashCode();
 	}
-
+	public JSONObject toJSON() throws JSONException {
+		JSONObject tagString = new JSONObject();
+		tagString.put(Tag.idKey, this.getId());
+		tagString.put(Tag.tagKey, this.toString());
+		tagString.put(Tag.colorKey, this.getColor());
+		return tagString;
+	}
+	public String getColor() {
+		return this.color;
+	}
 }

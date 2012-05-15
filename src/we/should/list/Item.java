@@ -145,7 +145,7 @@ public abstract class Item {
 	 * existing tag, it will not be added
 	 * @param s is the tag to be added
 	 */
-	public abstract void addTag(String s);
+	public abstract void addTag(String tag, String color);
 	
 	/**
 	 * Returns the set of Items that have the given tag
