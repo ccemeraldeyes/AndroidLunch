@@ -6,6 +6,8 @@ import java.util.List;
 import we.should.list.FieldType;
 import android.app.Activity;
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,21 +65,21 @@ public class FieldAdapter extends ArrayAdapter<FieldAdapter.ProtoField> {
 			protoRow = (ProtoFieldView) row.getTag();
 		}
 		
-		ProtoField pf = getItem(position);
+		final ProtoField pf = getItem(position);
 		protoRow.name.setText(pf.name);
 		protoRow.type.setSelection(pf.type);
-		protoRow.name.setTag(pf);
-		protoRow.type.setTag(pf);
-		protoRow.removeField.setTag(pf);
 		
-		protoRow.name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+		protoRow.name.addTextChangedListener(new TextWatcher() {
 
-			public void onFocusChange(View v, boolean hasFocus) {
-				if (!hasFocus) {
-					ProtoField pf = (ProtoField) v.getTag();
-					pf.name = ((EditText) v).getText().toString();
-				}
+			public void afterTextChanged(Editable s) {
+				pf.name = s.toString();
 			}
+
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {}
+
+			public void onTextChanged(CharSequence s, int start, int before,
+					int count) {}
 			
 		});
 		
@@ -85,21 +87,16 @@ public class FieldAdapter extends ArrayAdapter<FieldAdapter.ProtoField> {
 
 			public void onItemSelected(AdapterView<?> parent, View view,
 					int pos, long id) {
-				ProtoField pf = (ProtoField) parent.getTag();
 				pf.type = pos;
 			}
 
-			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void onNothingSelected(AdapterView<?> arg0) {}
 			
 		});
 		
 		protoRow.removeField.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View v) {
-				ProtoField pf = (ProtoField) v.getTag();
 				FieldAdapter.this.remove(pf);
 			}
 			
