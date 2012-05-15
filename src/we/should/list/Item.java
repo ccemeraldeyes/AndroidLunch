@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.io.Serializable;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -33,7 +32,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import we.should.database.WSdb;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;

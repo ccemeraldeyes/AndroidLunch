@@ -1,8 +1,8 @@
 package we.should.list;
 
-import java.util.*;
-
-import we.should.list.FieldType;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 /**
  * 
  * @author Davis Shepherd

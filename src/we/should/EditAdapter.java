@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
  * EditAdapter adapts a field into an editable view for use in the edit screen.

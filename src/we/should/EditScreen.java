@@ -75,16 +75,22 @@ public class EditScreen extends Activity {
 		mName.addTextChangedListener(new TextWatcher() {
 
 			public void afterTextChanged(Editable s) {
-				if (s.length() == mName.getThreshold() - 1) {
-					setupList(s.toString());
-				}
+//				if (s.length() == mName.getThreshold() - 1) {
+//					setupList(s.toString());
+//				}
 			}
 
 			public void beforeTextChanged(CharSequence s, int start,
 					int count, int after) {}
 
 			public void onTextChanged(CharSequence s, int start, int before,
-					int count) {}
+					int count) {
+				int orig = s.length() - count + before;
+				if ((s.length() >= mName.getThreshold())
+						&& orig < mName.getThreshold()) {
+					setupList(s.toString());
+				}
+			}
 			
 		});
 		mName.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -127,14 +133,13 @@ public class EditScreen extends Activity {
 		if (location == null) {
 			return;
 		}
-		List<Place> places;
 		try {
-			places = (new PlaceRequest()).searchByLocation(location, constraint);
+			List<Place> places = (new PlaceRequest()).searchByLocation(location, constraint);
+			mName.setAdapter(new PlaceAdapter(this, places));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
 		}
-		mName.setAdapter(new PlaceAdapter(this, places));
 	}
 	
 	/**

@@ -16,6 +16,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.location.Location;
+import android.net.Uri;
 import android.util.Log;
 
 /**
@@ -33,8 +34,9 @@ public class PlaceRequest {
 	 * Currently it will search for any Place with type University or Restaurant, or Movie_rental, or movie_theater, or cafe, or bar.
 	 */
 	private static String keyString = "AIzaSyDb2H4C8ztSgKJtlxx5jheMHjV_vIrIxAA";
-	private static final String PLACES_SEARCH_URL =  "https://maps.googleapis.com/maps/api/place/search/json?";
-	private static final String PLACES_DETAIL_SEARCH = "https://maps.googleapis.com/maps/api/place/details/json?";
+	private static final String SCHEME = "https";
+	private static final String PLACES_SEARCH_URL =  "//maps.googleapis.com/maps/api/place/search/json?";
+	private static final String PLACES_DETAIL_SEARCH = "//maps.googleapis.com/maps/api/place/details/json?";
 	public static final String LOG_KEY = "WeShould.search";
 	public PlaceRequest() {
 	}
@@ -54,8 +56,8 @@ public class PlaceRequest {
 			throw new IllegalArgumentException("Location is null");
 		}
 		Log.v(LOG_KEY, "Start SearchByLocation");
-		String url = buildURLForGooglePlaces(l, searchname);
-		try {		
+		try {
+			URI url = buildURLForGooglePlaces(l, searchname);
 			JSONObject obj = executeQuery(url);
 			//make sure status is okay before we get the results
 			if(obj.getString("status").equals("OK")) {			
@@ -87,8 +89,8 @@ public class PlaceRequest {
 	 * @return DetailPlace if success, null if fail
 	 */
 	public DetailPlace searchPlaceDetail(String reference) {
-		String url = buildURLForDetailPlace(reference);
 		try {		
+			URI url = buildURLForDetailPlace(reference);
 			JSONObject obj = executeQuery(url);
 			if(obj.getString("status").equals("OK")) {	
 				//making a new DetailPlace
@@ -111,9 +113,9 @@ public class PlaceRequest {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	private JSONObject executeQuery(String url) throws JSONException, ClientProtocolException, IOException, URISyntaxException {
+	private JSONObject executeQuery(URI url) throws JSONException, ClientProtocolException, IOException, URISyntaxException {
 		HttpClient httpclient = new DefaultHttpClient();
-		HttpGet request = new HttpGet(new URI(url));
+		HttpGet request = new HttpGet(url);
 		ResponseHandler<String> handler = new BasicResponseHandler();
 		String result = httpclient.execute(request, handler);
 		return new JSONObject (result);
@@ -128,8 +130,9 @@ public class PlaceRequest {
 	 * searchName is filter such that only places contains the exactly searchName in its name will be return
 	 * 
 	 * @return url for the searchByLocation query
+	 * @throws URISyntaxException 
 	 */
-    private String buildURLForGooglePlaces(Location myLocation, String searchName){
+    private URI buildURLForGooglePlaces(Location myLocation, String searchName) throws URISyntaxException{
         String baseUrl = PLACES_SEARCH_URL;
         String lat = String.valueOf(myLocation.getLatitude());
         String lon = String.valueOf(myLocation.getLongitude());
@@ -137,18 +140,18 @@ public class PlaceRequest {
                      "rankby=distance" + "&" + "sensor=false" +
                      "&" + "name=" + searchName +
                      "&" + "key=" + keyString;
-        return url;
+        return new URI(SCHEME, url, null);
     }
     
     /*
      * @param referenceString - the reference obtain by Place Object which get it by performing a searchByLocation query
      * @return url for the placeDetail query
      */
-    private String buildURLForDetailPlace(String referenceString) {
+    private URI buildURLForDetailPlace(String referenceString) throws URISyntaxException {
     	String baseUrl = PLACES_DETAIL_SEARCH;
     	String reference = referenceString;
     	String url = baseUrl + "reference=" + reference
     			+ "&" + "sensor=true" + "&" + "key=" + keyString;
-    	return url;
+    	return new URI(SCHEME, url, null);
     }
 }
