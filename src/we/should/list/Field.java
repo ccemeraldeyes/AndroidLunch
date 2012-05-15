@@ -1,8 +1,8 @@
 package we.should.list;
 
-import java.util.*;
-
-import we.should.list.FieldType;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 /**
  * 
  * @author Davis Shepherd
@@ -13,6 +13,7 @@ import we.should.list.FieldType;
 public class Field {
 	
 	public static final Field NAME = new Field("name", FieldType.TextField);
+	public static final Field WEBSITE = new Field("website", FieldType.TextField);
 	public static final Field PHONENUMBER = new Field("phone number", FieldType.PhoneNumber);
 	public static final Field ADDRESS = new Field("address", FieldType.MultilineTextField);
 	public static final Field RATING = new Field("rating", FieldType.Rating);
@@ -78,6 +79,7 @@ public class Field {
 	public static List<Field> getDefaultFields(){
 		List<Field> out = new LinkedList<Field>();
 		out.add(NAME);
+		out.add(WEBSITE);
 		out.add(PHONENUMBER);
 		out.add(ADDRESS);
 		out.add(RATING);
@@ -91,10 +93,27 @@ public class Field {
 	public static List<Field> getMovieFields(){
 		List<Field> out = new LinkedList<Field>();
 		out.add(NAME);
+		out.add(WEBSITE);
 		out.add(RATING);
 		out.add(COMMENT);
 		return out;
 	}
+	
+	/**
+	 * Returns a list of fields with reserved names.
+	 * @return a list of fields that have special behavior
+	 */
+	public static List<String> getReservedNames() {
+		List<String> list = new ArrayList<String>();
+		list.add(NAME.getName().toLowerCase());
+		list.add(WEBSITE.getName().toLowerCase());
+		list.add(PHONENUMBER.getName().toLowerCase());
+		list.add(ADDRESS.getName().toLowerCase());
+		list.add(COMMENT.getName().toLowerCase());
+		list.add(TAGS.getName().toLowerCase());
+		return list;
+	}
+	
 	/**
 	 * @ param other object to which the comparison is made
 	 * @ return true if the name and type of other is equal to this

@@ -28,9 +28,6 @@ import android.widget.TextView;
 
 public class ViewScreen extends Activity {
 	
-	/** Intent key. **/
-	private static final int REFER = 0;
-	
 	/** The category of the item we're viewing. **/
 	private Category mCategory;
 	
@@ -84,7 +81,9 @@ public class ViewScreen extends Activity {
 		switch (item.getItemId()) {
 		case R.id.refer:
     		Intent intent = new Intent(getApplicationContext(), ReferDialog.class);
-    		startActivityForResult(intent, REFER);
+    		intent.putExtra(WeShouldActivity.CATEGORY, mCategory.getName());
+    		intent.putExtra(WeShouldActivity.INDEX, mIndex);
+    		startActivityForResult(intent, ActivityKey.REFER.ordinal());
 			break;
 		case R.id.edit:
     		intent = new Intent(getApplicationContext(), EditScreen.class);

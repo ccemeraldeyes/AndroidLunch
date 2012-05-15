@@ -1,9 +1,10 @@
 package we.should.search;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import android.location.Location;
-import android.util.Log;
+
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
@@ -13,6 +14,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.location.Location;
+import android.net.Uri;
+import android.util.Log;
 
 /**
  * PlaceRequest is the object use for querying on Google Place API.
@@ -28,9 +33,10 @@ public class PlaceRequest {
 	 * 
 	 * Currently it will search for any Place with type University or Restaurant, or Movie_rental, or movie_theater, or cafe, or bar.
 	 */
-	private static String keyString = "APIKEY HERE";
-	private static final String PLACES_SEARCH_URL =  "https://maps.googleapis.com/maps/api/place/search/json?";
-	private static final String PLACES_DETAIL_SEARCH = "https://maps.googleapis.com/maps/api/place/details/json?";
+	private static String keyString = "AIzaSyDb2H4C8ztSgKJtlxx5jheMHjV_vIrIxAA";
+	private static final String SCHEME = "https";
+	private static final String PLACES_SEARCH_URL =  "//maps.googleapis.com/maps/api/place/search/json?";
+	private static final String PLACES_DETAIL_SEARCH = "//maps.googleapis.com/maps/api/place/details/json?";
 	public static final String LOG_KEY = "WeShould.search";
 	public PlaceRequest() {
 	}
@@ -50,8 +56,8 @@ public class PlaceRequest {
 			throw new IllegalArgumentException("Location is null");
 		}
 		Log.v(LOG_KEY, "Start SearchByLocation");
-		String url = buildURLForGooglePlaces(l, searchname);
-		try {		
+		try {
+			URI url = buildURLForGooglePlaces(l, searchname);
 			JSONObject obj = executeQuery(url);
 			//make sure status is okay before we get the results
 			if(obj.getString("status").equals("OK")) {			
@@ -83,8 +89,8 @@ public class PlaceRequest {
 	 * @return DetailPlace if success, null if fail
 	 */
 	public DetailPlace searchPlaceDetail(String reference) {
-		String url = buildURLForDetailPlace(reference);
 		try {		
+			URI url = buildURLForDetailPlace(reference);
 			JSONObject obj = executeQuery(url);
 			if(obj.getString("status").equals("OK")) {	
 				//making a new DetailPlace
@@ -107,7 +113,7 @@ public class PlaceRequest {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	private JSONObject executeQuery(String url) throws JSONException, ClientProtocolException, IOException {
+	private JSONObject executeQuery(URI url) throws JSONException, ClientProtocolException, IOException, URISyntaxException {
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpGet request = new HttpGet(url);
 		ResponseHandler<String> handler = new BasicResponseHandler();
@@ -116,21 +122,17 @@ public class PlaceRequest {
 	}
 	
 
-	/* 
+	/** 
 	 * Build the url for the searchByLocation query
 	 * 
 	 * @param myLocation - given the location to search
-	 * @param meters - the radius to search within, maximum is 50000
 	 * @param searchName - the name to filter the results 
 	 * searchName is filter such that only places contains the exactly searchName in its name will be return
 	 * 
 	 * @return url for the searchByLocation query
+	 * @throws URISyntaxException 
 	 */
-    private String buildURLForGooglePlaces(Location myLocation, String searchName){
-//    	String types = searchTypes[0];
-//    	for(int i = 1; i < searchTypes.length; i++) {
-//    		types += "%7C" + searchTypes[i];
-//    	}
+    private URI buildURLForGooglePlaces(Location myLocation, String searchName) throws URISyntaxException{
         String baseUrl = PLACES_SEARCH_URL;
         String lat = String.valueOf(myLocation.getLatitude());
         String lon = String.valueOf(myLocation.getLongitude());
@@ -138,18 +140,18 @@ public class PlaceRequest {
                      "rankby=distance" + "&" + "sensor=false" +
                      "&" + "name=" + searchName +
                      "&" + "key=" + keyString;
-        return url;
+        return new URI(SCHEME, url, null);
     }
     
     /*
      * @param referenceString - the reference obtain by Place Object which get it by performing a searchByLocation query
      * @return url for the placeDetail query
      */
-    private String buildURLForDetailPlace(String referenceString) {
+    private URI buildURLForDetailPlace(String referenceString) throws URISyntaxException {
     	String baseUrl = PLACES_DETAIL_SEARCH;
     	String reference = referenceString;
     	String url = baseUrl + "reference=" + reference
     			+ "&" + "sensor=true" + "&" + "key=" + keyString;
-    	return url;
+    	return new URI(SCHEME, url, null);
     }
 }
