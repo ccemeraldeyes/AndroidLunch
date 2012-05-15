@@ -154,13 +154,13 @@ public class EditScreen extends Activity {
 		for (Field f : mData.keySet()) {
 			mItem.set(f, mData.get(f));
 		}
+		mItem.set(Field.NAME, mName.getText().toString());
 		
 		if (mItem.getName() == null || mItem.getName().equals("")) {
 			Toast.makeText(this, "Please enter a name.", Toast.LENGTH_SHORT).show();
 			return;
 		}
 		
-		mItem.set(Field.NAME, mName.getText().toString());
 		mItem.save();
 		finish();
 	}
