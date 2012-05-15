@@ -55,6 +55,11 @@
             android:windowSoftInputMode="adjustPan" >
         </activity>
         
+        <activity
+            android:name=".ReferDialog"
+            android:label="@string/app_name" >
+        </activity>
+        
     </application>
 
 </manifest>

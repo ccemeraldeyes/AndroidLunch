@@ -56,12 +56,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	public static final String CATEGORY = "CATEGORY";
 	public static final String INDEX = "INDEX";
 	
-	/** Activity keys. **/
-	public static final int NEW_CAT = 0;
-	public static final int NEW_ITEM = 1;
-	public static final int VIEW_ITEM = 2;
-	public static final int EDIT_ITEM = 3;
-	
 	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
 
@@ -200,7 +194,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			mMenuIDs.put(i, mCategories.get(s));
 			i++;
 		}
-		return super.onCreateOptionsMenu(menu);
+		return super.onPrepareOptionsMenu(menu);
 	}
 	
 	@Override
@@ -212,7 +206,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			break;
 		case R.id.add_cat:
 			intent = new Intent(this, NewCategory.class);
-			startActivityForResult(intent, NEW_CAT);
+			startActivityForResult(intent, ActivityKey.NEW_CAT.ordinal());
 			break;
 		}
 		
@@ -222,7 +216,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			Intent intent = new Intent(this, EditScreen.class);
 			intent.putExtra(CATEGORY, cat.getName());
 			intent.putExtra(INDEX, -1);
-			startActivityForResult(intent, NEW_ITEM);
+			startActivityForResult(intent, ActivityKey.NEW_ITEM.ordinal());
 		}
 		return true;
 	}
@@ -272,7 +266,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
 					intent.putExtra(CATEGORY, item.getCategory().getName());
 					intent.putExtra(INDEX, position);
-					startActivityForResult(intent, VIEW_ITEM);
+					startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 			    }
 			  });
 			
