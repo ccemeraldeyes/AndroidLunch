@@ -74,8 +74,13 @@ public class ViewScreen extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.help:
+			Intent intent = new Intent(this, HelpScreen.class);
+			intent.putExtra(WeShouldActivity.HELP_TEXT, R.string.help_text);
+			startActivity(intent);
+			break;
 		case R.id.refer:
-    		Intent intent = new Intent(getApplicationContext(), ReferDialog.class);
+    		intent = new Intent(getApplicationContext(), ReferDialog.class);
     		intent.putExtra(WeShouldActivity.CATEGORY, mCategory.getName());
     		intent.putExtra(WeShouldActivity.INDEX, mIndex);
     		startActivityForResult(intent, ActivityKey.REFER.ordinal());

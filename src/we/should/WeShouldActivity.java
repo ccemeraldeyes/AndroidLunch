@@ -52,6 +52,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/** Bundle keys. **/
 	public static final String CATEGORY = "CATEGORY";
 	public static final String INDEX = "INDEX";
+	public static final String HELP_TEXT = "HELP_TEXT";
 	
 	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
@@ -199,6 +200,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		switch (item.getItemId()) {
 		case R.id.help:
 			Intent intent = new Intent(this, HelpScreen.class);
+			intent.putExtra(HELP_TEXT, R.string.help_home);
 			startActivity(intent);
 			break;
 		case R.id.add_cat:
