@@ -37,9 +37,6 @@ public class ViewScreen extends Activity {
 	/** The item we're viewing. **/
 	private Item mItem;
 	
-	/** The call button. **/
-	private Button mCall;
-	
 	/** The list of fields. **/
 	private ListView mFieldListView;
 	
@@ -59,8 +56,6 @@ public class ViewScreen extends Activity {
 		
 		mIndex = extras.getInt(WeShouldActivity.INDEX);
 		mItem = mCategory.getItems().get(mIndex);
-
-        mCall = (Button) findViewById(R.id.call);
         update();
     }
 	
@@ -79,8 +74,13 @@ public class ViewScreen extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.help:
+			Intent intent = new Intent(this, HelpScreen.class);
+			intent.putExtra(WeShouldActivity.HELP_TEXT, R.string.help_text);
+			startActivity(intent);
+			break;
 		case R.id.refer:
-    		Intent intent = new Intent(getApplicationContext(), ReferDialog.class);
+    		intent = new Intent(getApplicationContext(), ReferDialog.class);
     		intent.putExtra(WeShouldActivity.CATEGORY, mCategory.getName());
     		intent.putExtra(WeShouldActivity.INDEX, mIndex);
     		startActivityForResult(intent, ActivityKey.REFER.ordinal());
@@ -103,10 +103,6 @@ public class ViewScreen extends Activity {
 		mItem = cat.getItems().get(mIndex);
 		
 		((TextView) findViewById(R.id.name)).setText(mItem.getName());
-		
-        if (mItem.getPhoneNo() == null || mItem.getPhoneNo().equals("")) {
-        	mCall.setVisibility(View.GONE);
-        }
         
         mData = new HashMap<Field, String>();
         for (Field f : mItem.getCategory().getFields()) {

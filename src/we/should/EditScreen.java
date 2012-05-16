@@ -27,6 +27,7 @@ import we.should.search.Place;
 import we.should.search.PlaceRequest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -136,6 +137,11 @@ public class EditScreen extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.help:
+			Intent intent = new Intent(this, HelpScreen.class);
+			intent.putExtra(WeShouldActivity.HELP_TEXT, R.string.help_edit);
+			startActivity(intent);
+			break;
 		case R.id.save:
 			save();
 		}
@@ -146,6 +152,9 @@ public class EditScreen extends Activity {
 	 * Set up the autocomplete list.
 	 */
 	private void setupList(String constraint) {
+		if (!mItem.getFields().contains(Field.ADDRESS)) {
+			return;
+		}
 		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 		if (location == null) {

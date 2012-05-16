@@ -32,17 +32,18 @@ public abstract class Category {
 	protected final String name;	
 	protected Context ctx = null;
 	protected int id;
-	protected String color; //test value
+	protected String color = DEFAULT_COLOR; //test value
 	protected List<Field> fields;
 
 	
 	/**
 	 * Creates a new abstract Category with the given name.
 	 * @param name - name of this category
+	 *
 	 */
 	protected Category(String name, Context ctx){
 		if(name == null) this.name = "";
-		else this.name = name;
+		else this.name = name.substring(0,Math.min(name.length(), 32)).trim();;//enforces length
 		this.fields = new LinkedList<Field>();
 		this.color = Category.DEFAULT_COLOR;
 		this.ctx = ctx;

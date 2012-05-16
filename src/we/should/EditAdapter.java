@@ -8,6 +8,8 @@ import we.should.list.Field;
 import we.should.list.FieldType;
 import android.app.Activity;
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,24 +88,30 @@ public class EditAdapter extends ArrayAdapter<Field> {
 		case TextField:
 		case MultilineTextField:
 		case PhoneNumber:
-			((TextView) view).setText(mData.get(field));
-			view.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+			TextView tv = (TextView) view;
+			tv.setText(mData.get(field));
+			tv.addTextChangedListener(new TextWatcher() {
 
-				public void onFocusChange(View view, boolean hasFocus) {
-					if (!hasFocus) {
-						mData.put(field, ((TextView) view).getText().toString());
-					}
+				public void afterTextChanged(Editable s) {
+					mData.put(field, s.toString());
 				}
+
+				public void beforeTextChanged(CharSequence s, int start,
+						int count, int after) {}
+
+				public void onTextChanged(CharSequence s, int start,
+						int before, int count) {}
 				
 			});
 			break;
 		case Rating:
+			RatingBar rb = (RatingBar) view;
 			if (mData.get(field).equals("")) {
-				((RatingBar) view).setRating(0.0f);
+				rb.setRating(0.0f);
 			} else {
-				((RatingBar) view).setRating(Float.parseFloat(mData.get(field)));
+				rb.setRating(Float.parseFloat(mData.get(field)));
 			}
-			((RatingBar) view).setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+			rb.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
 
 				public void onRatingChanged(RatingBar ratingBar, float rating,
 						boolean fromUser) {

@@ -23,7 +23,6 @@ import android.util.Log;
 //TODO: InsertItem...make itemid,tagid a key or unique, sql will enforce
 //TODO: inserts return ID or 0 if fail... verify returns line#=ID
 //TODO: question... should I remove categoryID from update?
-//TODO: validate colorID? id > 0 or >=0???
 
 public class WSdb {
 	private SQLiteDatabase db; 
@@ -131,20 +130,20 @@ public class WSdb {
 	 * @exception SQLiteConstraintException if insert violates constraints
 	 * @exception IllegalArgumentException if argument format invalid
 	 */
-	public long insertCategory(String name, int colorID, String schema)
+	public long insertCategory(String name, String color, String schema)
 			throws IllegalArgumentException, SQLiteConstraintException{
 		
 		//TODO: verify colorID?
-		Log.v("InsertCategory", "arguments-- " + name + ", " + colorID + ", " + schema);
+		Log.v("InsertCategory", "arguments-- " + name + ", " + color + ", " + schema);
 		
 		//check arguments for null and empty strings
-		if (hasNoChars(name) || name.length() > 32 || hasNoChars(schema)){
+		if (hasNoChars(name) || hasNoChars(color) || hasNoChars(schema)){
 			Log.e("db.insertCategory","argument format error");
 			throw new IllegalArgumentException ();
 		}
 		ContentValues newTaskValue = new ContentValues();
 		newTaskValue.put(CategoryConst.NAME, name);
-		newTaskValue.put(CategoryConst.COLOR, colorID);
+		newTaskValue.put(CategoryConst.COLOR, color);
 		newTaskValue.put(CategoryConst.SCHEMA, schema);
 		
 		return db.insertOrThrow(CategoryConst.TBL_NAME, null, newTaskValue);
@@ -159,18 +158,19 @@ public class WSdb {
 	 * @exception SQLiteConstraintException if insert violates constraints
 	 * @exception IllegalArgumentException if argument format invalid
 	 */
-	public long insertTag(String name)
+	public long insertTag(String name, String color)
 			throws IllegalArgumentException, SQLiteConstraintException{
 		
 		Log.v("WSdb.insertTag","inserting tag" + name);
 		
 		// check argument for null or empty string
-		if(hasNoChars(name) || name.length() > 32){
+		if(hasNoChars(name) || hasNoChars(color)){
 			Log.e("db.insertTag","argument (name) is empty or greter than 32 characters");
 			throw new IllegalArgumentException();
 		}
 		ContentValues newTaskValue = new ContentValues();
 		newTaskValue.put(TagConst.NAME, name);
+		newTaskValue.put(TagConst.COLOR, color);
 		
 		return db.insertOrThrow(TagConst.TBL_NAME, null, newTaskValue);
 	}
@@ -436,21 +436,21 @@ public class WSdb {
 	 * @exception SQLiteConstraintException if insert violates constraints
 	 * @exception IllegalArgumentException if argument format invalid
 	 */
-	public boolean updateCategory(int catID, String name, int colorID, String schema) 
+	public boolean updateCategory(int catID, String name, String color, String schema) 
 					throws IllegalArgumentException, SQLiteConstraintException{
 
-		Log.v("DB.updateCategory","update category categoryId=" + 
+		Log.v("DB.updateCategory","update category categoryID=" + 
 		          catID);
 
 		// check arguments for valid format
-		if (hasNoChars(name) || name.length() > 32 || colorID < 1 || hasNoChars(schema)){
+		if (hasNoChars(name) || hasNoChars(color) || hasNoChars(schema)){
 			Log.e("db.updateCategory","Invalid Argument format");
 			throw new IllegalArgumentException();
 		}	
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(CategoryConst.NAME, name);
-		updateValue.put(CategoryConst.COLOR, colorID);
+		updateValue.put(CategoryConst.COLOR, color);
 		updateValue.put(CategoryConst.SCHEMA, schema);
 		String whereClause=CategoryConst.ID + "=" + catID;
 		
@@ -475,18 +475,19 @@ public class WSdb {
 	 * @param tagID id of tag to update
 	 * @param newName new name of tag - maximum length of 32 characters
 	 */
-	public boolean updateTag(int tagID, String newName)
+	public boolean updateTag(int tagID, String newName, String color)
 			throws IllegalArgumentException, SQLiteConstraintException{
 
 		Log.v("DB.updateTag","update tagId=" + tagID);
 		
-		if (hasNoChars(newName) || newName.length() > 32 || tagID<1){
+		if (hasNoChars(newName) || hasNoChars(color) || tagID<1){
 			Log.e("db.updateTag","Invalid argument");
 			throw new IllegalArgumentException();
 		}
 		int affected=0;
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(TagConst.NAME, newName);
+		updateValue.put(TagConst.COLOR, color);
 		String whereClause=TagConst.ID + "=" + tagID;
 		db.beginTransaction();
 		affected = db.updateWithOnConflict(TagConst.TBL_NAME, updateValue, whereClause, null,SQLiteDatabase.CONFLICT_ROLLBACK);
@@ -671,12 +672,12 @@ public class WSdb {
 	public void fillTables(){
 		try {
 			Log.v("WSdb.fillTables","enter test data");
-	        insertCategory("Cat 1", 1, "schema for cat 1");
-	        insertCategory("cat 2", 1, "schema for cat 2");
+	        insertCategory("Cat 1", "abc123", "schema for cat 1");
+	        insertCategory("cat 2", "abc123", "schema for cat 2");
 		    insertItem("Itemname1", 2, "DATA here");
 	        insertItem("Itemname2", 1, "DATA2 here");    
-	        insertTag("tag1");
-	        insertTag("tag2");
+	        insertTag("tag1", "abc123");
+	        insertTag("tag2", "abc123");
 	        insertItem_Tag(1,2);
 	        insertItem_Tag(1,1);
 		} catch (Exception e) {

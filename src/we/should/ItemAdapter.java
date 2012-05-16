@@ -16,14 +16,11 @@ public class ItemAdapter extends ArrayAdapter<Item> {
 	private int mLayoutResourceId;
 	
 	private Context mContext;
-	
-	private List<Item> mData;
 
 	public ItemAdapter(Context context, List<Item> data) {
 		super(context, R.layout.item_row, data);
 		mLayoutResourceId = R.layout.item_row;
 		mContext = context;
-		mData = data;
 	}
 
 	@Override
@@ -43,7 +40,7 @@ public class ItemAdapter extends ArrayAdapter<Item> {
 			itemRow = (ItemRow) row.getTag();
 		}
 		
-		Item item = mData.get(position);
+		Item item = getItem(position);
 		itemRow.name.setText(item.getName());
 		itemRow.comment.setText(item.getComment());
 		

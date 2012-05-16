@@ -37,13 +37,13 @@ import android.util.Log;
 
 public class GenericItem extends Item {
 	
-	private final Category c;
+	protected Category c;
 		
 	protected GenericItem(Category c, Context ctx) {
 		super(ctx);
 		this.c = c;
 		values = new HashMap<Field, String>();
-		List<Field> fields = c.getFields();
+		List<Field> fields = this.getFields();
 		for(Field i : fields){
 			values.put(i, "");
 		}
@@ -58,29 +58,32 @@ public class GenericItem extends Item {
 				assert (c.getItems().contains(this));
 			else
 				assert (!c.getItems().contains(this));
-			assert (new HashSet<Field>(c.getFields()).equals(values.keySet()));
+			assert (new HashSet<Field>(this.getFields()).equals(values.keySet()));
 		}
 	}
 	@Override
 	public Set<Address> getAddresses() {
 		List<Address> out = new LinkedList<Address>();
 		boolean err = (ctx == null);
-		if (!err) {
-			Geocoder g = new Geocoder(ctx, Locale.US);
-			String address = this.get(Field.ADDRESS);
-			try {
-				out = g.getFromLocationName(address, 1);
-			} catch (IOException e) {
-				Log.w("GenericItem.getAdresses", "Server error. Could not fetch geo data.");
-				err = true;
+		String address = this.values.get(Field.ADDRESS);
+		if (address != null) {
+			if (!err) {
+				Geocoder g = new Geocoder(ctx, Locale.US);
+				try {
+					out = g.getFromLocationName(address, 1);
+				} catch (IOException e) {
+					Log.w("GenericItem.getAdresses",
+							"Server error. Could not fetch geo data.");
+					err = true;
+				}
 			}
-		} 
-		if(err) {
-			String addStr = this.get(Field.ADDRESS);
-			Address a = new Address(Locale.US);
-			a.setAddressLine(0, addStr);
-			out.add(a);
-			Log.w("GenericItem.getAdresses", "Context is null, so no geo data can be loaded.");
+			if (err) {
+				Address a = new Address(Locale.US);
+				a.setAddressLine(0, address);
+				out.add(a);
+				Log.w("GenericItem.getAdresses",
+						"Context is null, so no geo data can be loaded.");
+			}
 		}
 		return new HashSet<Address>(out);
 
@@ -94,6 +97,18 @@ public class GenericItem extends Item {
 	@Override
 	public void delete() {
 		c.removeItem(this);
+		if(this.id != 0){
+			if(this.ctx != null){
+				WSdb db = new WSdb(ctx);
+				db.open();
+				db.deleteItem(this.id);
+				db.close();
+			} else {
+				Log.w("Item.save()", "This item has no context. Item cannot be deleted from database.");
+			}
+		} else {
+			Log.w("Item.save()", "This item has not been saved. Item cannot be deleted to database.");
+		}
 	}
 
 	@Override
@@ -101,7 +116,7 @@ public class GenericItem extends Item {
 		if(key.equals(Field.TAGS)){
 			throw new IllegalArgumentException("Use the getTags() method to access the tags of this.");
 		}
-		if(c.getFields().contains(key)) {
+		if(this.getFields().contains(key)) {
 			return values.get(key);
 		} else {
 			throw new IllegalArgumentException(key.toString() + " is not a field of the " + c.getName() + " category.");
@@ -123,7 +138,7 @@ public class GenericItem extends Item {
 		if(key.equals(Field.TAGS)){
 			throw new IllegalArgumentException(Field.TAGS + " cannot be set with this method!");
 		}
-		if(c.getFields().contains(key)){
+		if(this.getFields().contains(key)){
 			values.put(key, value);
 		} else {
 			throw new IllegalArgumentException(key.toString() + " is not a field of the " + c.getName() + " category.");
@@ -142,7 +157,11 @@ public class GenericItem extends Item {
 			this.c.addItem(this);
 			this.added = true;
 		}
-		if(ctx != null){
+		if(ctx == null) {
+			Log.w("GenericItem.save()", "Item not be saved to database because context is null");
+		} else if(this.c.id == 0) {
+			Log.w("GenericItem.save()", "Item cannot be saved to Databse, because its category hasn't been saved to the database");
+		} else {
 			WSdb db = new WSdb(ctx);
 			db.open();
 			saveTagsToDB(db);
@@ -155,8 +174,6 @@ public class GenericItem extends Item {
 			}
 			updateTagLinks(db);
 			db.close();
-		} else {
-			Log.w("GenericItem.save()", "Item not be saved to Database because context is null");
 		}
 		checkRep();
 	}
@@ -170,7 +187,7 @@ public class GenericItem extends Item {
 			JSONArray out = new JSONArray(tags);
 			for(int i = 0; i < out.length(); i++){
 				JSONObject tagString = out.getJSONObject(i);
-				result.add(new Tag(tagString.getInt(Tag.idKey), tagString.getString(Tag.tagKey)));
+				result.add(new Tag(tagString));
 			}
 		} catch (JSONException e) {
 			Log.e("GenericItem.getTags", "Tags string improperly formatted, returning empty set!");
@@ -178,10 +195,10 @@ public class GenericItem extends Item {
 		return result;
 	}
 	@Override
-	public void addTag(String s) {
+	public void addTag(String tag, String color) {
 		Set<Tag> tags = this.getTags();
-		if (!tags.contains(new Tag(0,s))){
-			tags.add(new Tag(0, s));
+		if (!tags.contains(new Tag(0,tag, color))){
+			tags.add(new Tag(0, tag, color));
 			JSONArray newTags = tagsToJSON(tags);
 			values.put(Field.TAGS, newTags.toString());
 		}
@@ -192,7 +209,7 @@ public class GenericItem extends Item {
 		for(Tag t : thisTags) {
 			int tagID;
 			if (!dbTags.contains(t)) {
-				tagID = (int) db.insertTag(t.toString());				
+				tagID = (int) db.insertTag(t.toString(), "abc123");//TODO: tags include colors				
 			} else {
 				tagID = dbTags.get(dbTags.indexOf(t)).getId();
 			}
@@ -211,10 +228,9 @@ public class GenericItem extends Item {
 	private JSONArray tagsToJSON(Set<Tag> tags){
 		JSONArray newTags = new JSONArray();
 		for(Tag tag : tags){
-			JSONObject tagString = new JSONObject();
+			JSONObject tagString;
 			try {
-				tagString.put(Tag.idKey, tag.getId());
-				tagString.put(Tag.tagKey, tag.toString());
+				tagString = tag.toJSON();
 			} catch (JSONException e) {
 				Log.e("GenericItem.addTag", "JSON exception when attempting to add tag.");
 				return new JSONArray();
@@ -247,6 +263,10 @@ public class GenericItem extends Item {
 	}
 	public String toString(){
 		return this.getName();
+	}
+	@Override
+	public List<Field> getFields() {
+		return this.c.getFields();
 	}
 
 }

@@ -46,7 +46,7 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 			
 			placeRow = new PlaceRow();
 			placeRow.name = (TextView) row.findViewById(R.id.name);
-			placeRow.rating = (TextView) row.findViewById(R.id.rating);
+			placeRow.vicinity = (TextView) row.findViewById(R.id.vicinity);
 			row.setTag(placeRow);
 		} else {
 			placeRow = (PlaceRow) row.getTag();
@@ -54,17 +54,13 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 		
 		Place place = mPlaces.get(position);
 		placeRow.name.setText(place.getName());
-		if (place.getRating() > 0) {
-			placeRow.rating.setText("Rating: " + place.getRating());
-		} else {
-			placeRow.rating.setText("");
-		}
+		placeRow.vicinity.setText(place.getVicinity());
 		return row;
 	}
 	
 	private static class PlaceRow {
 		TextView name;
-		TextView rating;
+		TextView vicinity;
 	}
 	
 	private class PlaceFilter extends Filter {

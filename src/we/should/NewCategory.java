@@ -11,6 +11,7 @@ import we.should.list.Field;
 import we.should.list.FieldType;
 import we.should.list.GenericCategory;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -60,6 +61,11 @@ public class NewCategory extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.help:
+			Intent intent = new Intent(this, HelpScreen.class);
+			intent.putExtra(WeShouldActivity.HELP_TEXT, R.string.help_add);
+			startActivity(intent);
+			break;
 		case R.id.save:
 			save();
 			break;

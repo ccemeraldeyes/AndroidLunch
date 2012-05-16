@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,6 +54,22 @@ public abstract class Item {
 	 */
 	public abstract Set<android.location.Address> getAddresses();
 	
+//	/**
+//	 * Adds an address to this item. Processes the string and translates
+//	 * to a lat and long.
+//	 * @param add string representation of an address
+//	 * @return true if lookup is successful, false otherwise
+//	 * @modifies this.addresses if lookup is successful
+//	 */
+//	public abstract boolean addAddress(String add);
+//	
+//	/**
+//	 * Adds a pre-validated address to this
+//	 * @param add Address object representation of an address
+//	 * @return add.hasLatitude && add.hasLongitude
+//	 * @modifies this.addresses if add.hasLatitude && add.hasLongitude
+//	 */
+//	public abstract boolean addAddress(android.location.Address add);
 	/**
 	 * 
 	 * @return the comment field of this. If the comment has not been
@@ -69,8 +86,14 @@ public abstract class Item {
 	/**
 	 * Returns the category of this item
 	 * @return the category object associated with this item.
-	 */
+	 */	
 	public abstract Category getCategory();
+	/**
+	 * Returns the fields that this item has
+	 * @return a list of Field objects.
+	 */
+	public abstract List<Field> getFields();
+
 	/**
 	 * Returns the value contained in the given field, only if the given field is
 	 * part of this items category, otherwise throws illegal argument exception.
@@ -122,7 +145,7 @@ public abstract class Item {
 	 * existing tag, it will not be added
 	 * @param s is the tag to be added
 	 */
-	public abstract void addTag(String s);
+	public abstract void addTag(String tag, String color);
 	
 	/**
 	 * Returns the set of Items that have the given tag
@@ -144,7 +167,6 @@ public abstract class Item {
 		while(items.moveToNext()){
 			int id = items.getInt(0);
 			int catId = items.getInt(2);
-			
 			if (!cats.containsKey(catId)) {
 				Cursor c = db.getCategory(catId);
 				c.moveToNext();
@@ -188,7 +210,8 @@ public abstract class Item {
 			i.added = true;
 			out.add(i);
 		}
-		items.close(); // TS
+		items.close();
+		db.close();
 		return out;
 	}
 	/**

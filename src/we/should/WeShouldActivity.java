@@ -1,6 +1,7 @@
 package we.should;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,9 +54,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/** Bundle keys. **/
 	public static final String CATEGORY = "CATEGORY";
 	public static final String INDEX = "INDEX";
+	public static final String HELP_TEXT = "HELP_TEXT";
 	
 	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
+	private final Category REFERRALS = new GenericCategory("Referrals", new LinkedList<Field>(), this);
 
 	/** The TabHost that cycles between categories. **/
 	private TabHost mTabHost;
@@ -144,8 +147,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		if (mCategories.size() == 0) {
 			mCategories.put(MOVIES.getName(), MOVIES);
 			mCategories.put(RESTAURANTS.getName(), RESTAURANTS);
+			mCategories.put(REFERRALS.getName(), REFERRALS);
 			MOVIES.save();
 			RESTAURANTS.save();
+			REFERRALS.save();
 		}
 
         mTabHost.setup();
@@ -198,6 +203,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		switch (item.getItemId()) {
 		case R.id.help:
 			Intent intent = new Intent(this, HelpScreen.class);
+			intent.putExtra(HELP_TEXT, R.string.help_home);
 			startActivity(intent);
 			break;
 		case R.id.add_cat:
