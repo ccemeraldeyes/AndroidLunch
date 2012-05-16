@@ -9,7 +9,9 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -38,17 +40,27 @@ public class GetReferralsService extends IntentService {
 		
 		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();
-		HttpPost httppost = new HttpPost("http://23.23.237.174/check-referrals");
+//		HttpPost httppost = new HttpPost("http://23.23.237.174/check-referrals");
 
+	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+	    nameValuePairs.add(new BasicNameValuePair("user_email", username));
+		
+		String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
+		
+		HttpGet httpget = new HttpGet("http://23.23.237.174/check-referrals?"+paramString);
+		
 		try {
 		    // Add your data
-		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-		    nameValuePairs.add(new BasicNameValuePair("user_email", WeShouldActivity.ACCOUNT_NAME));
-		    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-		    // Execute HTTP Post Request
-		    HttpResponse response = httpclient.execute(httppost);
+//		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+//		    nameValuePairs.add(new BasicNameValuePair("user_email", WeShouldActivity.ACCOUNT_NAME));
+//		    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+//
+//		    // Execute HTTP Post Request
+//		    HttpResponse response = httpclient.execute(httppost);
 		    //response.getEntity().
+			
+			HttpResponse response = httpclient.execute(httpget);
+			System.out.println(response.toString());
 		    
 		    Log.v("GETREFERRALSSERVICE", "Checking for new referrals");
 		    

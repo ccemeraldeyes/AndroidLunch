@@ -39,6 +39,9 @@ public class ApproveReferral extends Activity {
 				List<Referral> approvedList = mAdapter.getApprovedList();
 				
 				// save them
+				for(Referral r: approvedList){
+					//save
+				}
 				
 				finish();
 			}

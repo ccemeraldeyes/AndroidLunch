@@ -15,9 +15,11 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
 
 import we.should.list.Category;
 import we.should.list.Field;
@@ -30,6 +32,7 @@ import we.should.search.PlaceRequest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -206,32 +209,39 @@ public class EditScreen extends Activity {
 		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();
 		
-		HttpGet httpget = new HttpGet("http://23.23.237.174/save-item?user_email="+WeShouldActivity.ACCOUNT_NAME);
-		try {
-			httpclient.execute(httpget);
-		} catch (ClientProtocolException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
+		
+//		String querystring = "?user_email="+;
+//		
+//		for (Field f: mData.keySet()){
+//			querystring += "&"+f.getName()+"="+mData.get(f);
+//		}
+	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+	    nameValuePairs.add(new BasicNameValuePair("user_email", settings.getString(WeShouldActivity.ACCOUNT_NAME, "")));
+		for (Field f : mData.keySet()) {
+			nameValuePairs.add(new BasicNameValuePair(f.getName(), mData.get(f)));
 		}
 		
-		HttpPost httppost = new HttpPost("http://23.23.237.174/save-item");
-		httppost.setHeader("Content-type", "application/json");
+		String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
+
+		
+		HttpGet httpget = new HttpGet("http://23.23.237.174/save-item?"+paramString);
+		
+//		HttpPost httppost = new HttpPost("http://23.23.237.174/save-item");
+//		httppost.setHeader("Content-type", "application/json");
 //		httpclient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, " Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6");
 
 		try {
 		    // Add your data
-		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-		    nameValuePairs.add(new BasicNameValuePair("user_email", WeShouldActivity.ACCOUNT_NAME));
-			for (Field f : mData.keySet()) {
-				nameValuePairs.add(new BasicNameValuePair(f.getName(), mData.get(f)));
-			}
-		    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
-		    // Execute HTTP Post Request
-		    HttpResponse response = httpclient.execute(httppost);
+//		    httpget.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+//
+//		    // Execute HTTP Post Request
+//		    HttpResponse response = httpclient.execute(httppost);
+			
+
+			
+			httpclient.execute(httpget);
 		    Log.v("GETREFERRALSSERVICE", "backing up items");
 
 		} catch (ClientProtocolException e) {
