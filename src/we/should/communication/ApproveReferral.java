@@ -12,7 +12,11 @@ import android.widget.ListView;
 
 public class ApproveReferral extends Activity {
 	
-	private Button mButton;
+	/** The button to save approved referrals. **/
+	private Button mSave;
+	
+	/** The adapter that handles our referrals. **/
+	private ReferralAdapter mAdapter;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -23,14 +27,19 @@ public class ApproveReferral extends Activity {
 		List<Referral> list = new ArrayList<Referral>();
 		list.add(new Referral("The Kraken", "Will", false));
 		list.add(new Referral("Reboot", "Troy", false));
-		lv.setAdapter(new ReferralAdapter(this, list));
+		mAdapter = new ReferralAdapter(this, list);
+		lv.setAdapter(mAdapter);
 		
-		mButton = (Button) findViewById(R.id.approve);
-		mButton.setOnClickListener(new View.OnClickListener() {
+		mSave = (Button) findViewById(R.id.save);
+		mSave.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View v) {
 				// get which items are approved from the referraladapter
+				
+				List<Referral> approvedList = mAdapter.getApprovedList();
+				
 				// save them
+				
 				finish();
 			}
 			

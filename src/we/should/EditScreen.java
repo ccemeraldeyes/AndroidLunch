@@ -13,9 +13,11 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.CoreProtocolPNames;
 
 import we.should.list.Category;
 import we.should.list.Field;
@@ -32,6 +34,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.util.Patterns;
 
 import android.text.Editable;
@@ -200,19 +203,23 @@ public class EditScreen extends Activity {
 		
 		mItem.save();
 		
-//		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-//		Account[] accounts = AccountManager.get(getBaseContext()).getAccounts();
-//		String email = "";
-//		for (Account account : accounts) {
-//		    if (emailPattern.matcher(account.name).matches()) {
-//		        email = account.name;
-//		        break;
-//		    }
-//		}
-		
 		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();
+		
+		HttpGet httpget = new HttpGet("http://23.23.237.174/save-item?user_email="+WeShouldActivity.ACCOUNT_NAME);
+		try {
+			httpclient.execute(httpget);
+		} catch (ClientProtocolException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		HttpPost httppost = new HttpPost("http://23.23.237.174/save-item");
+		httppost.setHeader("Content-type", "application/json");
+//		httpclient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, " Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6");
 
 		try {
 		    // Add your data
@@ -225,11 +232,14 @@ public class EditScreen extends Activity {
 
 		    // Execute HTTP Post Request
 		    HttpResponse response = httpclient.execute(httppost);
+		    Log.v("GETREFERRALSSERVICE", "backing up items");
 
 		} catch (ClientProtocolException e) {
 		    // TODO Auto-generated catch block
+			Log.v("GETREFERRALSSERVICE", e.getMessage());
 		} catch (IOException e) {
 		    // TODO Auto-generated catch block
+			Log.v("GETREFERRALSSERVICE", e.getMessage());
 		}
 		
 		

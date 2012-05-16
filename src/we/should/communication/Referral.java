@@ -13,17 +13,33 @@ public class Referral {
 		mSender = sender;
 		mApproved = approved;
 	}
-	
+
+	/**
+	 * @return the name of this referral
+	 */
 	public String getName() {
 		return mName;
 	}
-	
+
+	/**
+	 * @return the email address of the sender
+	 */
 	public String getSender() {
 		return mSender;
 	}
-	
+
+	/**
+	 * @return whether this has been approved for saving
+	 */
 	public boolean isApproved() {
 		return mApproved;
+	}
+
+	/**
+	 * @param approved whether or not to approve this for saving
+	 */
+	public void setApproved(boolean approved) {
+		this.mApproved = approved;
 	}
 
 }
