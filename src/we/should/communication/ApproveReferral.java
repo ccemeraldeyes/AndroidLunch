@@ -29,7 +29,7 @@ public class ApproveReferral extends Activity {
 		mButton.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View v) {
-				// get which items are approved
+				// get which items are approved from the referraladapter
 				// save them
 				finish();
 			}

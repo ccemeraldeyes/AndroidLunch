@@ -96,6 +96,8 @@ public class ReferDialog extends Activity {
 		    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 		    //TODO: get item stuff from db and send that too!
 
+		    
+		    
 		    // Execute HTTP Post Request
 		    HttpResponse response = httpclient.execute(httppost);
 

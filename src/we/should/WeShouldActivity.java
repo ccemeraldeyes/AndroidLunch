@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import we.should.communication.GetReferralsService;
 import we.should.database.WSdb;
 import we.should.list.Category;
 import we.should.list.Field;
@@ -14,6 +15,7 @@ import we.should.list.Movies;
 import we.should.search.CustomPinPoint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Criteria;
@@ -76,6 +78,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         map = (MapView) findViewById(R.id.mapview);

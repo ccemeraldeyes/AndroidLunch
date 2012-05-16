@@ -69,8 +69,7 @@ public class Splash extends Activity {
 		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
 		String accountName = settings.getString(WeShouldActivity.ACCOUNT_NAME, null);
 		if (accountName != null) {
-			Intent openStartingPoint = new Intent("we.should.MAIN");
-			startActivity(openStartingPoint);
+			afterLogin();
 		}
 	}
 	
@@ -84,12 +83,7 @@ public class Splash extends Activity {
 		editor.putString(WeShouldActivity.ACCOUNT_NAME, accountName);
 		editor.commit();
 		
-		Intent service = new Intent(this, GetReferralsService.class);
-		service.putExtra(WeShouldActivity.ACCOUNT_NAME, accountName);
-		startService(service);
-		
-		Intent openStartingPoint = new Intent("we.should.MAIN");
-		startActivity(openStartingPoint);
+
 	}
 	
 	/**
@@ -119,42 +113,15 @@ public class Splash extends Activity {
 		finish();
 	}
 
-	
-	protected boolean checkReferrals(){
-//		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-//		Account[] accounts = AccountManager.get(getBaseContext()).getAccounts();
-//		String emails = "";
-//		for (Account account : accounts) {
-//		    if (emailPattern.matcher(account.name).matches()) {
-//		        emails += account.name+",";
-//		    }
-//		}
+	protected void afterLogin(){
+		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
+		Intent service = new Intent(this, GetReferralsService.class);
+		service.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
+		startService(service);
 		
-		// Create a new HttpClient and Post Header
-		HttpClient httpclient = new DefaultHttpClient();
-		HttpPost httppost = new HttpPost("http://23.23.237.174/check-referrals");
-
-		try {
-		    // Add your data
-		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-		    nameValuePairs.add(new BasicNameValuePair("user_email", WeShouldActivity.ACCOUNT_NAME));
-		    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-		    // Execute HTTP Post Request
-		    HttpResponse response = httpclient.execute(httppost);
-		    
-		    //TODO: check for new referrals. maybe just save new items but flag them?
-		    //then present them for approval to user
-		    //redirect to new page before main
-
-		} catch (ClientProtocolException e) {
-		    // TODO Auto-generated catch block
-		} catch (IOException e) {
-		    // TODO Auto-generated catch block
-		}
-		
-		return false;
-	
+		Intent openStartingPoint = new Intent("we.should.MAIN");
+		startActivity(openStartingPoint);
 	}
+
 	
 }
