@@ -34,7 +34,6 @@ import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.Toast;
-
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
@@ -57,7 +56,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
 	private final Category REFERRALS = new GenericCategory("Referrals", new LinkedList<Field>(), this);
-
+	
+	private static final List<CustomPinPoint> lstPinPoints = new LinkedList<CustomPinPoint>();
+	
 	/** The TabHost that cycles between categories. **/
 	private TabHost mTabHost;
 	
@@ -89,10 +90,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         updateTabs();        
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
-			
 			public void onTabChanged(String tabId) {
 				updatePins(tabId.trim());
-				
 			}
 		});
         db = new WSdb(this);
@@ -111,8 +110,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     }
 
     protected void updatePins(String name) {
+    	//clear the pin everytime we load a new tab.
+    	for(CustomPinPoint pin : lstPinPoints) {
+    		overlayList.remove(pin);
+    	}
+    	
     	List<Item> items = mCategories.get(name).getItems();
-		Drawable customPin = getResources().getDrawable(R.drawable.restaurant); //default for now.
+		Drawable customPin = getResources().getDrawable(R.drawable.google_place); //default for now.
     	for (Item item : items) {
     		Set<Address> addrs = item.getAddresses();
     		for(Address addr : addrs) {
@@ -123,6 +127,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         			OverlayItem overlayItem = new OverlayItem(placeLocation, item.getName(), item.get(Field.ADDRESS));
         			CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this);
         			custom.insertPinpoint(overlayItem);
+        			lstPinPoints.add(custom);
         			overlayList.add(custom);
     			} catch (IllegalStateException ex) {
     				Log.v("UPDATEMAPVIEW", item.getName() + "'s address doesn't have lat or lng value");

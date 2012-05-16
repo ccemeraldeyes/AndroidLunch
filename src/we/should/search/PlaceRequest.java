@@ -16,7 +16,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.location.Location;
-import android.net.Uri;
 import android.util.Log;
 
 /**
@@ -106,7 +105,7 @@ public class PlaceRequest {
 	}
 	
 	
-	/*
+	/**
 	 * @param url - the url to execute.
 	 * @return a JSONObject from Google Place API
 	 * @throws JSONException
@@ -143,7 +142,7 @@ public class PlaceRequest {
         return new URI(SCHEME, url, null);
     }
     
-    /*
+    /**
      * @param referenceString - the reference obtain by Place Object which get it by performing a searchByLocation query
      * @return url for the placeDetail query
      */
