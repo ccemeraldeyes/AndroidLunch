@@ -23,7 +23,6 @@ import android.util.Log;
 //TODO: InsertItem...make itemid,tagid a key or unique, sql will enforce
 //TODO: inserts return ID or 0 if fail... verify returns line#=ID
 //TODO: question... should I remove categoryID from update?
-//TODO: validate colorID? id > 0 or >=0???
 
 public class WSdb {
 	private SQLiteDatabase db; 
