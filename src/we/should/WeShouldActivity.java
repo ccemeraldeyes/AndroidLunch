@@ -104,7 +104,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         	zoomLocation(location);
         } else {
         	Toast.makeText(WeShouldActivity.this, 
-        			"Couldn''t get provider", Toast.LENGTH_SHORT).show();
+        			"Couldn't get provider", Toast.LENGTH_SHORT).show();
         }
         map.postInvalidate();    
     }
