@@ -53,8 +53,13 @@ public class SetTags extends Activity {
 		List<String> list = new ArrayList<String>(mTags.keySet());
 		mTagNames = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
 		
+		List<String> searchList = new ArrayList<String>();
+		for (Tag t : Tag.getTags(this)) {
+			searchList.add(t.toString());
+		}
 		mTagSearch = (AutoCompleteTextView) findViewById(R.id.name);
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_list_item_1, searchList);
 		mTagSearch.setAdapter(adapter);
 		
 		mAdd = (Button) findViewById(R.id.add);
@@ -72,7 +77,7 @@ public class SetTags extends Activity {
 						String name = mTagSearch.getText().toString();
 						String color = colors[which];
 						mTags.put(name, color);
-						mTagNames.add(name + "-" + color);
+						mTagNames.add(name);
 						mTagSearch.setText("");
 					}
 				});

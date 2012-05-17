@@ -159,8 +159,10 @@ public class EditScreen extends Activity {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (ActivityKey.get(requestCode)) {
 		case SET_TAGS:
-			mTags = (Set<Tag>) data.getSerializableExtra(WeShouldActivity.TAGS);
-			mTagsView.setText(Tag.getFormatted(mTags));
+			if (resultCode == RESULT_OK) {
+				mTags = (Set<Tag>) data.getSerializableExtra(WeShouldActivity.TAGS);
+				mTagsView.setText(Tag.getFormatted(mTags));
+			}
 			break;
 		}
 	}
