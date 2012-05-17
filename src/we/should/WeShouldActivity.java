@@ -1,7 +1,7 @@
 package we.should;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +34,7 @@ import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.Toast;
+
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
@@ -52,12 +53,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	public static final String CATEGORY = "CATEGORY";
 	public static final String INDEX = "INDEX";
 	public static final String HELP_TEXT = "HELP_TEXT";
+	public static final String TAGS = "TAGS";
 	
 	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
-	private final Category REFERRALS = new GenericCategory("Referrals", new LinkedList<Field>(), this);
+	private final Category REFERRALS = new GenericCategory("Referrals", new ArrayList<Field>(), this);
 	
-	private static final List<CustomPinPoint> lstPinPoints = new LinkedList<CustomPinPoint>();
+	private static final List<CustomPinPoint> lstPinPoints = new ArrayList<CustomPinPoint>();
 	
 	/** The TabHost that cycles between categories. **/
 	private TabHost mTabHost;
@@ -193,9 +195,12 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		mMenuIDs = new HashMap<Integer, Category>();
 		int i = Menu.FIRST;
 		for (String s : mCategories.keySet()) {
-			addMenu.add(R.id.add_item, i, i, s);
-			mMenuIDs.put(i, mCategories.get(s));
-			i++;
+			Category cat = mCategories.get(s);
+//			if (cat.canAdd()) {
+				addMenu.add(R.id.add_item, i, i, s);
+				mMenuIDs.put(i, cat);
+				i++;
+//			}
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}
