@@ -42,10 +42,8 @@ public class SetTags extends Activity {
 		mTagNames = new ArrayList<String>(mTags.keySet());
 		
 		mTagSearch = (AutoCompleteTextView) findViewById(R.id.name);
-		if (!mTagNames.isEmpty()) {
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
-			mTagSearch.setAdapter(adapter);
-		}
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+		mTagSearch.setAdapter(adapter);
 		
 		mAdd = (Button) findViewById(R.id.add);
 		final String[] colors = new String[Tag.getAllTagColors().size()];
