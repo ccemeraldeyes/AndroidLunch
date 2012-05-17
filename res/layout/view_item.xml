@@ -35,6 +35,12 @@
     
     <include
         layout="@layout/divider" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tags"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
     
     <TextView
         android:id="@+id/tags"

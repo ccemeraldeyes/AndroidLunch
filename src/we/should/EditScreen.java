@@ -1,5 +1,6 @@
 package we.should;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -123,7 +124,7 @@ public class EditScreen extends Activity {
 
 		mTags = new HashSet<Tag>(mItem.getTags());
 		mTagsView = (TextView) findViewById(R.id.tags);
-		mTagsView.setText(Tag.getFormatted(mItem.getTags()));
+		mTagsView.setText(Tag.getFormatted(mTags));
 		mTagsView.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
 				setTags();
@@ -153,12 +154,14 @@ public class EditScreen extends Activity {
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (ActivityKey.get(requestCode)) {
 		case SET_TAGS:
-			Tag[] arrayTags = (Tag[]) data.getSerializableExtra(WeShouldActivity.TAGS);
-			mTags = new HashSet<Tag>(Arrays.asList(arrayTags));
+			mTags = (Set<Tag>) data.getSerializableExtra(WeShouldActivity.TAGS);
+			mTagsView.setText(Tag.getFormatted(mTags));
+			break;
 		}
 	}
 	
@@ -169,7 +172,7 @@ public class EditScreen extends Activity {
 		Intent intent = new Intent(EditScreen.this, SetTags.class);
 		
 		// Why do we have to use .toArray() here?  Because Eclipse sucks.
-		intent.putExtra(WeShouldActivity.TAGS, mTags.toArray());
+		intent.putExtra(WeShouldActivity.TAGS, (Serializable) mTags);
 		startActivityForResult(intent, ActivityKey.SET_TAGS.ordinal());
 	}
 	
