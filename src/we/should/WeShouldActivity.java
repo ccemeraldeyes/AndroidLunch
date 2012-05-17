@@ -196,11 +196,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		int i = Menu.FIRST;
 		for (String s : mCategories.keySet()) {
 			Category cat = mCategories.get(s);
-//			if (cat.canAdd()) {
+			if (!cat.getName().equals(REFERRALS.getName())) {
 				addMenu.add(R.id.add_item, i, i, s);
 				mMenuIDs.put(i, cat);
 				i++;
-//			}
+			}
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}
