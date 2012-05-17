@@ -31,11 +31,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
     </ListView>
-    
-    <TextView 
-        android:id="@id/android:empty"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="No tags set yet" />
 
 </LinearLayout>

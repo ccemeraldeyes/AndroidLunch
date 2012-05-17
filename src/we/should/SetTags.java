@@ -28,7 +28,7 @@ public class SetTags extends Activity {
 	private Map<String, NameColorPair> mTags;
 	
 	/** A list of all of the tag names. **/
-	private List<String> mTagNames;
+	private ArrayAdapter<String> mTagNames;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -39,7 +39,8 @@ public class SetTags extends Activity {
 		for (Tag t : Tag.getTags(this)) {
 			mTags.put(t.toString(), new NameColorPair(t.toString(), t.getColor()));
 		}
-		mTagNames = new ArrayList<String>(mTags.keySet());
+		List<String> list = new ArrayList<String>(mTags.keySet());
+		mTagNames = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
 		
 		mTagSearch = (AutoCompleteTextView) findViewById(R.id.name);
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
@@ -60,6 +61,7 @@ public class SetTags extends Activity {
 						String name = mTagSearch.getText().toString();
 						String color = colors[which];
 						mTags.put(name, new NameColorPair(name, color));
+						mTagNames.add(name + "-" + color);
 						mTagSearch.setText("");
 					}
 				});
@@ -68,8 +70,7 @@ public class SetTags extends Activity {
 		});
 		
 		ListView lv = (ListView) findViewById(R.id.tags_list);
-		lv.setAdapter(new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_1));
+		lv.setAdapter(mTagNames);
 	}
 
 	private static class NameColorPair {
