@@ -11,7 +11,7 @@ import java.util.List;
  * 
  */
 public enum FieldType {
-	TextField, MultilineTextField, PhoneNumber, Rating;
+	TextField, MultilineTextField, PhoneNumber, Rating, CheckBox;
 
 	public static int size = FieldType.values().length;
 

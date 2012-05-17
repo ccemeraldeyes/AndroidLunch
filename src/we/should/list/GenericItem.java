@@ -45,7 +45,11 @@ public class GenericItem extends Item {
 		values = new HashMap<Field, String>();
 		List<Field> fields = this.getFields();
 		for(Field i : fields){
-			values.put(i, "");
+			if (i.getType().equals(FieldType.CheckBox)) {
+				values.put(i, "false");
+			} else {
+				values.put(i, "");
+			}
 		}
 		checkRep();
 	}

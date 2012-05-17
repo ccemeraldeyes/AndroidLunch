@@ -7,6 +7,7 @@ import java.util.Map;
 
 import we.should.list.Category;
 import we.should.list.Field;
+import we.should.list.FieldType;
 import we.should.list.Item;
 import we.should.search.DetailPlace;
 import we.should.search.Place;
@@ -66,7 +67,7 @@ public class EditScreen extends Activity {
 		catDisplay.setText(catName);
 		
 		mData = new HashMap<Field, String>();
-		for (Field f : cat.getFields()) {
+		for (Field f : mItem.getFields()) {
 			mData.put(f, mItem.get(f));
 		}
 		mData.remove(Field.NAME);
@@ -104,7 +105,7 @@ public class EditScreen extends Activity {
 		});
 		
 		mFieldListView = (ListView) findViewById(R.id.fieldList);
-		mFields = new ArrayList<Field>(mItem.getCategory().getFields());
+		mFields = new ArrayList<Field>(mItem.getFields());
 		mFields.remove(Field.NAME);
 		mFieldListView.setAdapter(new EditAdapter(this, mFields, mData));
 	}
@@ -126,6 +127,7 @@ public class EditScreen extends Activity {
 			break;
 		case R.id.save:
 			save();
+			break;
 		}
 		return true;
 	}

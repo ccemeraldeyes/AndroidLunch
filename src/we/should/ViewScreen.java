@@ -105,13 +105,13 @@ public class ViewScreen extends Activity {
 		((TextView) findViewById(R.id.name)).setText(mItem.getName());
         
         mData = new HashMap<Field, String>();
-        for (Field f : mItem.getCategory().getFields()) {
+        for (Field f : mItem.getFields()) {
         	mData.put(f, mItem.get(f));
         }
         mData.remove(Field.NAME);
 		
 		mFieldListView = (ListView) findViewById(R.id.fieldList);
-		List<Field> fields = new ArrayList<Field>(mItem.getCategory().getFields());
+		List<Field> fields = new ArrayList<Field>(mItem.getFields());
 		fields.remove(Field.NAME);
 		mFieldListView.setAdapter(new ViewAdapter(this, fields, mData));
 	}
