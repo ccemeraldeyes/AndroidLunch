@@ -12,6 +12,7 @@ import we.should.list.Field;
 import we.should.list.GenericCategory;
 import we.should.list.Item;
 import we.should.list.Movies;
+import we.should.list.Tag;
 import we.should.search.CustomPinPoint;
 import android.content.Context;
 import android.content.Intent;
@@ -61,11 +62,17 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	
 	private static final List<CustomPinPoint> lstPinPoints = new ArrayList<CustomPinPoint>();
 	
-	/** The TabHost that cycles between categories. **/
+	/** The TabHost that cycles between tabs. **/
 	private TabHost mTabHost;
+	
+	/** How we want to sort said tabs. **/
+	private SortType mSortType;
 	
 	/** A map that maps the name of each category to its in-memory representation. **/
 	private Map<String, Category> mCategories;
+	
+	/** A map that maps the name of each tag to its values. **/
+	private Map<String, Tag> mTags;
 	
 	/** A mapping from id's to categorys, used for submenu creation. **/
 	private Map<Integer, Category> mMenuIDs;
@@ -78,6 +85,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private List<Overlay> overlayList;
 	protected WSdb db;
 	protected String DBFILE;
+	
+	/** An enum describin how we want to group our tabs. **/
+	private static enum SortType {
+		Category, Tag;
+	}
     
     /** Called when the activity is first created. */
     @Override
@@ -90,6 +102,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         overlayList = map.getOverlays();
         
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
+        mSortType = SortType.Category;
         updateTabs();        
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
 			public void onTabChanged(String tabId) {
@@ -118,6 +131,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	}
     	
     	List<Item> items = mCategories.get(name).getItems();
+    	switch (mSortType) {
+    	case Category:
+    		break;
+    	case Tag:
+    		items = new ArrayList<Item>(Item.getItemsOfTag(mTags.get(name), this));
+    		break;
+    	}
 		Drawable customPin = getResources().getDrawable(R.drawable.google_place); //default for now.
     	for (Item item : items) {
     		Set<Address> addrs = item.getAddresses();
@@ -138,11 +158,25 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		}
     	}
 	}
+    
+    /**
+     * Updates the tabs depending on what we want to sort by.
+     */
+    private void updateTabs() {
+    	switch (mSortType) {
+    	case Category:
+    		updateTabsCategory();
+    		break;
+    	case Tag:
+    		updateTabsTag();
+    		break;
+    	}
+    }
 
 	/**
      * Updates the tabs on startup or when categories change.
      */
-	private void updateTabs() {
+	private void updateTabsCategory() {
 		mCategories = new HashMap<String, Category>();
 		Set<Category> categories = Category.getCategories(this);
 		for (Category cat : categories) {
@@ -160,13 +194,34 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         mTabHost.setup();
 		mTabHost.clearAllTabs();
 		TabHost.TabSpec spec;
-        TabPopulator tp = new TabPopulator();
+        CategoryPopulator tp = new CategoryPopulator();
         for (String name : mCategories.keySet()) {
 	        spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ")
 	        		.setContent(tp);
 	        mTabHost.addTab(spec);
         }
         updatePins(mTabHost.getCurrentTabTag().trim());
+	}
+	
+	/**
+	 * Updates the tabs when tags change.
+	 */
+	private void updateTabsTag() {
+		mTags = new HashMap<String, Tag>();
+		List<Tag> tags = Tag.getTags(this);
+		for (Tag tag : tags) {
+			mTags.put(tag.toString(), tag);
+		}
+		mTabHost.setup();
+		mTabHost.clearAllTabs();
+		TabHost.TabSpec spec;
+		TagPopulator tp = new TagPopulator();
+		for (String name : mTags.keySet()) {
+			spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ")
+					.setContent(tp);
+			mTabHost.addTab(spec);
+		}
+		updatePins(mTabHost.getCurrentTabTag().trim());
 	}
 
 	@Override
@@ -255,7 +310,12 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		return false;
 	}
 	
-	private class TabPopulator implements TabContentFactory {
+	/**
+	 * This class populates each tab with items from that tab's category.
+	 * 
+	 * @author Will
+	 */
+	private class CategoryPopulator implements TabContentFactory {
 
 		public View createTabContent(String tag) {
 			ListView lv = new ListView(getApplicationContext());
@@ -278,6 +338,41 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 			    }
 			  });
+			
+			return lv;
+		}
+		
+	}
+	
+	/**
+	 * This class populates each tab with items from that tab's tag.
+	 * 
+	 * @author Will
+	 */
+	private class TagPopulator implements TabContentFactory {
+		
+		public View createTabContent(String name) {
+			Context ctx = getApplicationContext();
+			ListView lv = new ListView(ctx);
+			
+			String cleanedTag = name.trim(); // because we use spaces for formatting
+			Tag tag = Tag.get(ctx, cleanedTag);
+			if (tag == null) {
+				throw new IllegalStateException("Tag not found!?");
+			}
+			
+			final List<Item> itemsList = new ArrayList<Item>(Item.getItemsOfTag(tag, ctx));
+			lv.setAdapter(new ItemAdapter(ctx, itemsList));
+			lv.setOnItemClickListener(new OnItemClickListener() {
+			    public void onItemClick(AdapterView<?> parent, View view,
+			        int position, long id) {
+			    	Item item = itemsList.get(position);
+					Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
+					intent.putExtra(CATEGORY, item.getCategory().getName());
+					intent.putExtra(INDEX, position);
+					startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
+			    }
+			 });
 			
 			return lv;
 		}

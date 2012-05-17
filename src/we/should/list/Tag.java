@@ -152,4 +152,20 @@ public class Tag implements Serializable {
 	public String getColor() {
 		return this.color;
 	}
+	
+	/**
+	 * Returns the tag with the same name as name, or null if no such tag exists.
+	 * @param ctx the Context to use
+	 * @param name the name of the tag to get
+	 * @return the tag called name
+	 */
+	public static Tag get(Context ctx, String name) {
+		List<Tag> list = getTags(ctx);
+		for (Tag tag : list) {
+			if (tag.toString().equals(name)) {
+				return tag;
+			}
+		}
+		return null;
+	}
 }
