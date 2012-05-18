@@ -69,6 +69,7 @@ public class GenericItem extends Item {
 	public Set<Address> getAddresses() {
 		Set<Address> out = new HashSet<Address>();
 		String address = this.values.get(Field.ADDRESS);
+		if (address == null) return out; //return empty set;
 		Address a = JSONToAddress(address);
 		out.add(a);
 		return out;
@@ -95,7 +96,7 @@ public class GenericItem extends Item {
 				Log.w("GenericItem.getAdresses",
 						"Context is null, so no geo data can be loaded.");
 			}
-			return out.get(0);
+			if(out.size() > 0) return out.get(0);
 		}
 		return new Address(DEFAULT_LOCALE);
 		
