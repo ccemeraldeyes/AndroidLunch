@@ -22,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class SetTags extends Activity {
 	
@@ -59,7 +60,7 @@ public class SetTags extends Activity {
 		}
 		mTagSearch = (AutoCompleteTextView) findViewById(R.id.name);
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_1, searchList);
+				R.layout.autocomplete_text_view, searchList);
 		mTagSearch.setAdapter(adapter);
 		
 		mAdd = (Button) findViewById(R.id.add);
@@ -70,11 +71,21 @@ public class SetTags extends Activity {
 		}
 		mAdd.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				final String addName = mTagSearch.getText().toString();
+				for (int i = 0; i < mTagNames.getCount(); i++) {
+					if (mTagNames.getItem(i).equals(addName)) {
+						Toast.makeText(SetTags.this,
+								"This item already contains this tag.",
+								Toast.LENGTH_LONG).show();
+						return;
+					}
+				}
+				
 				AlertDialog.Builder builder = new AlertDialog.Builder(SetTags.this);
 				builder.setTitle("Pick a color");
 				builder.setItems(colors, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
-						String name = mTagSearch.getText().toString();
+						String name = addName;
 						String color = colors[which];
 						mTags.put(name, color);
 						mTagNames.add(name);
