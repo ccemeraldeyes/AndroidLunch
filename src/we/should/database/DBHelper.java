@@ -35,7 +35,9 @@ public class DBHelper extends SQLiteOpenHelper{
 					Item_TagConst.ITEM_ID + " integer references " + 
 					  ItemConst.TBL_NAME + "(" + ItemConst.ID + "), " + 
 					Item_TagConst.TAG_ID + " integer references " + 
-					  TagConst.TBL_NAME + "(" + TagConst.ID +"));";
+					  TagConst.TBL_NAME + "(" + TagConst.ID +"), " +
+					"primary key (" + Item_TagConst.ITEM_ID + 
+					  ", " + Item_TagConst.TAG_ID + "));";
 	
 	private static final String CREATE_TABLE_TAG="create table " + 
 					TagConst.TBL_NAME + " ("+ 
