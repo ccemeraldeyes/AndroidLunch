@@ -130,9 +130,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		overlayList.remove(pin);
     	}
     	
-    	List<Item> items = mCategories.get(name).getItems();
+    	List<Item> items = null;
     	switch (mSortType) {
     	case Category:
+    		items = mCategories.get(name).getItems();
     		break;
     	case Tag:
     		items = new ArrayList<Item>(Item.getItemsOfTag(mTags.get(name), this));
@@ -171,6 +172,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		updateTabsTag();
     		break;
     	}
+    	updatePins(mTabHost.getCurrentTabTag().trim());
     }
 
 	/**
@@ -200,7 +202,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	        		.setContent(tp);
 	        mTabHost.addTab(spec);
         }
-        updatePins(mTabHost.getCurrentTabTag().trim());
 	}
 	
 	/**
@@ -221,7 +222,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					.setContent(tp);
 			mTabHost.addTab(spec);
 		}
-		updatePins(mTabHost.getCurrentTabTag().trim());
 	}
 
 	@Override
@@ -244,6 +244,17 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		menu.clear();
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
+		
+		// Set up the toggle item
+		MenuItem toggle = menu.findItem(R.id.toggle);
+		switch (mSortType) {
+		case Category:
+			toggle.setTitle("Sort by tags");
+			break;
+		case Tag:
+			toggle.setTitle("Sort by categories");
+			break;
+		}
 		
 		// Now populate the custom submenu
 		SubMenu addMenu = menu.findItem(R.id.add_item).getSubMenu();
@@ -272,6 +283,16 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			intent = new Intent(this, NewCategory.class);
 			startActivityForResult(intent, ActivityKey.NEW_CAT.ordinal());
 			break;
+		case R.id.toggle:
+			switch (mSortType) {
+			case Category:
+				mSortType = SortType.Tag;
+				break;
+			case Tag:
+				mSortType = SortType.Category;
+				break;
+			}
+			updateTabs();
 		}
 		
 		// It's probably in the submenu
@@ -362,7 +383,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			}
 			
 			final List<Item> itemsList = new ArrayList<Item>(Item.getItemsOfTag(tag, ctx));
-			lv.setAdapter(new ItemAdapter(ctx, itemsList));
+			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
 			lv.setOnItemClickListener(new OnItemClickListener() {
 			    public void onItemClick(AdapterView<?> parent, View view,
 			        int position, long id) {
@@ -372,7 +393,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					intent.putExtra(INDEX, position);
 					startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 			    }
-			 });
+			  });
 			
 			return lv;
 		}
