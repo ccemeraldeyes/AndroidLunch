@@ -286,7 +286,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		case R.id.toggle:
 			switch (mSortType) {
 			case Category:
-				mSortType = SortType.Tag;
+				if (Tag.getTags(this).size() > 0) {
+					mSortType = SortType.Tag;
+				} else {
+					Toast.makeText(this, "There are currently no tags", Toast.LENGTH_LONG).show();
+				}
 				break;
 			case Tag:
 				mSortType = SortType.Category;
