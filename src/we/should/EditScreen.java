@@ -206,7 +206,7 @@ public class EditScreen extends Activity {
 		DetailPlace detailPlace = (new PlaceRequest()).searchPlaceDetail(place.getReference());
 		Map<Field, String> fieldMap = detailPlace.asFieldMap();
 		for (Field f : fieldMap.keySet()) {
-			if (fieldMap.get(f) != null && !fieldMap.get(f).equals("")) {
+			if (fieldMap.get(f) != null) {
 				mData.put(f, fieldMap.get(f));
 			}
 		}
