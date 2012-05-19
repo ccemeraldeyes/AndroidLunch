@@ -1,7 +1,7 @@
 package we.should;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +13,7 @@ import we.should.list.Field;
 import we.should.list.GenericCategory;
 import we.should.list.Item;
 import we.should.list.Movies;
+import we.should.list.Tag;
 import we.should.search.CustomPinPoint;
 import android.content.Context;
 import android.content.Intent;
@@ -55,16 +56,25 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	public static final String CATEGORY = "CATEGORY";
 	public static final String INDEX = "INDEX";
 	public static final String HELP_TEXT = "HELP_TEXT";
+	public static final String TAGS = "TAGS";
 	
 	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
-	private final Category REFERRALS = new GenericCategory("Referrals", new LinkedList<Field>(), this);
-
-	/** The TabHost that cycles between categories. **/
+	private final Category REFERRALS = new GenericCategory("Referrals", new ArrayList<Field>(), this);
+	
+	private static final List<CustomPinPoint> lstPinPoints = new ArrayList<CustomPinPoint>();
+	
+	/** The TabHost that cycles between tabs. **/
 	private TabHost mTabHost;
+	
+	/** How we want to sort said tabs. **/
+	private SortType mSortType;
 	
 	/** A map that maps the name of each category to its in-memory representation. **/
 	private Map<String, Category> mCategories;
+	
+	/** A map that maps the name of each tag to its values. **/
+	private Map<String, Tag> mTags;
 	
 	/** A mapping from id's to categorys, used for submenu creation. **/
 	private Map<Integer, Category> mMenuIDs;
@@ -77,6 +87,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private List<Overlay> overlayList;
 	protected WSdb db;
 	protected String DBFILE;
+	
+	/** An enum describin how we want to group our tabs. **/
+	private static enum SortType {
+		Category, Tag;
+	}
     
     /** Called when the activity is first created. */
     @Override
@@ -90,12 +105,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         overlayList = map.getOverlays();
         
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
+        mSortType = SortType.Category;
         updateTabs();        
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
-			
 			public void onTabChanged(String tabId) {
 				updatePins(tabId.trim());
-				
 			}
 		});
         db = new WSdb(this);
@@ -108,14 +122,27 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         	zoomLocation(location);
         } else {
         	Toast.makeText(WeShouldActivity.this, 
-        			"Couldn''t get provider", Toast.LENGTH_SHORT).show();
+        			"Couldn't get provider", Toast.LENGTH_SHORT).show();
         }
         map.postInvalidate();    
     }
 
     protected void updatePins(String name) {
-    	List<Item> items = mCategories.get(name).getItems();
-		Drawable customPin = getResources().getDrawable(R.drawable.restaurant); //default for now.
+    	//clear the pin everytime we load a new tab.
+    	for(CustomPinPoint pin : lstPinPoints) {
+    		overlayList.remove(pin);
+    	}
+    	
+    	List<Item> items = null;
+    	switch (mSortType) {
+    	case Category:
+    		items = mCategories.get(name).getItems();
+    		break;
+    	case Tag:
+    		items = new ArrayList<Item>(Item.getItemsOfTag(mTags.get(name), this));
+    		break;
+    	}
+		Drawable customPin = getResources().getDrawable(R.drawable.google_place); //default for now.
     	for (Item item : items) {
     		Set<Address> addrs = item.getAddresses();
     		for(Address addr : addrs) {
@@ -126,6 +153,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         			OverlayItem overlayItem = new OverlayItem(placeLocation, item.getName(), item.get(Field.ADDRESS));
         			CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this);
         			custom.insertPinpoint(overlayItem);
+        			lstPinPoints.add(custom);
         			overlayList.add(custom);
     			} catch (IllegalStateException ex) {
     				Log.v("UPDATEMAPVIEW", item.getName() + "'s address doesn't have lat or lng value");
@@ -134,11 +162,26 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		}
     	}
 	}
+    
+    /**
+     * Updates the tabs depending on what we want to sort by.
+     */
+    private void updateTabs() {
+    	switch (mSortType) {
+    	case Category:
+    		updateTabsCategory();
+    		break;
+    	case Tag:
+    		updateTabsTag();
+    		break;
+    	}
+    	updatePins(mTabHost.getCurrentTabTag().trim());
+    }
 
 	/**
      * Updates the tabs on startup or when categories change.
      */
-	private void updateTabs() {
+	private void updateTabsCategory() {
 		mCategories = new HashMap<String, Category>();
 		Set<Category> categories = Category.getCategories(this);
 		for (Category cat : categories) {
@@ -156,13 +199,32 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         mTabHost.setup();
 		mTabHost.clearAllTabs();
 		TabHost.TabSpec spec;
-        TabPopulator tp = new TabPopulator();
+        CategoryPopulator tp = new CategoryPopulator();
         for (String name : mCategories.keySet()) {
 	        spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ")
 	        		.setContent(tp);
 	        mTabHost.addTab(spec);
         }
-        updatePins(mTabHost.getCurrentTabTag().trim());
+	}
+	
+	/**
+	 * Updates the tabs when tags change.
+	 */
+	private void updateTabsTag() {
+		mTags = new HashMap<String, Tag>();
+		List<Tag> tags = Tag.getTags(this);
+		for (Tag tag : tags) {
+			mTags.put(tag.toString(), tag);
+		}
+		mTabHost.setup();
+		mTabHost.clearAllTabs();
+		TabHost.TabSpec spec;
+		TagPopulator tp = new TagPopulator();
+		for (String name : mTags.keySet()) {
+			spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ")
+					.setContent(tp);
+			mTabHost.addTab(spec);
+		}
 	}
 
 	@Override
@@ -186,14 +248,28 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
 		
+		// Set up the toggle item
+		MenuItem toggle = menu.findItem(R.id.toggle);
+		switch (mSortType) {
+		case Category:
+			toggle.setTitle("Sort by tags");
+			break;
+		case Tag:
+			toggle.setTitle("Sort by categories");
+			break;
+		}
+		
 		// Now populate the custom submenu
 		SubMenu addMenu = menu.findItem(R.id.add_item).getSubMenu();
 		mMenuIDs = new HashMap<Integer, Category>();
 		int i = Menu.FIRST;
 		for (String s : mCategories.keySet()) {
-			addMenu.add(R.id.add_item, i, i, s);
-			mMenuIDs.put(i, mCategories.get(s));
-			i++;
+			Category cat = mCategories.get(s);
+			if (!cat.getName().equals(REFERRALS.getName())) {
+				addMenu.add(R.id.add_item, i, i, s);
+				mMenuIDs.put(i, cat);
+				i++;
+			}
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -210,6 +286,20 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			intent = new Intent(this, NewCategory.class);
 			startActivityForResult(intent, ActivityKey.NEW_CAT.ordinal());
 			break;
+		case R.id.toggle:
+			switch (mSortType) {
+			case Category:
+				if (Tag.getTags(this).size() > 0) {
+					mSortType = SortType.Tag;
+				} else {
+					Toast.makeText(this, "There are currently no tags", Toast.LENGTH_LONG).show();
+				}
+				break;
+			case Tag:
+				mSortType = SortType.Category;
+				break;
+			}
+			updateTabs();
 		}
 		
 		// It's probably in the submenu
@@ -248,7 +338,12 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		return false;
 	}
 	
-	private class TabPopulator implements TabContentFactory {
+	/**
+	 * This class populates each tab with items from that tab's category.
+	 * 
+	 * @author Will
+	 */
+	private class CategoryPopulator implements TabContentFactory {
 
 		public View createTabContent(String tag) {
 			ListView lv = new ListView(getApplicationContext());
@@ -260,6 +355,41 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			}
 			
 			final List<Item> itemsList = cat.getItems();
+			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
+			lv.setOnItemClickListener(new OnItemClickListener() {
+			    public void onItemClick(AdapterView<?> parent, View view,
+			        int position, long id) {
+			    	Item item = itemsList.get(position);
+					Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
+					intent.putExtra(CATEGORY, item.getCategory().getName());
+					intent.putExtra(INDEX, position);
+					startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
+			    }
+			  });
+			
+			return lv;
+		}
+		
+	}
+	
+	/**
+	 * This class populates each tab with items from that tab's tag.
+	 * 
+	 * @author Will
+	 */
+	private class TagPopulator implements TabContentFactory {
+		
+		public View createTabContent(String name) {
+			Context ctx = getApplicationContext();
+			ListView lv = new ListView(ctx);
+			
+			String cleanedTag = name.trim(); // because we use spaces for formatting
+			Tag tag = Tag.get(ctx, cleanedTag);
+			if (tag == null) {
+				throw new IllegalStateException("Tag not found!?");
+			}
+			
+			final List<Item> itemsList = new ArrayList<Item>(Item.getItemsOfTag(tag, ctx));
 			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
 			lv.setOnItemClickListener(new OnItemClickListener() {
 			    public void onItemClick(AdapterView<?> parent, View view,

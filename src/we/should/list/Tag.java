@@ -1,7 +1,12 @@
 package we.should.list;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,7 +15,11 @@ import we.should.database.WSdb;
 import android.content.Context;
 import android.database.Cursor;
 
-public class Tag {
+public class Tag implements Serializable {
+	
+	/** Needed for serialization. **/
+	private static final long serialVersionUID = -2873443189292108185L;
+	
 	protected static String idKey = "id";
 	protected static String tagKey = "tag";
 	protected static String colorKey = "color";
@@ -87,6 +96,39 @@ public class Tag {
 		db.close(); //TS
 		return out;	
 	}
+	
+	/**
+	 * Returns a formatted list of a set of tags.
+	 */
+	public static String getFormatted(Collection<? extends Tag> s) {
+		StringBuilder builder = new StringBuilder();
+	     Iterator<? extends Tag> iter = s.iterator();
+	     while (iter.hasNext()) {
+	         builder.append(iter.next());
+	         if (!iter.hasNext()) {
+	           break;                  
+	         }
+	         builder.append("; ");
+	     }
+	     return builder.toString();
+	}
+	
+	/**
+	 * Returns a map that maps each possible color's human readable name to its
+	 * value.
+	 * 
+	 * @return see above
+	 */
+	public static Map<String, String> getAllTagColors() {
+		Map<String, String> colorMap = new HashMap<String, String>();
+		colorMap.put("Red", "#FF0000");
+		colorMap.put("Green", "#00FF00");
+		colorMap.put("Blue", "#0000FF");
+		colorMap.put("Yellow", "#FFFF00");
+		colorMap.put("Purple", "#FF00FF");
+		colorMap.put("Cyan", "#00FFFF");
+		return colorMap;
+	}
 	/**
 	 * returns true if the names of this and o are the same.
 	 */
@@ -109,5 +151,21 @@ public class Tag {
 	}
 	public String getColor() {
 		return this.color;
+	}
+	
+	/**
+	 * Returns the tag with the same name as name, or null if no such tag exists.
+	 * @param ctx the Context to use
+	 * @param name the name of the tag to get
+	 * @return the tag called name
+	 */
+	public static Tag get(Context ctx, String name) {
+		List<Tag> list = getTags(ctx);
+		for (Tag tag : list) {
+			if (tag.toString().equals(name)) {
+				return tag;
+			}
+		}
+		return null;
 	}
 }

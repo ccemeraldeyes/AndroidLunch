@@ -91,7 +91,6 @@ public abstract class Category {
 	 */
 	public abstract List<Item> getItems();
 	
-	
 	/**
 	 * Returns a new item in this Category. This item is not added until Item.save() is called.
 	 * @return a new Item(C)

@@ -16,7 +16,12 @@ public class ReferralItem extends GenericItem {
 	
 	private List<Field> fields;
 	
-	
+	/**
+	 * Creates a new Referral item with the given fields.
+	 * @param c category in which this will be saved.
+	 * @param fields
+	 * @param ctx
+	 */
 	public ReferralItem(Category c, List<Field> fields, Context ctx) {
 		super(c, ctx);
 		this.fields = fields;
