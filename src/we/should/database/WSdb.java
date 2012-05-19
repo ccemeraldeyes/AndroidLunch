@@ -12,17 +12,12 @@ import android.util.Log;
  * WeShould Database class - contains database methods used in the 
  * 							 WeShould Android Application<br/>
  * 
- * NOTE: Most methods are sending Log verbose output.  Running LogCat 
- * 		 while executing displays information.  See DBexamples.txt for 
- * 		 examples on how to call the methods and parse results.
- * 
  * @author  Troy Schuring
  * 			UW CSE403 SP12
  */
 
-//TODO: InsertItem...make itemid,tagid a key or unique, sql will enforce
 //TODO: inserts return ID or 0 if fail... verify returns line#=ID
-//TODO: question... should I remove categoryID from update?
+//TODO: question... should I remove categoryupdate?
 
 public class WSdb {
 	private SQLiteDatabase db; 
@@ -40,11 +35,6 @@ public class WSdb {
 		context=c;
 		dbhelper = new DBHelper(context, ItemConst.DATABASE_NAME, null, 
 									 ItemConst.DATABASE_VERSION);
-	}
-	
-	//TODO: need this?????
-	public SQLiteDatabase getDB(){
-		return this.db;
 	}
 	
 	
@@ -97,7 +87,7 @@ public class WSdb {
 	 * @param name of Item being entered
 	 * @param categoryId unique id of Item's category
 	 * @param data json code holding item schema & data
-	 * @return row ID of the newly inserted row, or -1 if an error occurred 
+	 * @return row ID of the newly inserted row
 	 * @exception SQLiteConstraintException if insert violates constraints
 	 * @exception IllegalArgumentException if argument format invalid
 	 */
@@ -124,8 +114,8 @@ public class WSdb {
 	 * Insert a category into the database
 	 * 
 	 * @param name of category being entered - maximum length 32 characters
-	 * @param color key id of the color associated with this Category
-	 * @param schema string to identify category schema 
+	 * @param color color associated with this Category
+	 * @param schema json string to identify category schema 
 	 * @return row ID of the newly inserted row
 	 * @exception SQLiteConstraintException if insert violates constraints
 	 * @exception IllegalArgumentException if argument format invalid
@@ -133,7 +123,6 @@ public class WSdb {
 	public long insertCategory(String name, String color, String schema)
 			throws IllegalArgumentException, SQLiteConstraintException{
 		
-		//TODO: verify colorID?
 		Log.v("InsertCategory", "arguments-- " + name + ", " + color + ", " + schema);
 		
 		//check arguments for null and empty strings
@@ -154,6 +143,7 @@ public class WSdb {
 	 * Insert a Tag into the database
 	 * 
 	 * @param name of Tag - maximum length 32 characters
+	 * @param color color to be associated with this tag
 	 * @return row ID of the newly inserted tag
 	 * @exception SQLiteConstraintException if insert violates constraints
 	 * @exception IllegalArgumentException if argument format invalid
@@ -193,13 +183,6 @@ public class WSdb {
 			Log.e("db.insertItem_Tag","invalid id argument");
 			throw new IllegalArgumentException();
 		}
-		
-		//TODO: if I make itemid,tagid a key or unique, sql will enforce this
-		// check to see if item is already tagged with this tag
-		/*if(isItemTagged(itemID, tagID)){
-			Log.e("db.insertItem_Tag","This item_tag already exists");
-			throw new SQLiteConstraintException("This item-tag pair already exists!");
-		}*/
 		
 		ContentValues newTaskValue = new ContentValues();
 		newTaskValue.put(Item_TagConst.ITEM_ID, itemID);
@@ -245,9 +228,6 @@ public class WSdb {
 	 * Get the list of all items ordered by id
 	 * 
 	 * @return cursor to list of all items ordered by id (default)
-	 * 
-	 * SQL query
-	 * select * from item
 	 */
 	public Cursor getAllItems(){
 		return db.query(ItemConst.TBL_NAME, null, null,null, null,
@@ -257,11 +237,9 @@ public class WSdb {
 	/**
 	 * Get the item with id=<code>itemId</code>
 	 * 
+	 * @param itemId key id of item to get
 	 * @return cursor to the list containing item if it exists in the 
 	 * 			database
-	 * 
-	 * SQL query
-	 * select * from item where id=[given id]
 	 */
 	public Cursor getItem(int itemId){
 		String where = ItemConst.ID + "=" + itemId;
@@ -273,9 +251,6 @@ public class WSdb {
 	 * Get the list of all categories ordered by id
 	 * 
 	 * @return cursor to list of all categories ordered by id (default)
-	 * 
-	 * SQL query
-	 * select * from category
 	 */
 	public Cursor getAllCategories(){
 		return db.query(CategoryConst.TBL_NAME, null, null,
@@ -289,9 +264,6 @@ public class WSdb {
 	 * @param catId key id of the category you want to return
 	 * @return cursor to list containing category if it exists in the 
 	 * 			database
-	 * 
-	 * SQL query
-	 * select * from category where id=[given id]
 	 */
 	public Cursor getCategory(int catId){
 		String where=CategoryConst.ID + "=" + catId;
@@ -304,9 +276,6 @@ public class WSdb {
 	 * Get the list of all tags ordered by id
 	 * 
 	 * @return cursor to ordered list of tags
-	 * 
-	 * SQL query
-	 * select * from tag
 	 */
 	public Cursor getAllTags(){
 		return db.query(TagConst.TBL_NAME, null, null, null, null,
@@ -316,11 +285,9 @@ public class WSdb {
 	/**
 	 * Get the tag with id=<code>tagId</code>
 	 * 
+	 * @param tagId key id of tag to get
 	 * @return cursor to the list containing tag if it exists in 
 	 * 			database
-	 * 
-	 * SQL query
-	 * select * from tag where tagid=[given id]
 	 */
 	public Cursor getTag(int tagId){
 		String where = TagConst.ID + "=" + tagId;
@@ -333,11 +300,6 @@ public class WSdb {
 	 * 
 	 * @param taagId key id of the tag of the items to return
 	 * @return cursor to list of all item id# with the given tag
-	 *  
-	 * SQL query
-	 * select * from item_tag, item 
-	 *   where item_tag.tag_id=tagId 
-	 *   and item_tag.item_id = item.id
 	 */
 	public Cursor getItemsOfTag(int tagId){
 		
@@ -358,11 +320,6 @@ public class WSdb {
 	 * 
 	 * @param  itemId id of the item to get all tags of
 	 * @return cursor to list of all tag id# of the given item
-	 *  
-	 * SQL query
-	 * select * from item_tag, tag
-	 *   where item_tag.item_id=itemId
-	 *   and item_tag.tag_id= tag.id
 	 */
 	public Cursor getTagsOfItem(int itemId){
 		
@@ -385,8 +342,6 @@ public class WSdb {
 	 * 
 	 * @param catId id of the category
 	 * @return cursor to all items in this category
-	 * 
-	 * select * from item where cat_id=[given id]
 	 */
 	public Cursor getItemsOfCategory(int catId){
 		String where=ItemConst.CAT_ID + "=" + catId;
@@ -417,7 +372,7 @@ public class WSdb {
 			c.close();
 			return false;
 		}
-	}
+	} 
 	
 		
 	/****************************************************************
@@ -435,6 +390,8 @@ public class WSdb {
 	 * @return true if update is successful, false or exception otherwise
 	 * @exception SQLiteConstraintException if insert violates constraints
 	 * @exception IllegalArgumentException if argument format invalid
+	 * @return true if update succeeded, 
+	 * 			false if failed and transaction rolled back
 	 */
 	public boolean updateCategory(int catID, String name, String color, String schema) 
 					throws IllegalArgumentException, SQLiteConstraintException{
@@ -447,7 +404,7 @@ public class WSdb {
 			Log.e("db.updateCategory","Invalid Argument format");
 			throw new IllegalArgumentException();
 		}	
-		int affected=0;
+		
 		ContentValues updateValue = new ContentValues();
 		updateValue.put(CategoryConst.NAME, name);
 		updateValue.put(CategoryConst.COLOR, color);
@@ -455,14 +412,17 @@ public class WSdb {
 		String whereClause=CategoryConst.ID + "=" + catID;
 		
 		db.beginTransaction();
-		affected=db.updateWithOnConflict(CategoryConst.TBL_NAME, updateValue, whereClause, null,SQLiteDatabase.CONFLICT_ROLLBACK);
+		int affected=0;
+		affected=db.updateWithOnConflict(CategoryConst.TBL_NAME, updateValue, 
+				whereClause, null, SQLiteDatabase.CONFLICT_ROLLBACK);
 		
 		if (affected > 0){
 			db.setTransactionSuccessful();
 			db.endTransaction();
 			return true;
 		}else{
-    		Log.e("db.updateCategory", "update failed & rolled back, check constraint exception");
+    		Log.e("db.updateCategory", "update failed & rolled back, " +
+    				"check constraint exception");
 			db.endTransaction();
 			return false;
 		}
@@ -470,10 +430,13 @@ public class WSdb {
 	
 
 	/**
-	 * Change the name of a Tag
+	 * Update a Tag
 	 * 
 	 * @param tagID id of tag to update
-	 * @param newName new name of tag - maximum length of 32 characters
+	 * @param newName new name of tag
+	 * @param color new color of tag
+	 * @return true if update succeeded, 
+	 * 			false if failed and transaction rolled back
 	 */
 	public boolean updateTag(int tagID, String newName, String color)
 			throws IllegalArgumentException, SQLiteConstraintException{
@@ -490,7 +453,8 @@ public class WSdb {
 		updateValue.put(TagConst.COLOR, color);
 		String whereClause=TagConst.ID + "=" + tagID;
 		db.beginTransaction();
-		affected = db.updateWithOnConflict(TagConst.TBL_NAME, updateValue, whereClause, null,SQLiteDatabase.CONFLICT_ROLLBACK);
+		affected = db.updateWithOnConflict(TagConst.TBL_NAME, updateValue, 
+				whereClause, null, SQLiteDatabase.CONFLICT_ROLLBACK);
 		if (affected > 0){
 			db.setTransactionSuccessful();
 			db.endTransaction();
@@ -504,10 +468,11 @@ public class WSdb {
 	 * Update all fields of an item other than the key id 
 	 * 
 	 * @param itemID id of item to update
-	 * @param newName new name of item
+	 * @param name new name of item
 	 * @param catId id of category item belongs to
 	 * @param data string of JSON field data
-	 * @return number of rows updated (0 if failed, 1 if success)
+	 * @return true if update succeeded, 
+	 * 			false if failed and transaction rolled back
 	 */
 	public boolean updateItem(int itemID, String name, int catId, String data)
 			throws IllegalArgumentException, SQLiteConstraintException{
@@ -526,7 +491,8 @@ public class WSdb {
 		updateValue.put(ItemConst.DATA, data);
 		
 		String whereClause=ItemConst.ID + "=" + itemID;
-		affected = db.updateWithOnConflict(ItemConst.TBL_NAME, updateValue, whereClause, null,SQLiteDatabase.CONFLICT_ROLLBACK);
+		affected = db.updateWithOnConflict(ItemConst.TBL_NAME, updateValue, 
+				whereClause, null,SQLiteDatabase.CONFLICT_ROLLBACK);
 		if (affected > 0) 
 			return true;
 		else
