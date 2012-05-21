@@ -87,6 +87,7 @@ public class ViewAdapter extends ArrayAdapter<Field> {
 		if (convertView == null) {
 			holder = new ViewHolder();
 			switch (enumType) {
+			case CheckBox:
 			case TextField:
 			case MultilineTextField:
 			case PhoneNumber:
@@ -140,6 +141,7 @@ public class ViewAdapter extends ArrayAdapter<Field> {
 	
 	private void loadData(final Field field, View view) {
 		switch (field.getType()) {
+		case CheckBox:
 		case TextField:
 		case MultilineTextField:
 		case PhoneNumber:

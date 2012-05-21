@@ -8,14 +8,13 @@ import java.util.Map;
 import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.Item;
+import we.should.list.Tag;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -39,6 +38,9 @@ public class ViewScreen extends Activity {
 	
 	/** The list of fields. **/
 	private ListView mFieldListView;
+	
+	/** The display of this item's tags. **/
+	private TextView mTags;
 	
 	/** The data to display. **/
 	private Map<Field, String> mData;
@@ -105,14 +107,17 @@ public class ViewScreen extends Activity {
 		((TextView) findViewById(R.id.name)).setText(mItem.getName());
         
         mData = new HashMap<Field, String>();
-        for (Field f : mItem.getCategory().getFields()) {
+        for (Field f : mItem.getFields()) {
         	mData.put(f, mItem.get(f));
         }
         mData.remove(Field.NAME);
 		
 		mFieldListView = (ListView) findViewById(R.id.fieldList);
-		List<Field> fields = new ArrayList<Field>(mItem.getCategory().getFields());
+		List<Field> fields = new ArrayList<Field>(mItem.getFields());
 		fields.remove(Field.NAME);
 		mFieldListView.setAdapter(new ViewAdapter(this, fields, mData));
+		
+		mTags = (TextView) findViewById(R.id.tags);
+		mTags.setText(Tag.getFormatted(mItem.getTags()));
 	}
 }

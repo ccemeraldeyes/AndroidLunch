@@ -165,7 +165,7 @@ public class WSdb {
 		
 		// check argument for null or empty string
 		if(hasNoChars(name) || hasNoChars(color)){
-			Log.e("db.insertTag","argument (name) is empty or greter than 32 characters");
+			Log.e("db.insertTag","argument (name) is empty");
 			throw new IllegalArgumentException();
 		}
 		ContentValues newTaskValue = new ContentValues();
@@ -196,10 +196,10 @@ public class WSdb {
 		
 		//TODO: if I make itemid,tagid a key or unique, sql will enforce this
 		// check to see if item is already tagged with this tag
-		if(isItemTagged(itemID, tagID)){
+		/*if(isItemTagged(itemID, tagID)){
 			Log.e("db.insertItem_Tag","This item_tag already exists");
 			throw new SQLiteConstraintException("This item-tag pair already exists!");
-		}
+		}*/
 		
 		ContentValues newTaskValue = new ContentValues();
 		newTaskValue.put(Item_TagConst.ITEM_ID, itemID);

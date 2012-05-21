@@ -31,12 +31,10 @@ public class GenericCategory extends Category {
 	private List<Item> items; 
 	private boolean sync = false;
 	
-	
 	public GenericCategory(String name, List<Field> fields, Context ctx) {
 		super(name, fields, ctx);
 		items = new LinkedList<Item>();
 		checkRep();
-		
 	}
 	protected GenericCategory(String name, JSONArray a, Context ctx) throws JSONException{
 		super(name, a, ctx);
@@ -134,6 +132,7 @@ public class GenericCategory extends Category {
 	protected boolean removeItem(Item i) {
 		return this.items.remove(i);
 	}
+	
 	@Override
 	public void save() {
 		if (ctx != null) {
@@ -167,6 +166,8 @@ public class GenericCategory extends Category {
 		GenericCategory cp= GenericCategory.class.cast(other);
 		return this.name.equals(cp.name) && this.fields.equals(cp.fields);
 	}
+	
+	@Override
 	public int hashCode(){
 		return this.name.hashCode();
 	}

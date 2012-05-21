@@ -2,10 +2,15 @@ package we.should;
 
 
 import java.io.IOException;
+import java.io.Serializable;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
 import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
@@ -21,11 +26,15 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 
+import java.util.Set;
+
+
 import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.Item;
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import we.should.list.Tag;
 import we.should.search.DetailPlace;
 import we.should.search.Place;
 import we.should.search.PlaceRequest;
@@ -67,8 +76,14 @@ public class EditScreen extends Activity {
 	/** The listview holding the fields. **/
 	private ListView mFieldListView;
 	
+	/** A display of all of this item's tags. **/
+	private TextView mTagsView;
+	
 	/** The data associated with each field. **/
 	private Map<Field, String> mData;
+	
+	/** Which tags are set to true. **/
+	private Set<Tag> mTags;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -90,7 +105,7 @@ public class EditScreen extends Activity {
 		catDisplay.setText(catName);
 		
 		mData = new HashMap<Field, String>();
-		for (Field f : cat.getFields()) {
+		for (Field f : mItem.getFields()) {
 			mData.put(f, mItem.get(f));
 		}
 		mData.remove(Field.NAME);
@@ -99,11 +114,7 @@ public class EditScreen extends Activity {
 		mName.setText(mItem.getName());
 		mName.addTextChangedListener(new TextWatcher() {
 
-			public void afterTextChanged(Editable s) {
-//				if (s.length() == mName.getThreshold() - 1) {
-//					setupList(s.toString());
-//				}
-			}
+			public void afterTextChanged(Editable s) {}
 
 			public void beforeTextChanged(CharSequence s, int start,
 					int count, int after) {}
@@ -128,9 +139,25 @@ public class EditScreen extends Activity {
 		});
 		
 		mFieldListView = (ListView) findViewById(R.id.fieldList);
-		mFields = new ArrayList<Field>(mItem.getCategory().getFields());
+		mFields = new ArrayList<Field>(mItem.getFields());
 		mFields.remove(Field.NAME);
 		mFieldListView.setAdapter(new EditAdapter(this, mFields, mData));
+		
+		TextView tagsText = (TextView) findViewById(R.id.tags_text);
+		tagsText.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View view) {
+				setTags();
+			}
+		});
+
+		mTags = new HashSet<Tag>(mItem.getTags());
+		mTagsView = (TextView) findViewById(R.id.tags);
+		mTagsView.setText(Tag.getFormatted(mTags));
+		mTagsView.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View view) {
+				setTags();
+			}
+		});
 	}
 	
 	@Override
@@ -150,8 +177,33 @@ public class EditScreen extends Activity {
 			break;
 		case R.id.save:
 			save();
+			break;
 		}
 		return true;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (ActivityKey.get(requestCode)) {
+		case SET_TAGS:
+			if (resultCode == RESULT_OK) {
+				mTags = (Set<Tag>) data.getSerializableExtra(WeShouldActivity.TAGS);
+				mTagsView.setText(Tag.getFormatted(mTags));
+			}
+			break;
+		}
+	}
+	
+	/**
+	 * Pulls up the set tags menu.
+	 */
+	private void setTags() {
+		Intent intent = new Intent(EditScreen.this, SetTags.class); //was SetTags.class
+		
+		// Why do we have to use .toArray() here?  Because Eclipse sucks.
+		intent.putExtra(WeShouldActivity.TAGS, (Serializable) mTags);
+		startActivityForResult(intent, ActivityKey.SET_TAGS.ordinal());
 	}
 	
 	/**
@@ -182,7 +234,7 @@ public class EditScreen extends Activity {
 		DetailPlace detailPlace = (new PlaceRequest()).searchPlaceDetail(place.getReference());
 		Map<Field, String> fieldMap = detailPlace.asFieldMap();
 		for (Field f : fieldMap.keySet()) {
-			if (fieldMap.get(f) != null && !fieldMap.get(f).equals("")) {
+			if (fieldMap.get(f) != null) {
 				mData.put(f, fieldMap.get(f));
 			}
 		}
@@ -204,6 +256,10 @@ public class EditScreen extends Activity {
 			return;
 		}
 		
+		for (Tag t : mTags) {
+			mItem.addTag(t.toString(), t.getColor());
+		}
+		
 		mItem.save();
 		
 		// Create a new HttpClient and Post Header
@@ -218,7 +274,10 @@ public class EditScreen extends Activity {
 //		}
 	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 	    nameValuePairs.add(new BasicNameValuePair("user_email", settings.getString(WeShouldActivity.ACCOUNT_NAME, "")));
-		for (Field f : mData.keySet()) {
+		
+	    //TODO just make this a "data" string
+	    //TODO check for category and tag
+	    for (Field f : mData.keySet()) {
 			nameValuePairs.add(new BasicNameValuePair(f.getName(), mData.get(f)));
 		}
 		

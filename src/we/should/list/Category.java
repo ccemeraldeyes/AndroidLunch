@@ -91,7 +91,6 @@ public abstract class Category {
 	 */
 	public abstract List<Item> getItems();
 	
-	
 	/**
 	 * Returns a new item in this Category. This item is not added until Item.save() is called.
 	 * @return a new Item(C)
@@ -150,7 +149,7 @@ public abstract class Category {
 			 String name = c.getString(1);
 			 String color = c.getString(2);
 			 String schema = c.getString(3);
-			 if (name.equals("Movies")){
+			 if (name.equals(Category.Special.Movies.toString())){
 				 cat = new Movies(ctx);
 			 } else if(name.equals(Category.Special.Referrals.toString())) {
 				 cat = new Referrals(ctx);

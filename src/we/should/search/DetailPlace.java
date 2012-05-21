@@ -2,6 +2,7 @@ package we.should.search;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import we.should.list.Field;
@@ -15,19 +16,20 @@ import we.should.list.Field;
  * When there is error in parsing the JSONObject, call the isValid() method to determine that
  * 
  * To construct a Detailplace, you need a JSONObject from a DetailPlaceQuery on Google API.
+ * 
+ * @thorws JSONException - if the JSONObject pass through the constructor fail.
  * @author Lawrence
  */
 public class DetailPlace extends Place{
 	private String phoneNumber, website, url, address, international_phoneNumber;
 	
-	public DetailPlace(JSONObject obj) {
+	public DetailPlace(JSONObject obj) throws JSONException {
 		super(obj);
 		phoneNumber = obj.optString("formatted_phone_number", null);
 		website = obj.optString("website", null);
 		url = obj.optString("url", null);
 		address = obj.optString("formatted_address", null);
 		international_phoneNumber = obj.optString("international_phone_number", null);
-		isValid = true;
 	}
 	
 	/**

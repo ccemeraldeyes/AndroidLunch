@@ -14,6 +14,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -69,6 +72,9 @@ public class EditAdapter extends ArrayAdapter<Field> {
 			case PhoneNumber:
 				convertView = mInflater.inflate(R.layout.edit_row_phone, null);
 				break;
+			case CheckBox:
+				convertView = mInflater.inflate(R.layout.edit_row_checkbox, null);
+				break;
 			default:
 				throw new IllegalStateException("Do not know how to handle enum" + enumType);
 			}
@@ -115,11 +121,23 @@ public class EditAdapter extends ArrayAdapter<Field> {
 
 				public void onRatingChanged(RatingBar ratingBar, float rating,
 						boolean fromUser) {
-					mData.put(field, ((RatingBar) ratingBar).getRating() + "");
+					mData.put(field, ratingBar.getRating() + "");
 				}
 				
 			});
 			break;
+		case CheckBox:
+			CheckBox cb = (CheckBox) view;
+			cb.setChecked(Boolean.parseBoolean(mData.get(field)));
+			cb.setText(field.getName());
+			cb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+				public void onCheckedChanged(CompoundButton buttonView,
+						boolean isChecked) {
+					mData.put(field, Boolean.toString(buttonView.isChecked()));
+				}
+				
+			});
 		}
 	}
 	
