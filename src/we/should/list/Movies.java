@@ -12,7 +12,7 @@ import android.content.Context;
 public class Movies extends GenericCategory {
 	
 	public Movies(Context ctx){
-		super("Movies", Field.getMovieFields(), ctx);
+		super(Category.Special.Movies.toString(), Field.getMovieFields(), ctx);
 	}
 	
 	@Override
