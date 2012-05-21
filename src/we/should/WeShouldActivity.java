@@ -192,6 +192,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			mCategories.put(cat.getName(), cat);
 		}
 		if (mCategories.size() == 0) {
+			//Initialize DB if first app launch.
 			mCategories.put(MOVIES.getName(), MOVIES);
 			mCategories.put(RESTAURANTS.getName(), RESTAURANTS);
 			mCategories.put(REFERRALS.getName(), REFERRALS);

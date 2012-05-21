@@ -1,7 +1,7 @@
 package we.should.list;
 
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
 
 import org.json.JSONObject;
 
@@ -14,5 +14,18 @@ public class Referrals extends GenericCategory {
 	}
 	public Item newItem(JSONObject o){
 		return new ReferralItem(this, o, ctx);
+	}
+	
+	public static Referrals getReferralCategory(Context ctx){
+		Referrals r;
+		Set<Category> cats = Category.getCategories(ctx);
+		for(Category c : cats){
+			if(c.getName().equals(Category.Special.Referrals.toString())) {
+				r = (Referrals) c;
+				return r;
+			}
+			
+		}
+		throw new IllegalStateException("There is no Referrals category!");
 	}
 }
