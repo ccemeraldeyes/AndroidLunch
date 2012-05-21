@@ -152,6 +152,8 @@ public abstract class Category {
 			 String schema = c.getString(3);
 			 if (name.equals("Movies")){
 				 cat = new Movies(ctx);
+			 } else if(name.equals(Category.Special.Referrals.toString())) {
+				 cat = new Referrals(ctx);
 			 } else {
 				JSONArray schemaList;
 				try {
@@ -201,5 +203,9 @@ public abstract class Category {
 			}
 		}
 		return cat;
+	}
+
+	public enum Special {
+		Restaurants,  Movies, Referrals;
 	}
 }

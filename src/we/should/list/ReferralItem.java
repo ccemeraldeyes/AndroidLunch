@@ -1,6 +1,10 @@
 package we.should.list;
 
+import java.util.LinkedList;
 import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 
@@ -16,10 +20,21 @@ public class ReferralItem extends GenericItem {
 	
 	private List<Field> fields;
 	
-	
-	public ReferralItem(Category c, List<Field> fields, Context ctx) {
+
+	/**
+	 * Creates a new Referral Item from the JSON object passed to it
+	 * @param c - indicates in what category the item will be stored
+	 * @param values - the JSONObject representing the data to be stored in this
+	 * @param ctx - the context of the DB where the item will be manipulated.
+	 */
+	protected ReferralItem(Category c, JSONObject values, Context ctx) {
 		super(c, ctx);
-		this.fields = fields;
+		try {
+			DBtoData(values);
+		} catch (JSONException e) {
+			throw new IllegalArgumentException("JSONObject Improperlly formatted!");
+		}
+		this.fields = new LinkedList<Field>(this.values.keySet());
 	}
 	@Override
 	public List<Field> getFields(){

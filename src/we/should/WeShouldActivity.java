@@ -1,5 +1,6 @@
 package we.should;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +14,8 @@ import we.should.list.Field;
 import we.should.list.GenericCategory;
 import we.should.list.Item;
 import we.should.list.Movies;
+import we.should.list.Referrals;
+import we.should.list.Tag;
 import we.should.search.CustomPinPoint;
 import android.content.Context;
 import android.content.Intent;
@@ -56,11 +59,14 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	public static final String INDEX = "INDEX";
 	public static final String HELP_TEXT = "HELP_TEXT";
 	
-	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
+	private final Category RESTAURANTS = new GenericCategory(Category.Special.Restaurants.toString(), Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
-	private final Category REFERRALS = new GenericCategory("Referrals", new LinkedList<Field>(), this);
 
-	/** The TabHost that cycles between categories. **/
+	private final Category REFERRALS = new Referrals(this);
+	
+	private static final List<CustomPinPoint> lstPinPoints = new ArrayList<CustomPinPoint>();
+	
+	/** The TabHost that cycles between tabs. **/
 	private TabHost mTabHost;
 	
 	/** A map that maps the name of each category to its in-memory representation. **/

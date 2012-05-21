@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -239,5 +240,20 @@ public abstract class Item {
 			Field f = new Field(fieldString);
 			this.values.put(f, value);
 		}
+	}
+	/**
+	 * Returns a JSONObject representation of the data contained within this item
+	 * @return A JSONObject mapping the field names to their string values.
+	 */
+	public JSONObject dataToDB(){
+		JSONObject out = new JSONObject();
+		for(Entry<Field, String> e : values.entrySet()){
+			try {
+				out.put(e.getKey().toDB(), e.getValue());
+			} catch (JSONException err) {
+				err.printStackTrace();
+			}
+		}
+		return out;
 	}
 }
