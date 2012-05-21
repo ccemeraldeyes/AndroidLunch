@@ -199,7 +199,7 @@ public class EditScreen extends Activity {
 	 * Pulls up the set tags menu.
 	 */
 	private void setTags() {
-		Intent intent = new Intent(EditScreen.this, Tag.class); //was SetTags.class
+		Intent intent = new Intent(EditScreen.this, SetTags.class); //was SetTags.class
 		
 		// Why do we have to use .toArray() here?  Because Eclipse sucks.
 		intent.putExtra(WeShouldActivity.TAGS, (Serializable) mTags);
@@ -274,7 +274,10 @@ public class EditScreen extends Activity {
 //		}
 	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 	    nameValuePairs.add(new BasicNameValuePair("user_email", settings.getString(WeShouldActivity.ACCOUNT_NAME, "")));
-		for (Field f : mData.keySet()) {
+		
+	    //TODO just make this a "data" string
+	    //TODO check for category and tag
+	    for (Field f : mData.keySet()) {
 			nameValuePairs.add(new BasicNameValuePair(f.getName(), mData.get(f)));
 		}
 		

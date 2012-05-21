@@ -1,6 +1,7 @@
 package we.should.communication;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import we.should.ActivityKey;
 import we.should.R;
@@ -60,7 +63,15 @@ public class GetReferralsService extends IntentService {
 		    //response.getEntity().
 			
 			HttpResponse response = httpclient.execute(httpget);
-			System.out.println(response.toString());
+			
+			InputStream is = response.getEntity().getContent();
+			
+			byte[] buf = new byte[4096];
+			is.read(buf);
+
+			JSONObject resp = new JSONObject(new String(buf));
+			
+			Log.v("REFERRAL RESPONSE", new String(buf));
 		    
 		    Log.v("GETREFERRALSSERVICE", "Checking for new referrals");
 		    
@@ -74,6 +85,9 @@ public class GetReferralsService extends IntentService {
 		} catch (IOException e) {
 		    // TODO Auto-generated catch block
 			Log.v("GETREFERRALSSERVICE", e.getMessage());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 
