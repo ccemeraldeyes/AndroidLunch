@@ -12,20 +12,13 @@ public class Referrals extends GenericCategory {
 	public Referrals(Context ctx){
 		super(Category.Special.Referrals.toString(), new LinkedList<Field>(), ctx);
 	}
-	public Item newItem(JSONObject o){
+	public ReferralItem newItem(JSONObject o){
 		return new ReferralItem(this, o, ctx);
 	}
 	
 	public static Referrals getReferralCategory(Context ctx){
-		Referrals r;
-		Set<Category> cats = Category.getCategories(ctx);
-		for(Category c : cats){
-			if(c.getName().equals(Category.Special.Referrals.toString())) {
-				r = (Referrals) c;
-				return r;
-			}
-			
-		}
-		throw new IllegalStateException("There is no Referrals category!");
+		Referrals r = (Referrals) Category.getCategory(Category.Special.Referrals.toString(), ctx);
+		if(r==null) throw new IllegalStateException("There is no Referrals category!");
+		return r;
 	}
 }
