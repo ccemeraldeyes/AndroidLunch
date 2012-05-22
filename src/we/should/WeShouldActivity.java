@@ -6,16 +6,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import we.should.communication.GetReferralsService;
 import we.should.database.WSdb;
 import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.GenericCategory;
 import we.should.list.Item;
 import we.should.list.Movies;
+import we.should.list.Referrals;
+
 import we.should.list.Tag;
 import we.should.search.CustomPinPoint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Criteria;
@@ -30,6 +34,7 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -59,9 +64,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	public static final String HELP_TEXT = "HELP_TEXT";
 	public static final String TAGS = "TAGS";
 	
-	private final Category RESTAURANTS = new GenericCategory("Restaurants", Field.getDefaultFields(), this);
+	private final Category RESTAURANTS = new GenericCategory(Category.Special.Restaurants.toString(), Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
-	private final Category REFERRALS = new GenericCategory("Referrals", new ArrayList<Field>(), this);
+
+	private final Category REFERRALS = new Referrals(this);
+
 	
 	private static final List<CustomPinPoint> lstPinPoints = new ArrayList<CustomPinPoint>();
 	
@@ -98,6 +105,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+    	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         map = (MapView) findViewById(R.id.mapview);
@@ -197,6 +205,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			mCategories.put(cat.getName(), cat);
 		}
 		if (mCategories.size() == 0) {
+			//Initialize DB if first app launch.
 			mCategories.put(MOVIES.getName(), MOVIES);
 			mCategories.put(RESTAURANTS.getName(), RESTAURANTS);
 			mCategories.put(REFERRALS.getName(), REFERRALS);
@@ -362,8 +371,22 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			
 			final List<Item> itemsList = cat.getItems();
 			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
-			
-			// click list item to change map view to show item & current location
+
+			lv.setOnItemLongClickListener(
+				new OnItemLongClickListener() {
+					
+					public boolean onItemLongClick(AdapterView<?> parent,
+							View view, int position, long id) {
+						Item item = itemsList.get(position);
+						Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
+						intent.putExtra(CATEGORY, item.getCategory().getName());
+						intent.putExtra(INDEX, item.getId());
+						startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
+						return true;
+					}
+				
+				}
+			);
 			lv.setOnItemClickListener(new OnItemClickListener() {
 			    public void onItemClick(AdapterView<?> parent, View view,
 			        int position, long id) {
@@ -373,20 +396,23 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			    	if(addrs.isEmpty()) {
 			    		Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
 			    		intent.putExtra(CATEGORY, item.getCategory().getName());
-			    		intent.putExtra(INDEX, position);
+			    		intent.putExtra(INDEX, item.getId());
 			    		startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 			    	} else {
 				    	for(Address addr : addrs) {
-					    	int locX = (int) (addr.getLatitude() * 1E6);
-		    				int locY = (int) (addr.getLongitude() * 1E6);
-		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
-		        			GeoPoint myLoc = getDeviceLocation();
-		        			if(myLoc == null) {
-		        				zoomLocation(placeLocation);
-		        			} else {
-		        				zoomToTwoPoint(placeLocation, myLoc);
-		        			}
-		        		    break;
+				    		if(addr.hasLatitude() && addr.hasLongitude()) {
+						    	int locX = (int) (addr.getLatitude() * 1E6);
+			    				int locY = (int) (addr.getLongitude() * 1E6);
+			        			GeoPoint placeLocation = new GeoPoint(locX, locY);
+			        			GeoPoint myLoc = getDeviceLocation();
+			        			
+			        			if(myLoc == null) {
+			        				zoomLocation(placeLocation);
+			        			} else {
+			        				zoomToTwoPoint(placeLocation, myLoc);
+			        			}
+			        		    break;
+				    		}
 					    }
 			    	}
 			    }
@@ -438,7 +464,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			    	Item item = itemsList.get(position);
 					Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
 					intent.putExtra(CATEGORY, item.getCategory().getName());
-					intent.putExtra(INDEX, position);
+					intent.putExtra(INDEX, item.getId());
 					startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 			    }
 			  });

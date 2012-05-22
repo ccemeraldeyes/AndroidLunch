@@ -6,6 +6,7 @@ public enum ActivityKey {
 	NEW_ITEM,
 	VIEW_ITEM,
 	EDIT_ITEM,
+	NEW_REFERRAL,
 	SET_TAGS,
 	REFER;
 	

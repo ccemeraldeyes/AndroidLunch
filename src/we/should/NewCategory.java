@@ -32,6 +32,9 @@ public class NewCategory extends Activity {
 	/** The phoneable checkbox. **/
 	private CheckBox mPhoneable;
 	
+	/** The URL Checkbox **/
+	private CheckBox mUrl;
+	 
 	/** The array adapter that backs the list view. **/
 	private FieldAdapter mAdapter;
 
@@ -45,6 +48,8 @@ public class NewCategory extends Activity {
         mMappable = (CheckBox) findViewById(R.id.mappable);
         
         mPhoneable = (CheckBox) findViewById(R.id.phoneable);
+        
+        mUrl = (CheckBox) findViewById(R.id.url);
         
         mAdapter = new FieldAdapter(this, new ArrayList<ProtoField>());
         ListView lv = (ListView) findViewById(R.id.fieldList);
@@ -106,16 +111,21 @@ public class NewCategory extends Activity {
 		if (saveable) {
 			List<Field> fields = new ArrayList<Field>();
 			fields.add(Field.NAME);
-			if (mMappable.isChecked()) {
-				fields.add(Field.ADDRESS);
+			if (mUrl.isChecked()) {
+				fields.add(Field.WEBSITE);
 			}
 			if (mPhoneable.isChecked()) {
 				fields.add(Field.PHONENUMBER);
 			}
+			if (mMappable.isChecked()) {
+				fields.add(Field.ADDRESS);
+			}
+			
 			for (ProtoField pf : protoFields) {
 				fields.add(new Field(pf.name, FieldType.get(pf.type)));
 			}
 			fields.add(Field.COMMENT);
+			//fields.add(Field.TAGS);
 			try{
 				(new GenericCategory(mName.getText().toString(), fields, this)).save();
 			} catch(IllegalArgumentException e) {

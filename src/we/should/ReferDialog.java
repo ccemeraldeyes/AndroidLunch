@@ -1,12 +1,31 @@
 package we.should;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
+import we.should.list.Field;
+
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import we.should.list.Category;
 import we.should.list.Item;
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,19 +54,20 @@ public class ReferDialog extends Activity {
 		if (index == -1) {
 			mItem = cat.newItem();
 		} else {
-			mItem = cat.getItems().get(index);
+			mItem = cat.getItem(index);
 		}
+		if(mItem == null) throw new IllegalStateException("Index points to an item that doesn't exist!");
 		
 		mEmails = (EditText) findViewById(R.id.emails);
 		
 		mSend = (Button) findViewById(R.id.send);
 		mSend.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				List<String> emails = new ArrayList<String>();
-				for (String email : mEmails.getText().toString().split(",")) {
-					emails.add(email.trim());
-				}
-				send(emails);
+//				List<String> emails = new ArrayList<String>();
+//				for (String email : mEmails.getText().toString().split(",")) {
+//					emails.add(email.trim());
+//				}
+				send(mEmails.getText().toString(), mItem);
 				finish();
 			}
 		});
@@ -55,9 +75,60 @@ public class ReferDialog extends Activity {
 	
 	/**
 	 * Handles the sending of items.
+	 * @param item 
 	 */
-	private void send(List<String> emails) {
-		// do stuff!
+	private void send(String emails, Item item) {
+//		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+//		Account[] accounts = AccountManager.get(getBaseContext()).getAccounts();
+//		String email = "";
+//		for (Account account : accounts) {
+//		    if (emailPattern.matcher(account.name).matches()) {
+//		        email = account.name;
+//		        break;
+//		    }
+//		}
+		
+		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
+		String email = settings.getString(WeShouldActivity.ACCOUNT_NAME, "");
+		
+		Log.v("REFER EMAILS", emails);
+		
+		// Create a new HttpClient and Post Header
+		HttpClient httpclient = new DefaultHttpClient();
+		//HttpPost httppost = new HttpPost("http://23.23.237.174/refer");
+
+		try {
+		    // Add your data
+		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+		    nameValuePairs.add(new BasicNameValuePair("user_email", email));
+		    nameValuePairs.add(new BasicNameValuePair("email_list", emails));
+		    
+		    List<Field> fields = item.getFields();
+		    String itemdata = "";
+		    for(Field f: fields){
+		    	itemdata+=f.getName()+": "+item.get(f)+",";
+		    }
+		    	
+		    Log.v("REFERRAL DATA", itemdata);
+		    nameValuePairs.add(new BasicNameValuePair("item_data", itemdata));
+		    //httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+		    
+		    String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
+		    
+		    HttpGet httpget = new HttpGet("http://23.23.237.174/refer?"+paramString);
+
+		    
+		    
+		    // Execute HTTP Post Request
+		    HttpResponse response = httpclient.execute(httpget);
+		    
+		    System.out.println(response.toString());
+
+		} catch (ClientProtocolException e) {
+		    // TODO Auto-generated catch block
+		} catch (IOException e) {
+		    // TODO Auto-generated catch block
+		}
 	}
 	
 }

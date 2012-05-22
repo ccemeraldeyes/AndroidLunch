@@ -1,12 +1,11 @@
 package we.should.list;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -15,6 +14,7 @@ import org.json.JSONObject;
 
 import we.should.database.WSdb;
 import android.content.Context;
+import android.database.sqlite.SQLiteConstraintException;
 import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
@@ -42,7 +42,7 @@ public class GenericItem extends Item {
 	protected GenericItem(Category c, Context ctx) {
 		super(ctx);
 		this.c = c;
-		values = new HashMap<Field, String>();
+		values = new LinkedHashMap<Field, String>();
 		List<Field> fields = this.getFields();
 		for(Field i : fields){
 			if (i.getType().equals(FieldType.CheckBox)) {
@@ -114,12 +114,16 @@ public class GenericItem extends Item {
 				WSdb db = new WSdb(ctx);
 				db.open();
 				db.deleteItem(this.id);
+				Set<Tag> tags = getTags();
+				for(Tag t: tags){
+					db.deleteItemTagRel(this.id, t.getId());
+				}
 				db.close();
 			} else {
-				Log.w("Item.save()", "This item has no context. Item cannot be deleted from database.");
+				Log.w("Item.delete()", "This item has no context. Item cannot be deleted from database.");
 			}
 		} else {
-			Log.w("Item.save()", "This item has not been saved. Item cannot be deleted to database.");
+			Log.w("Item.delete()", "This item has not been saved. Item cannot be deleted from database.");
 		}
 	}
 
@@ -163,7 +167,7 @@ public class GenericItem extends Item {
 		if(this.getFields().contains(key)){
 			if(key.equals(Field.ADDRESS)){
 				Address add = getGeoData(value);
-				String newValue = addressToJSON(add).toString();
+				String newValue = addressToJSON(add, value).toString();
 				values.put(key, newValue);
 			} else {
 				values.put(key, value);
@@ -193,12 +197,18 @@ public class GenericItem extends Item {
 			WSdb db = new WSdb(ctx);
 			db.open();
 			saveTagsToDB(db);
-			if (this.id != 0) {
-				db.updateItem(this.id, this.getName(), 
-					this.c.id, dataToDB().toString());
-			} else {
-				this.id = (int) db.insertItem(this.getName(), 
-					this.c.id, dataToDB().toString());
+			try {
+				if (this.id != 0) {
+					db.updateItem(this.id, this.getName(), 
+						this.c.id, dataToDB().toString());
+				} else {
+						this.id = (int) db.insertItem(this.getName(), 
+							this.c.id, dataToDB().toString());
+				}
+			} catch (SQLiteConstraintException e) {
+				throw new IllegalStateException("There is already an item of that name!");
+			} catch (IllegalArgumentException e) {
+				throw new IllegalArgumentException("Illegal field values!");
 			}
 			updateTagLinks(db);
 			db.close();
@@ -267,10 +277,10 @@ public class GenericItem extends Item {
 		}
 		return newTags;
 	}
-	private JSONObject addressToJSON(Address a){
+	private JSONObject addressToJSON(Address a, String addressString){
 		JSONObject out = new JSONObject();
 		try{
-			out.put("address", a.getAddressLine(0));
+			out.put("address", addressString);
 			try{
 				out.put("lat", a.getLatitude());
 				out.put("long", a.getLongitude());
@@ -303,18 +313,6 @@ public class GenericItem extends Item {
 	@Override
 	public Category getCategory() {
 		return this.c;
-	}
-	
-	private JSONObject dataToDB(){
-		JSONObject out = new JSONObject();
-		for(Entry<Field, String> e : values.entrySet()){
-			try {
-				out.put(e.getKey().toDB(), e.getValue());
-			} catch (JSONException err) {
-				err.printStackTrace();
-			}
-		}
-		return out;
 	}
 	public boolean equals(Object other){
 		if(other == this) return true;

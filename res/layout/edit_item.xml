@@ -20,7 +20,7 @@
         android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:completionThreshold="7" />
+        android:completionThreshold="4" />
 
     <include
         layout="@layout/divider" />
@@ -31,9 +31,14 @@
         android:layout_height="0px"
         android:layout_weight="1"
         android:descendantFocusability="beforeDescendants" />
-    
-    <include
-        layout="@layout/divider" />
+
+    <Button
+        android:id="@+id/deleteItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/delete_item" />
+
+    <include layout="@layout/divider" />
     
     <TextView
         android:id="@+id/tags_text"

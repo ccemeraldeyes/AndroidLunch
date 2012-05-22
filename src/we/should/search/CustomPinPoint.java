@@ -9,6 +9,7 @@ import we.should.list.Item;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
@@ -52,8 +53,11 @@ public class CustomPinPoint extends ItemizedOverlay<OverlayItem>{
 	 */
 	@Override
 	protected boolean onTap(int index) { 
-		//OverlayItem overlay = pinpoints.get(index);
-		//overlay.getPoint();
+//		This can be used to find the distance.		
+//		float[] results = new float[1];
+//		Location.distanceBetween(myLoc.getLatitudeE6(),myLoc.getLongitudeE6()
+//				,placeLocation.getLatitudeE6(), placeLocation.getLongitudeE6()
+//				,results);
 		Dialog dialog = new CustomDialog(context, item, 0, 0);
 		dialog.show();
 		return true;
