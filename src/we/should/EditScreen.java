@@ -105,7 +105,8 @@ public class EditScreen extends Activity {
 
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				fillFields((Place) mName.getAdapter().getItem(position));
+				PlaceAdapter pa = (PlaceAdapter) mName.getAdapter();
+				fillFields((Place) pa.getItem(position));
 			}
 			
 		});
