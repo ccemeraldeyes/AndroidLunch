@@ -41,6 +41,7 @@ public class ReferralItem extends GenericItem {
 	}
 	@Override
 	public List<Field> getFields(){
+		if(this.fields == null) return new LinkedList<Field>();
 		return this.fields;
 	}
 	
