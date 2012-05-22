@@ -72,13 +72,15 @@ public class GetReferralsService extends IntentService {
 			
 			byte[] buf = new byte[4096];
 			is.read(buf);
-
-			resp = new JSONObject(new String(buf));
-			data = resp.getJSONArray("data"); //TODO check, I think it's actually "referrals" or something
-			
-			
 			
 			Log.v("REFERRAL RESPONSE", new String(buf));
+
+			resp = new JSONObject(new String(buf));
+			data = resp.getJSONArray("referrals"); 
+			
+			
+			
+			
 		    
 		    Log.v("GETREFERRALSSERVICE", "Checking for new referrals");
 		    
@@ -95,6 +97,7 @@ public class GetReferralsService extends IntentService {
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			Log.v("GET REFFERAL SERVICE", "JSON EXCEPTION "+e.getMessage());
 		}
 		
 
@@ -111,18 +114,22 @@ public class GetReferralsService extends IntentService {
 		
 		Context context = getApplicationContext();
 		CharSequence contentTitle = "New referrals!";
-		CharSequence contentText = "You have "+data.length()+" new referrals awaiting your approval.";
-		Intent notificationIntent = new Intent(this, ApproveReferral.class);
-		//THIS IS WHERE TO SET THE EXTRAS I THINK
 		
-		notificationIntent.putExtra("referrals", data.toString());
-
+		Log.v("REFERRAL DATA", data.toString());
 		
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-		notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
-		nm.notify(ActivityKey.NEW_REFERRAL.ordinal(), notification);
+		if(data.length() >0){
+			CharSequence contentText = "You have "+data.length()+" new referrals awaiting your approval.";
+			Intent notificationIntent = new Intent(this, ApproveReferral.class);
+			
+			notificationIntent.putExtra("data", data.toString());
+	
+			
+			PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+	
+			notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
+			nm.notify(ActivityKey.NEW_REFERRAL.ordinal(), notification);
+		} 
 	}
 
 }

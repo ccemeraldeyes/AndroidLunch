@@ -83,7 +83,7 @@ public class Splash extends Activity {
 		editor.putString(WeShouldActivity.ACCOUNT_NAME, accountName);
 		editor.commit();
 		
-
+		afterLogin();
 	}
 	
 	/**

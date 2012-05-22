@@ -47,4 +47,8 @@ public class Referral {
 		this.mApproved = approved;
 	}
 
+	
+	public JSONObject getData(){
+		return this.mData;
+	}
 }
