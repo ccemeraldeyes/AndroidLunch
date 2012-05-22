@@ -108,8 +108,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        map = (MapView) findViewById(R.id.mapview);
-        map.setBuiltInZoomControls(true);       
+        map = (MapView) findViewById(R.id.mapview);       
         controller = map.getController();
         overlayList = map.getOverlays();
         
@@ -371,72 +370,50 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			
 			final List<Item> itemsList = cat.getItems();
 			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
-
-			lv.setOnItemLongClickListener(
-				new OnItemLongClickListener() {
+			
+			// regular click to launch item information page
+			lv.setOnItemClickListener(
+				new OnItemClickListener() {
+					public void onItemClick(AdapterView<?> parent, View view,
+					        int position, long id) {
 					
-					public boolean onItemLongClick(AdapterView<?> parent,
-							View view, int position, long id) {
 						Item item = itemsList.get(position);
 						Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
 						intent.putExtra(CATEGORY, item.getCategory().getName());
 						intent.putExtra(INDEX, item.getId());
-						startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
-						return true;
+						startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());	
 					}
-				
 				}
 			);
-			lv.setOnItemClickListener(new OnItemClickListener() {
-			    public void onItemClick(AdapterView<?> parent, View view,
-			        int position, long id) {
+			
+			// long click to view item & current location in map
+			lv.setOnItemLongClickListener(new OnItemLongClickListener() {
+				public boolean onItemLongClick(AdapterView<?> parent,
+						View view, int position, long id) {
+					
 			    	Item item = itemsList.get(position);
 			    	Set<Address> addrs = item.getAddresses();
-			    	//instead of show info page, it zoom to location.
-			    	if(addrs.isEmpty()) {
-			    		Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
-			    		intent.putExtra(CATEGORY, item.getCategory().getName());
-			    		intent.putExtra(INDEX, item.getId());
-			    		startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
-			    	} else {
-				    	for(Address addr : addrs) {
-				    		if(addr.hasLatitude() && addr.hasLongitude()) {
-						    	int locX = (int) (addr.getLatitude() * 1E6);
-			    				int locY = (int) (addr.getLongitude() * 1E6);
-			        			GeoPoint placeLocation = new GeoPoint(locX, locY);
-			        			GeoPoint myLoc = getDeviceLocation();
-			        			
-			        			if(myLoc == null) {
-			        				zoomLocation(placeLocation);
-			        			} else {
-			        				zoomToTwoPoint(placeLocation, myLoc);
-			        			}
-			        		    break;
-				    		}
-					    }
-			    	}
-			    }
-			  });
-			
-			/** Long click to got to item information page
-			 *
-			 *  @author Troy using Will's old regular click code
-			 */
-			lv.setOnItemLongClickListener(new OnItemLongClickListener() {
-			    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-		    		 Item item = itemsList.get(position);
-		    		 Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
-		    		 intent.putExtra(CATEGORY, item.getCategory().getName());
-		    		 intent.putExtra(INDEX, position);
-		    		 startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());			    
-		    		 return true;
-			    }
 			    
-			  });
-		
+			    	for(Address addr : addrs) {
+			    		if(addr.hasLatitude() && addr.hasLongitude()) {
+					    	int locX = (int) (addr.getLatitude() * 1E6);
+		    				int locY = (int) (addr.getLongitude() * 1E6);
+		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
+		        			GeoPoint myLoc = getDeviceLocation();
+		        			
+		        			if(myLoc == null) {
+		        				zoomLocation(placeLocation);
+		        			} else {
+		        				zoomToTwoPoint(placeLocation, myLoc);
+		        			}
+		        		    break;
+			    		}
+				    }
+			    	return true;
+			    }
+			});
 			return lv;
 		}
-		
 	}
 	
 	/**
