@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import we.should.database.WSdb;
 import android.content.Context;
+import android.database.sqlite.SQLiteConstraintException;
 import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;
@@ -193,12 +194,19 @@ public class GenericItem extends Item {
 			WSdb db = new WSdb(ctx);
 			db.open();
 			saveTagsToDB(db);
-			if (this.id != 0) {
-				db.updateItem(this.id, this.getName(), 
-					this.c.id, dataToDB().toString());
-			} else {
-				this.id = (int) db.insertItem(this.getName(), 
-					this.c.id, dataToDB().toString());
+			try {
+				if (this.id != 0) {
+					db.updateItem(this.id, this.getName(), 
+						this.c.id, dataToDB().toString());
+				} else {
+					
+						this.id = (int) db.insertItem(this.getName(), 
+							this.c.id, dataToDB().toString());
+				}
+			} catch (SQLiteConstraintException e) {
+				throw new IllegalStateException("There is already an item of that name!");
+			} catch (IllegalArgumentException e) {
+				throw new IllegalArgumentException("Illegal field values!");
 			}
 			updateTagLinks(db);
 			db.close();

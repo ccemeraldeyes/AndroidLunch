@@ -30,8 +30,10 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
@@ -361,6 +363,21 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			
 			final List<Item> itemsList = cat.getItems();
 			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
+			lv.setOnItemLongClickListener(
+				new OnItemLongClickListener() {
+					
+					public boolean onItemLongClick(AdapterView<?> parent,
+							View view, int position, long id) {
+						Item item = itemsList.get(position);
+						Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
+						intent.putExtra(CATEGORY, item.getCategory().getName());
+						intent.putExtra(INDEX, position);
+						startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
+						return true;
+					}
+				
+				}
+			);
 			lv.setOnItemClickListener(new OnItemClickListener() {
 			    public void onItemClick(AdapterView<?> parent, View view,
 			        int position, long id) {
@@ -374,16 +391,24 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			    		startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 			    	} else {
 				    	for(Address addr : addrs) {
-					    	int locX = (int) (addr.getLatitude() * 1E6);
-		    				int locY = (int) (addr.getLongitude() * 1E6);
-		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
-		        			GeoPoint myLoc = getDeviceLocation();
-		        			if(myLoc == null) {
-		        				zoomLocation(placeLocation);
-		        			} else {
-		        				zoomToTwoPoint(placeLocation, myLoc);
-		        			}
-		        		    break;
+				    		if(addr.hasLatitude() && addr.hasLongitude()) {
+						    	int locX = (int) (addr.getLatitude() * 1E6);
+			    				int locY = (int) (addr.getLongitude() * 1E6);
+			        			GeoPoint placeLocation = new GeoPoint(locX, locY);
+			        			GeoPoint myLoc = getDeviceLocation();
+			        			
+			        			if(myLoc == null) {
+			        				zoomLocation(placeLocation);
+			        			} else {
+			        				//This can be used to find the distance between two locations
+//			        				float[] results = new float[1];
+//				        			Location.distanceBetween(myLoc.getLatitudeE6(),myLoc.getLongitudeE6()
+//				        					,placeLocation.getLatitudeE6(), placeLocation.getLongitudeE6()
+//				        					,results);
+			        				zoomToTwoPoint(placeLocation, myLoc);
+			        			}
+			        		    break;
+				    		}
 					    }
 			    	}
 			    }

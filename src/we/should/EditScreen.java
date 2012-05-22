@@ -94,8 +94,8 @@ public class EditScreen extends Activity {
 			public void onTextChanged(CharSequence s, int start, int before,
 					int count) {
 				int orig = s.length() - count + before;
-				if ((s.length() >= mName.getThreshold())
-						&& orig < mName.getThreshold()) {
+				if ((s.length() >= mName.getThreshold())){
+						//&& orig < mName.getThreshold()) {
 					setupList(s.toString());
 				}
 			}
@@ -149,7 +149,7 @@ public class EditScreen extends Activity {
 			startActivity(intent);
 			break;
 		case R.id.save:
-			save();
+			save();	
 			break;
 		}
 		return true;
@@ -232,8 +232,11 @@ public class EditScreen extends Activity {
 		for (Tag t : mTags) {
 			mItem.addTag(t.toString(), t.getColor());
 		}
-		
-		mItem.save();
+		try {
+			mItem.save();
+		} catch (Exception e) {
+			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+		}
 		finish();
 	}
 	
