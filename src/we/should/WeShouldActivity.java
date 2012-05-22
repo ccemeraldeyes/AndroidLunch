@@ -417,22 +417,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			    	}
 			    }
 			  });
-			
-			/** Long click to got to item information page
-			 *
-			 *  @author Troy using Will's old regular click code
-			 */
-			lv.setOnItemLongClickListener(new OnItemLongClickListener() {
-			    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-		    		 Item item = itemsList.get(position);
-		    		 Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
-		    		 intent.putExtra(CATEGORY, item.getCategory().getName());
-		    		 intent.putExtra(INDEX, position);
-		    		 startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());			    
-		    		 return true;
-			    }
-			    
-			  });
 		
 			return lv;
 		}
