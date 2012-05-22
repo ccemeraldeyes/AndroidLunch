@@ -1,11 +1,22 @@
 package we.should;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import we.should.communication.GetReferralsService;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -58,8 +69,7 @@ public class Splash extends Activity {
 		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
 		String accountName = settings.getString(WeShouldActivity.ACCOUNT_NAME, null);
 		if (accountName != null) {
-			Intent openStartingPoint = new Intent("we.should.MAIN");
-			startActivity(openStartingPoint);
+			afterLogin();
 		}
 	}
 	
@@ -69,10 +79,11 @@ public class Splash extends Activity {
 	private void logIn() {
 		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
 		SharedPreferences.Editor editor = settings.edit();
-		editor.putString(WeShouldActivity.ACCOUNT_NAME, (String) mAccountsSpinner.getSelectedItem());
+		String accountName = (String) mAccountsSpinner.getSelectedItem();
+		editor.putString(WeShouldActivity.ACCOUNT_NAME, accountName);
 		editor.commit();
-		Intent openStartingPoint = new Intent("we.should.MAIN");
-		startActivity(openStartingPoint);
+		
+
 	}
 	
 	/**
@@ -100,6 +111,16 @@ public class Splash extends Activity {
 	protected void onPause() {
 		super.onPause();
 		finish();
+	}
+
+	protected void afterLogin(){
+		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
+		Intent service = new Intent(this, GetReferralsService.class);
+		service.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
+		startService(service);
+		
+		Intent openStartingPoint = new Intent("we.should.MAIN");
+		startActivity(openStartingPoint);
 	}
 
 	

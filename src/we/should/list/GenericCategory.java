@@ -1,8 +1,10 @@
 package we.should.list;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,27 +53,45 @@ public class GenericCategory extends Category {
 	@Override
 	public List<Item> getItems() {
 		if (!sync && ctx != null && id != 0) {
-			WSdb db = new WSdb(ctx);
-			db.open();
-			Cursor cur = db.getItemsOfCategory(this.id);
-			while (cur.moveToNext()) {
-				JSONObject data = null;
+			Map<Integer, JSONObject> itemData = getItemData();
+			for (int i : itemData.keySet()){
+				Item nIt = this.newItem();
 				try {
-					data = new JSONObject(cur.getString(3));
-					GenericItem nIt = new GenericItem(this, ctx);
-					nIt.DBtoData(data);
-					nIt.setID(cur.getInt(0));
-					nIt.added = true;
+					nIt.DBtoData(itemData.get(i));
 					if(!this.items.contains(nIt)) this.items.add(nIt);
 				} catch (JSONException e) {
-					Log.e("GenericCategory.getItems()", "Database data string improperly formatted");
+					Log.w("GenericCategory.getItems()", "Couldn't fill data from DB " + itemData.get(i).toString());
 				}
+				nIt.id = i;
+				if(!this.items.contains(nIt)) this.items.add(nIt);
+				
 			}
-			cur.close(); // T.S.
-			db.close();
 			sync = true;
 		}
 		return this.items;
+	}
+	/**
+	 * Returns a list of JSONObjects formed from item rows
+	 * stored in the DB for this category
+	 * @return list of item JSONObjects
+	 */
+	protected Map<Integer, JSONObject> getItemData(){
+		Map<Integer, JSONObject> out = new LinkedHashMap<Integer, JSONObject>();
+		WSdb db = new WSdb(ctx);
+		db.open();
+		Cursor cur = db.getItemsOfCategory(this.id);
+		while (cur.moveToNext()) {
+			JSONObject data = null;
+			try {
+				data = new JSONObject(cur.getString(3));
+				out.put(cur.getInt(0), data);
+			} catch (JSONException e) {
+				Log.e("GenericCategory.getItems()", "Database data string improperly formatted");
+			}
+		}
+		cur.close(); // T.S.
+		db.close();
+		return out;
 	}
 
 	@Override

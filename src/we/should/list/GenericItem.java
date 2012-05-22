@@ -1,12 +1,11 @@
 package we.should.list;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -43,7 +42,7 @@ public class GenericItem extends Item {
 	protected GenericItem(Category c, Context ctx) {
 		super(ctx);
 		this.c = c;
-		values = new HashMap<Field, String>();
+		values = new LinkedHashMap<Field, String>();
 		List<Field> fields = this.getFields();
 		for(Field i : fields){
 			if (i.getType().equals(FieldType.CheckBox)) {
@@ -203,7 +202,6 @@ public class GenericItem extends Item {
 					db.updateItem(this.id, this.getName(), 
 						this.c.id, dataToDB().toString());
 				} else {
-					
 						this.id = (int) db.insertItem(this.getName(), 
 							this.c.id, dataToDB().toString());
 				}
@@ -315,18 +313,6 @@ public class GenericItem extends Item {
 	@Override
 	public Category getCategory() {
 		return this.c;
-	}
-	
-	private JSONObject dataToDB(){
-		JSONObject out = new JSONObject();
-		for(Entry<Field, String> e : values.entrySet()){
-			try {
-				out.put(e.getKey().toDB(), e.getValue());
-			} catch (JSONException err) {
-				err.printStackTrace();
-			}
-		}
-		return out;
 	}
 	public boolean equals(Object other){
 		if(other == this) return true;

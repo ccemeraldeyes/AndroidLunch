@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,6 +48,7 @@ public abstract class Item {
 	
 	protected Item(Context ctx){
 		this.ctx = ctx;
+		this.id = 0;
 	}
 	/**
 	 * @return a set of Address objects corresponding to the location(s) of this.
@@ -54,22 +56,6 @@ public abstract class Item {
 	 */
 	public abstract Set<android.location.Address> getAddresses();
 	
-//	/**
-//	 * Adds an address to this item. Processes the string and translates
-//	 * to a lat and long.
-//	 * @param add string representation of an address
-//	 * @return true if lookup is successful, false otherwise
-//	 * @modifies this.addresses if lookup is successful
-//	 */
-//	public abstract boolean addAddress(String add);
-//	
-//	/**
-//	 * Adds a pre-validated address to this
-//	 * @param add Address object representation of an address
-//	 * @return add.hasLatitude && add.hasLongitude
-//	 * @modifies this.addresses if add.hasLatitude && add.hasLongitude
-//	 */
-//	public abstract boolean addAddress(android.location.Address add);
 	/**
 	 * 
 	 * @return the comment field of this. If the comment has not been
@@ -229,6 +215,7 @@ public abstract class Item {
 	 * @throws JSONException
 	 * @modifies this.values
 	 */
+
 	protected void DBtoData(JSONObject d) throws JSONException{
 		@SuppressWarnings("unchecked")
 		Iterator<String> i = d.keys();
@@ -242,7 +229,27 @@ public abstract class Item {
 	public boolean isAdded() {
 		return added;
 	}
+	/**
+	 * Returns a unique Id for this item.
+	 * @return
+	 */
 	public int getId() {
+		if(id == 0) throw new IllegalStateException("Cannot call getId if the item hasn't been saved!");
 		return this.id;
+	}
+	/**
+	 * Returns a JSONObject representation of the data contained within this item
+	 * @return A JSONObject mapping the field names to their string values.
+	 */
+	public JSONObject dataToDB(){
+		JSONObject out = new JSONObject();
+		for(Entry<Field, String> e : values.entrySet()){
+			try {
+				out.put(e.getKey().toDB(), e.getValue());
+			} catch (JSONException err) {
+				err.printStackTrace();
+			}
+		}
+		return out;
 	}
 }

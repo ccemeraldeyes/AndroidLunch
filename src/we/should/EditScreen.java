@@ -1,17 +1,39 @@
 package we.should;
 
+
+import java.io.IOException;
 import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
+import java.util.regex.Pattern;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
+
 import java.util.Set;
+
 
 import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.Item;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import we.should.list.Tag;
 import we.should.search.DetailPlace;
 import we.should.search.Place;
@@ -21,13 +43,19 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 import android.os.Bundle;
+
+import android.util.Log;
+import android.util.Patterns;
+
 import android.text.Editable;
 import android.text.TextWatcher;
+
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -195,7 +223,7 @@ public class EditScreen extends Activity {
 	 * Pulls up the set tags menu.
 	 */
 	private void setTags() {
-		Intent intent = new Intent(EditScreen.this, SetTags.class);
+		Intent intent = new Intent(EditScreen.this, SetTags.class); //was SetTags.class
 		
 		// Why do we have to use .toArray() here?  Because Eclipse sucks.
 		intent.putExtra(WeShouldActivity.TAGS, (Serializable) mTags);
@@ -243,7 +271,7 @@ public class EditScreen extends Activity {
 	}
 	
 	/**
-	 * Save the data then exit.
+	 * Save the data then exit. If there is an error, Toast it and do nothing.
 	 */
 	private void save() {
 		for (Field f : mData.keySet()) {
@@ -263,6 +291,57 @@ public class EditScreen extends Activity {
 			mItem.save();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		
+		// Create a new HttpClient and Post Header
+		HttpClient httpclient = new DefaultHttpClient();
+		
+		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
+		
+//		String querystring = "?user_email="+;
+//		
+//		for (Field f: mData.keySet()){
+//			querystring += "&"+f.getName()+"="+mData.get(f);
+//		}
+	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+	    nameValuePairs.add(new BasicNameValuePair("user_email", settings.getString(WeShouldActivity.ACCOUNT_NAME, "")));
+		
+	    //TODO just make this a "data" string
+	    //TODO check for category and tag
+	    for (Field f : mData.keySet()) {
+			nameValuePairs.add(new BasicNameValuePair(f.getName(), mData.get(f)));
+		}
+		
+		String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
+
+		
+		HttpGet httpget = new HttpGet("http://23.23.237.174/save-item?"+paramString);
+		
+//		HttpPost httppost = new HttpPost("http://23.23.237.174/save-item");
+//		httppost.setHeader("Content-type", "application/json");
+//		httpclient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, " Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6");
+
+		try {
+		    // Add your data
+
+//		    httpget.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+//
+//		    // Execute HTTP Post Request
+//		    HttpResponse response = httpclient.execute(httppost);
+			
+
+			
+			httpclient.execute(httpget);
+		    Log.v("GETREFERRALSSERVICE", "backing up items");
+
+		} catch (ClientProtocolException e) {
+		    // TODO Auto-generated catch block
+			Log.v("GETREFERRALSSERVICE", e.getMessage());
+		} catch (IOException e) {
+		    // TODO Auto-generated catch block
+			Log.v("GETREFERRALSSERVICE", e.getMessage());
 		}
 		finish();
 	}
