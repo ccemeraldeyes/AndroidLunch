@@ -15,6 +15,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,6 +53,9 @@ public class GetReferralsService extends IntentService {
 		
 		HttpGet httpget = new HttpGet("http://23.23.237.174/check-referrals?"+paramString);
 		
+		JSONObject resp = new JSONObject();
+		JSONArray data = new JSONArray();
+		
 		try {
 		    // Add your data
 //		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
@@ -69,7 +73,10 @@ public class GetReferralsService extends IntentService {
 			byte[] buf = new byte[4096];
 			is.read(buf);
 
-			JSONObject resp = new JSONObject(new String(buf));
+			resp = new JSONObject(new String(buf));
+			data = resp.getJSONArray("data"); //TODO check, I think it's actually "referrals" or something
+			
+			
 			
 			Log.v("REFERRAL RESPONSE", new String(buf));
 		    
@@ -104,9 +111,12 @@ public class GetReferralsService extends IntentService {
 		
 		Context context = getApplicationContext();
 		CharSequence contentTitle = "New referrals!";
-		CharSequence contentText = "You have [X] new referrals awaiting your approval.";
+		CharSequence contentText = "You have "+data.length()+" new referrals awaiting your approval.";
 		Intent notificationIntent = new Intent(this, ApproveReferral.class);
 		//THIS IS WHERE TO SET THE EXTRAS I THINK
+		
+		notificationIntent.putExtra("referrals", data.toString());
+
 		
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 

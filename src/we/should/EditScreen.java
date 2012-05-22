@@ -267,36 +267,17 @@ public class EditScreen extends Activity {
 		
 		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
 		
-//		String querystring = "?user_email="+;
-//		
-//		for (Field f: mData.keySet()){
-//			querystring += "&"+f.getName()+"="+mData.get(f);
-//		}
+
 	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-	    nameValuePairs.add(new BasicNameValuePair("user_email", settings.getString(WeShouldActivity.ACCOUNT_NAME, "")));
-		
-	    //TODO just make this a "data" string
-	    //TODO check for category and tag
-	    for (Field f : mData.keySet()) {
-			nameValuePairs.add(new BasicNameValuePair(f.getName(), mData.get(f)));
-		}
+	    nameValuePairs.add(new BasicNameValuePair("user_email", settings.getString(WeShouldActivity.ACCOUNT_NAME, "")));	    
+	    nameValuePairs.add(new BasicNameValuePair("item", mItem.dataToDB().toString()));
 		
 		String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
 
 		
 		HttpGet httpget = new HttpGet("http://23.23.237.174/save-item?"+paramString);
-		
-//		HttpPost httppost = new HttpPost("http://23.23.237.174/save-item");
-//		httppost.setHeader("Content-type", "application/json");
-//		httpclient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, " Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6");
 
 		try {
-		    // Add your data
-
-//		    httpget.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-//
-//		    // Execute HTTP Post Request
-//		    HttpResponse response = httpclient.execute(httppost);
 			
 
 			

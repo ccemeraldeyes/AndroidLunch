@@ -6,7 +6,9 @@ import java.util.List;
 import we.should.R;
 import we.should.database.WSdb;
 import we.should.list.Category;
+import we.should.list.Item;
 import we.should.list.ReferralItem;
+import we.should.list.Referrals;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -24,6 +26,7 @@ public class ApproveReferral extends Activity {
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		
 		final Context c = this.getApplicationContext(); //I don't know if this is the right way to do this!
 		
 		super.onCreate(savedInstanceState);
@@ -33,8 +36,8 @@ public class ApproveReferral extends Activity {
 		List<Referral> list = new ArrayList<Referral>();
 		
 		//get referral items from extras
-		list.add(new Referral("The Kraken", "Will", false));
-		list.add(new Referral("Reboot", "Troy", false));
+		list.add(new Referral("The Kraken", "Will", false, null));
+		list.add(new Referral("Reboot", "Troy", false, null));
 		mAdapter = new ReferralAdapter(this, list);
 		lv.setAdapter(mAdapter);
 		
@@ -46,13 +49,17 @@ public class ApproveReferral extends Activity {
 				
 				List<Referral> approvedList = mAdapter.getApprovedList();
 				
-				Category cat = Category.getCategory("referral", c); //is this right?
+				//send approved/rejected to remote db and delete
 				
+				Referrals refs = Referrals.getReferralCategory(c);
 				
-				WSdb db = new WSdb(c);
 				// save them
 				for(Referral r: approvedList){
-					db.insertItem(r.getName(), 0, null); //get cat and data
+					//get JSON object (store in referral)
+					ReferralItem ref = (ReferralItem) refs.newItem(null);
+					ref.save();
+					
+
 				}
 				
 				finish();

@@ -1,5 +1,7 @@
 package we.should.communication;
 
+import org.json.JSONObject;
+
 public class Referral {
 	
 	private String mName;
@@ -8,10 +10,13 @@ public class Referral {
 	
 	private boolean mApproved;
 	
-	public Referral(String name, String sender, boolean approved) {
+	private JSONObject mData;
+	
+	public Referral(String name, String sender, boolean approved, JSONObject data) {
 		mName = name;
 		mSender = sender;
 		mApproved = approved;
+		mData = data;
 	}
 
 	/**
