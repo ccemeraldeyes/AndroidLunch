@@ -20,7 +20,7 @@
         android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:completionThreshold="7" />
+        android:completionThreshold="4" />
 
     <include
         layout="@layout/divider" />
@@ -36,7 +36,7 @@
         android:id="@+id/deleteItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Delete Item" />
+        android:text="@string/delete_item" />
 
     <include layout="@layout/divider" />
     

@@ -63,7 +63,8 @@ public class ViewScreen extends Activity {
 	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		update();
+		if(resultCode == Activity.RESULT_CANCELED) finish();
+		else update();
 	}
 	
 	@Override

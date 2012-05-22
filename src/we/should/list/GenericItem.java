@@ -117,10 +117,10 @@ public class GenericItem extends Item {
 				db.deleteItem(this.id);
 				db.close();
 			} else {
-				Log.w("Item.save()", "This item has no context. Item cannot be deleted from database.");
+				Log.w("Item.delete()", "This item has no context. Item cannot be deleted from database.");
 			}
 		} else {
-			Log.w("Item.save()", "This item has not been saved. Item cannot be deleted to database.");
+			Log.w("Item.delete()", "This item has not been saved. Item cannot be deleted from database.");
 		}
 	}
 
