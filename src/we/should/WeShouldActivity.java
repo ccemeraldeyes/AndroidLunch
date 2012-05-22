@@ -33,8 +33,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
@@ -86,9 +90,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private LocationManager lm;
 	private MapController controller;
 	private String towers;
-	private int devX, devY;
 	private MyLocationOverlay myLocationOverlay;
 	private List<Overlay> overlayList;
+	private ImageButton zoomButton;
+	
 	protected WSdb db;
 	protected String DBFILE;
 	
@@ -109,6 +114,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         overlayList = map.getOverlays();
         
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
+        this.zoomButton = (ImageButton) findViewById(R.id.my_location_button);
         mSortType = SortType.Category;
         updateTabs();        
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
@@ -116,17 +122,24 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 				updatePins(tabId.trim());
 			}
 		});
+        
+        this.zoomButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View arg0) {
+				GeoPoint loc = getDeviceLocation();
+				if(loc != null) {
+					zoomLocation(getDeviceLocation());
+				}
+			}
+        });
+        
         db = new WSdb(this);
         //Testing
         myLocationOverlay = new MyLocationOverlay(this, map);
         map.getOverlays().add(myLocationOverlay);
         //Getting current location.
-        Location location = getDeviceLocation();
+        GeoPoint location = getDeviceLocation();
         if(location != null) {
         	zoomLocation(location);
-        } else {
-        	Toast.makeText(WeShouldActivity.this, 
-        			"Couldn't get provider", Toast.LENGTH_SHORT).show();
         }
         map.postInvalidate();    
     }
@@ -155,7 +168,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     				int locY = (int) (addr.getLongitude() * 1E6);
         			GeoPoint placeLocation = new GeoPoint(locX, locY);
         			OverlayItem overlayItem = new OverlayItem(placeLocation, item.getName(), item.get(Field.ADDRESS));
-        			CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this);
+        			CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this, item);
         			custom.insertPinpoint(overlayItem);
         			lstPinPoints.add(custom);
         			overlayList.add(custom);
@@ -324,10 +337,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	}
 
 	public void onLocationChanged(Location location) {
-		devX = (int) (location.getLatitude() * 1E6);
-		devY = (int) (location.getLongitude() * 1E6);
-		GeoPoint ourLocation = new GeoPoint(devX, devY);
-		controller.animateTo(ourLocation);
+		//we do nothing when user change the location of the map
 	}
 	
 	//We will handle this later.
@@ -361,14 +371,49 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			
 			final List<Item> itemsList = cat.getItems();
 			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
+			lv.setOnItemLongClickListener(
+				new OnItemLongClickListener() {
+					
+					public boolean onItemLongClick(AdapterView<?> parent,
+							View view, int position, long id) {
+						Item item = itemsList.get(position);
+						Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
+						intent.putExtra(CATEGORY, item.getCategory().getName());
+						intent.putExtra(INDEX, item.getId());
+						startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
+						return true;
+					}
+				
+				}
+			);
 			lv.setOnItemClickListener(new OnItemClickListener() {
 			    public void onItemClick(AdapterView<?> parent, View view,
 			        int position, long id) {
 			    	Item item = itemsList.get(position);
-					Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
-					intent.putExtra(CATEGORY, item.getCategory().getName());
-					intent.putExtra(INDEX, position);
-					startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
+			    	Set<Address> addrs = item.getAddresses();
+			    	//instead of show info page, it zoom to location.
+			    	if(addrs.isEmpty()) {
+			    		Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
+			    		intent.putExtra(CATEGORY, item.getCategory().getName());
+			    		intent.putExtra(INDEX, item.getId());
+			    		startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
+			    	} else {
+				    	for(Address addr : addrs) {
+				    		if(addr.hasLatitude() && addr.hasLongitude()) {
+						    	int locX = (int) (addr.getLatitude() * 1E6);
+			    				int locY = (int) (addr.getLongitude() * 1E6);
+			        			GeoPoint placeLocation = new GeoPoint(locX, locY);
+			        			GeoPoint myLoc = getDeviceLocation();
+			        			
+			        			if(myLoc == null) {
+			        				zoomLocation(placeLocation);
+			        			} else {
+			        				zoomToTwoPoint(placeLocation, myLoc);
+			        			}
+			        		    break;
+				    		}
+					    }
+			    	}
 			    }
 			  });
 			
@@ -402,7 +447,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			    	Item item = itemsList.get(position);
 					Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
 					intent.putExtra(CATEGORY, item.getCategory().getName());
-					intent.putExtra(INDEX, position);
+					intent.putExtra(INDEX, item.getId());
 					startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 			    }
 			  });
@@ -415,22 +460,38 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/*
 	 * @return the location of the device
 	 */
-	private Location getDeviceLocation() {
+	private GeoPoint getDeviceLocation() {
 		 lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE); // it is a string
 	     Criteria crit = new Criteria();
 	     towers = (lm.getBestProvider(crit, false)); //getting best provider.
-	     return lm.getLastKnownLocation(towers);	
+	     Location location = lm.getLastKnownLocation(towers);
+	     if(location == null) {
+	        Toast.makeText(WeShouldActivity.this, 
+	        			"Couldn't get providers", Toast.LENGTH_SHORT).show();
+	    	 return null;
+	     } else {
+		     int myLocX = (int) (location.getLatitude() * 1E6);
+			 int myLocY = (int) (location.getLongitude() * 1E6);
+		     return new GeoPoint(myLocX, myLocY);
+		}
 	}
 	
+	private void zoomToTwoPoint(GeoPoint point, GeoPoint point2) {
+		int maxX = Math.max(point.getLatitudeE6(), point2.getLatitudeE6());
+		int minX = Math.min(point.getLatitudeE6(), point2.getLatitudeE6());
+		int maxY = Math.max(point.getLongitudeE6(), point2.getLongitudeE6());
+		int minY = Math.min(point.getLongitudeE6(), point2.getLongitudeE6());
+		controller.zoomToSpan(maxX - minX, maxY - minY);
+		controller.animateTo(new GeoPoint((minX + maxX) / 2, (minY + maxY) / 2));		
+	}
 	/*
 	 * if location is valid, make a pint and zoom user to that location.
 	 * if the location isn't valid, it display error message with toast. 
 	 */
-	private void zoomLocation(Location location) {
-	    devX = (int) (location.getLatitude() * 1E6);
-	    devY = (int) (location.getLongitude() * 1E6);
-	    GeoPoint ourLocation = new GeoPoint(devX, devY);
-	    controller.animateTo(ourLocation);
-	    controller.setZoom(18);
+	private void zoomLocation(GeoPoint location) {
+	    controller.animateTo(location);
+	    controller.setZoom(17);
 	}
+	
+
 }

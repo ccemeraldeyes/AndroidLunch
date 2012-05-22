@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/popupLayout"
+              android:orientation="vertical"
+              android:layout_width="275dp"
+              android:layout_height="wrap_content"
+              android:background="#FFFFFF"
+              android:paddingLeft="15dp"
+              android:paddingRight="15dp"
+              android:paddingTop="10dp"
+              android:paddingBottom="15dp"
+              >
+
+    <TextView
+        android:id="@+id/tvPopupName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Name:"
+        android:textColor="#ff6b6b6b"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/tvPopupDis"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Distance:"
+        android:textColor="#ff6b6b6b"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/tvPopUpAddr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Address:"
+        android:textColor="#ff6b6b6b"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Button
+        android:id="@+id/btnMoreInfo"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:textColor="#ff6b6b6b"
+        android:text="More Info" />
+
+</LinearLayout>

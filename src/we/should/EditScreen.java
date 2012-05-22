@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
@@ -39,11 +40,15 @@ import we.should.search.DetailPlace;
 import we.should.search.Place;
 import we.should.search.PlaceRequest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
+import android.os.AsyncTask.Status;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -58,12 +63,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class EditScreen extends Activity {
-	
+	/** Result code for item deletion **/
+	public static final int DELETE = 2;
+
 	/** The item that we're editing. **/
 	private Item mItem;
 	
@@ -79,11 +87,17 @@ public class EditScreen extends Activity {
 	/** A display of all of this item's tags. **/
 	private TextView mTagsView;
 	
+	/** Delete Item button **/
+	private Button mDelete;
+	
 	/** The data associated with each field. **/
 	private Map<Field, String> mData;
 	
 	/** Which tags are set to true. **/
 	private Set<Tag> mTags;
+	
+	/** Async location lookup **/
+	private AsyncTask<String, Void, List<Place>> mLookup;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -98,8 +112,9 @@ public class EditScreen extends Activity {
 		if (index == -1) {
 			mItem = cat.newItem();
 		} else {
-			mItem = cat.getItems().get(index);
+			mItem = cat.getItem(index);
 		}
+		if (mItem == null) throw new IllegalStateException("Index points to non-existent item!");
 		
 		TextView catDisplay = (TextView) findViewById(R.id.category);
 		catDisplay.setText(catName);
@@ -121,9 +136,8 @@ public class EditScreen extends Activity {
 
 			public void onTextChanged(CharSequence s, int start, int before,
 					int count) {
-				int orig = s.length() - count + before;
-				if ((s.length() >= mName.getThreshold())
-						&& orig < mName.getThreshold()) {
+				//int orig = s.length() - count + before;
+				if ((s.length() >= mName.getThreshold())){ //&& orig < mName.getThreshold()) {
 					setupList(s.toString());
 				}
 			}
@@ -133,7 +147,8 @@ public class EditScreen extends Activity {
 
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				fillFields((Place) mName.getAdapter().getItem(position));
+				PlaceAdapter pa = (PlaceAdapter) mName.getAdapter();
+				fillFields((Place) pa.getItem(position));
 			}
 			
 		});
@@ -158,6 +173,16 @@ public class EditScreen extends Activity {
 				setTags();
 			}
 		});
+		
+		mDelete = (Button) findViewById(R.id.deleteItem);
+		if (!mItem.isAdded()) mDelete.setVisibility(View.GONE);
+		else mDelete.setOnClickListener(new View.OnClickListener() {
+			
+			
+			public void onClick(View v) {
+				delete();
+			}
+		});
 	}
 	
 	@Override
@@ -176,7 +201,7 @@ public class EditScreen extends Activity {
 			startActivity(intent);
 			break;
 		case R.id.save:
-			save();
+			save();	
 			break;
 		}
 		return true;
@@ -214,17 +239,24 @@ public class EditScreen extends Activity {
 			return;
 		}
 		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-		if (location == null) {
-			return;
-		}
-		try {
-			List<Place> places = (new PlaceRequest()).searchByLocation(location, constraint);
-			mName.setAdapter(new PlaceAdapter(this, places));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return;
-		}
+		if(mLookup != null) {
+			if(!mLookup.getStatus().equals(Status.FINISHED)) {
+				mLookup.cancel(true);
+			}
+		} 
+		mLookup = new DoSuggestionLookup(locationManager, this);
+		mLookup.execute(constraint);
+//		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+//		if (location == null) {
+//			return;
+//		}
+//		try {
+//			List<Place> places = (new PlaceRequest()).searchByLocation(location, constraint);
+//			mName.setAdapter(new PlaceAdapter(this, places));
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			return;
+//		}
 	}
 	
 	/**
@@ -243,10 +275,10 @@ public class EditScreen extends Activity {
 	}
 	
 	/**
-	 * Save the data then exit.
+	 * Save the data then exit. If there is an error, Toast it and do nothing.
 	 */
 	private void save() {
-		for (Field f : mData.keySet()) {
+		for (Field f : mItem.getFields()) {
 			mItem.set(f, mData.get(f));
 		}
 		mItem.set(Field.NAME, mName.getText().toString());
@@ -259,8 +291,13 @@ public class EditScreen extends Activity {
 		for (Tag t : mTags) {
 			mItem.addTag(t.toString(), t.getColor());
 		}
-		
-		mItem.save();
+		try {
+			mItem.save();
+		} catch (Exception e) {
+			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+
 		
 		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();
@@ -291,9 +328,55 @@ public class EditScreen extends Activity {
 		    // TODO Auto-generated catch block
 			Log.v("GETREFERRALSSERVICE", e.getMessage());
 		}
-		
-		
 		finish();
 	}
-	
+	private void delete() {
+		new AlertDialog.Builder(this)
+        .setIcon(android.R.drawable.ic_dialog_alert)
+        .setTitle(R.string.delete_item)
+        .setMessage(R.string.delete_item_confirm)
+        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+        	
+        	public void onClick(DialogInterface dialog, int which) {
+
+                mItem.delete();
+                setResult(DELETE);
+                finish();    
+            }
+
+        })
+        .setNegativeButton(R.string.no, null)
+        .show();
+	}
+	private class DoSuggestionLookup extends AsyncTask<String, Void, List<Place>> {
+
+		LocationManager locationManager;
+		Context ctx;
+		public DoSuggestionLookup(LocationManager lm, Context ctx){
+			this.locationManager = lm;
+			this.ctx = ctx;
+		}
+		
+		protected List<Place> doInBackground(String... params) {
+			List<Place> places = new ArrayList<Place>();
+			if (!mItem.getFields().contains(Field.ADDRESS)) {
+				return places;
+			}
+			Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			if (location == null) {
+				return places;
+			}
+			try {
+				if(!isCancelled()) places = (new PlaceRequest()).searchByLocation(location, params[0]);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return places;
+			}
+			return places;
+		}
+		protected void onPostExecute(List<Place> result){
+			if(result != null && !isCancelled()) mName.setAdapter(new PlaceAdapter(ctx, result));
+		}
+		
+	}
 }

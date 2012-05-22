@@ -10,4 +10,8 @@
     <string name="help_text">Welcome to WeShould!  This is the help text!</string>
     <string name="no_cat">No categories exist.  Please press the menu button and add a category.</string>
     <string name="help_information">Special fields\n\nPhone number - press the number to call\n\nURL - press the web address to open in the browser</string>
+    <string name="delete_item">Delete Item</string>
+    <string name="delete_item_confirm">Are you sure you wish to delete this item?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

@@ -48,6 +48,7 @@ public abstract class Item {
 	
 	protected Item(Context ctx){
 		this.ctx = ctx;
+		this.id = 0;
 	}
 	/**
 	 * @return a set of Address objects corresponding to the location(s) of this.
@@ -55,22 +56,6 @@ public abstract class Item {
 	 */
 	public abstract Set<android.location.Address> getAddresses();
 	
-//	/**
-//	 * Adds an address to this item. Processes the string and translates
-//	 * to a lat and long.
-//	 * @param add string representation of an address
-//	 * @return true if lookup is successful, false otherwise
-//	 * @modifies this.addresses if lookup is successful
-//	 */
-//	public abstract boolean addAddress(String add);
-//	
-//	/**
-//	 * Adds a pre-validated address to this
-//	 * @param add Address object representation of an address
-//	 * @return add.hasLatitude && add.hasLongitude
-//	 * @modifies this.addresses if add.hasLatitude && add.hasLongitude
-//	 */
-//	public abstract boolean addAddress(android.location.Address add);
 	/**
 	 * 
 	 * @return the comment field of this. If the comment has not been
@@ -240,6 +225,17 @@ public abstract class Item {
 			Field f = new Field(fieldString);
 			this.values.put(f, value);
 		}
+	}
+	public boolean isAdded() {
+		return added;
+	}
+	/**
+	 * Returns a unique Id for this item.
+	 * @return
+	 */
+	public int getId() {
+		if(id == 0) throw new IllegalStateException("Cannot call getId if the item hasn't been saved!");
+		return this.id;
 	}
 	/**
 	 * Returns a JSONObject representation of the data contained within this item

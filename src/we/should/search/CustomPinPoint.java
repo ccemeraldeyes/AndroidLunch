@@ -3,8 +3,13 @@ package we.should.search;
 import java.util.ArrayList;
 import java.util.List;
 
+import we.should.CustomDialog;
+import we.should.list.Item;
+
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
@@ -16,7 +21,8 @@ import com.google.android.maps.OverlayItem;
  */
 public class CustomPinPoint extends ItemizedOverlay<OverlayItem>{
 	private List<OverlayItem> pinpoints = new ArrayList<OverlayItem>();
-	//private Context c;
+	private Item item;
+	private Context context;
 	/**
 	 * Creating a pinpoint with drawable
 	 */
@@ -28,9 +34,10 @@ public class CustomPinPoint extends ItemizedOverlay<OverlayItem>{
 	 * @param m - Drawable 
 	 * @param context - context will be useful on onTap
 	 */
-	public CustomPinPoint(Drawable m, Context context) {
+	public CustomPinPoint(Drawable m, Context context, Item item) {
 		this(m);
-		//this.c = context;//@param context - context will be useful on onTap
+		this.context = context;
+		this.item = item;
 	}
 	
 	/**
@@ -46,8 +53,14 @@ public class CustomPinPoint extends ItemizedOverlay<OverlayItem>{
 	 */
 	@Override
 	protected boolean onTap(int index) { 
-		//OverlayItem overlay = pinpoints.get(index);
-		return super.onTap(index);
+//		This can be used to find the distance.		
+//		float[] results = new float[1];
+//		Location.distanceBetween(myLoc.getLatitudeE6(),myLoc.getLongitudeE6()
+//				,placeLocation.getLatitudeE6(), placeLocation.getLongitudeE6()
+//				,results);
+		Dialog dialog = new CustomDialog(context, item, 0, 0);
+		dialog.show();
+		return true;
 	}
 
 	/**

@@ -28,8 +28,10 @@ public class ReferralItem extends GenericItem {
 	 * @param ctx - the context of the DB where the item will be manipulated.
 	 */
 	protected ReferralItem(Category c, JSONObject values, Context ctx) {
-
 		super(c, ctx);
+		if(values == null){
+			throw new IllegalArgumentException("Values is null!");
+		}
 		try {
 			DBtoData(values);
 		} catch (JSONException e) {

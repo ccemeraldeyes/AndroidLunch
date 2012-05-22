@@ -58,6 +58,7 @@ public class GenericCategory extends Category {
 				Item nIt = this.newItem();
 				try {
 					nIt.DBtoData(itemData.get(i));
+					if(!this.items.contains(nIt)) this.items.add(nIt);
 				} catch (JSONException e) {
 					Log.w("GenericCategory.getItems()", "Couldn't fill data from DB " + itemData.get(i).toString());
 				}
@@ -68,24 +69,6 @@ public class GenericCategory extends Category {
 			sync = true;
 		}
 		return this.items;
-//			WSdb db = new WSdb(ctx);
-//			db.open();
-//			Cursor cur = db.getItemsOfCategory(this.id);
-//			while (cur.moveToNext()) {
-//				JSONObject data = null;
-//				try {
-//					data = new JSONObject(cur.getString(3));
-//					GenericItem nIt = new GenericItem(this, ctx);
-//					nIt.DBtoData(data);
-//					nIt.setID(cur.getInt(0));
-//					if(!this.items.contains(nIt)) this.items.add(nIt);
-//				} catch (JSONException e) {
-//					Log.e("GenericCategory.getItems()", "Database data string improperly formatted");
-//				}
-//			}
-//			cur.close(); // T.S.
-//			db.close();
-//			sync = true;
 	}
 	/**
 	 * Returns a list of JSONObjects formed from item rows
