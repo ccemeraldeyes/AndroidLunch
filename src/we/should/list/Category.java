@@ -92,6 +92,18 @@ public abstract class Category {
 	public abstract List<Item> getItems();
 	
 	/**
+	 * 
+	 * @param index
+	 * @return
+	 */
+	public Item getItem(int index) {
+		List<Item> items = getItems();
+		for(Item i : items){
+			if(i.getId() == index) return i;
+		}
+		return null;
+	}
+	/**
 	 * Returns a new item in this Category. This item is not added until Item.save() is called.
 	 * @return a new Item(C)
 	 */
@@ -204,5 +216,4 @@ public abstract class Category {
 	public enum Special {
 		Movies, Referrals;
 	}
-
 }

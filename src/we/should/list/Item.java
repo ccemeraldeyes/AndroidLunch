@@ -239,4 +239,10 @@ public abstract class Item {
 			this.values.put(f, value);
 		}
 	}
+	public boolean isAdded() {
+		return added;
+	}
+	public int getId() {
+		return this.id;
+	}
 }

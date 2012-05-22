@@ -61,6 +61,7 @@ public class GenericCategory extends Category {
 					GenericItem nIt = new GenericItem(this, ctx);
 					nIt.DBtoData(data);
 					nIt.setID(cur.getInt(0));
+					nIt.added = true;
 					if(!this.items.contains(nIt)) this.items.add(nIt);
 				} catch (JSONException e) {
 					Log.e("GenericCategory.getItems()", "Database data string improperly formatted");

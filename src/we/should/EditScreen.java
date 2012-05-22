@@ -40,7 +40,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class EditScreen extends Activity {
-	
+	/** Result code for item deletion **/
+	public static final int DELETE = 2;
+
 	/** The item that we're editing. **/
 	private Item mItem;
 	
@@ -81,8 +83,9 @@ public class EditScreen extends Activity {
 		if (index == -1) {
 			mItem = cat.newItem();
 		} else {
-			mItem = cat.getItems().get(index);
+			mItem = cat.getItem(index);
 		}
+		if (mItem == null) throw new IllegalStateException("Index points to non-existent item!");
 		
 		TextView catDisplay = (TextView) findViewById(R.id.category);
 		catDisplay.setText(catName);
@@ -143,7 +146,8 @@ public class EditScreen extends Activity {
 		});
 		
 		mDelete = (Button) findViewById(R.id.deleteItem);
-		mDelete.setOnClickListener(new View.OnClickListener() {
+		if (!mItem.isAdded()) mDelete.setVisibility(View.GONE);
+		else mDelete.setOnClickListener(new View.OnClickListener() {
 			
 			
 			public void onClick(View v) {
@@ -272,7 +276,7 @@ public class EditScreen extends Activity {
         	public void onClick(DialogInterface dialog, int which) {
 
                 mItem.delete();
-                setResult(Activity.RESULT_CANCELED);
+                setResult(DELETE);
                 finish();    
             }
 

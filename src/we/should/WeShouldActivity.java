@@ -371,7 +371,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 						Item item = itemsList.get(position);
 						Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
 						intent.putExtra(CATEGORY, item.getCategory().getName());
-						intent.putExtra(INDEX, position);
+						intent.putExtra(INDEX, item.getId());
 						startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 						return true;
 					}
@@ -387,7 +387,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			    	if(addrs.isEmpty()) {
 			    		Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
 			    		intent.putExtra(CATEGORY, item.getCategory().getName());
-			    		intent.putExtra(INDEX, position);
+			    		intent.putExtra(INDEX, item.getId());
 			    		startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 			    	} else {
 				    	for(Address addr : addrs) {
@@ -400,11 +400,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			        			if(myLoc == null) {
 			        				zoomLocation(placeLocation);
 			        			} else {
-			        				//This can be used to find the distance between two locations
-//			        				float[] results = new float[1];
-//				        			Location.distanceBetween(myLoc.getLatitudeE6(),myLoc.getLongitudeE6()
-//				        					,placeLocation.getLatitudeE6(), placeLocation.getLongitudeE6()
-//				        					,results);
 			        				zoomToTwoPoint(placeLocation, myLoc);
 			        			}
 			        		    break;
@@ -444,7 +439,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			    	Item item = itemsList.get(position);
 					Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
 					intent.putExtra(CATEGORY, item.getCategory().getName());
-					intent.putExtra(INDEX, position);
+					intent.putExtra(INDEX, item.getId());
 					startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 			    }
 			  });

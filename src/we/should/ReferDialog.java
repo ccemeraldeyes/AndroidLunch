@@ -35,8 +35,9 @@ public class ReferDialog extends Activity {
 		if (index == -1) {
 			mItem = cat.newItem();
 		} else {
-			mItem = cat.getItems().get(index);
+			mItem = cat.getItem(index);
 		}
+		if(mItem == null) throw new IllegalStateException("Index points to an item that doesn't exist!");
 		
 		mEmails = (EditText) findViewById(R.id.emails);
 		

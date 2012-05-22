@@ -57,13 +57,14 @@ public class ViewScreen extends Activity {
 		((TextView) findViewById(R.id.category)).setText(catName);
 		
 		mIndex = extras.getInt(WeShouldActivity.INDEX);
-		mItem = mCategory.getItems().get(mIndex);
+		mItem = mCategory.getItem(mIndex);
+		if(mItem == null) throw new IllegalStateException("Index points to an item that doesn't exist!");
         update();
     }
 	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if(resultCode == Activity.RESULT_CANCELED) finish();
+		if(resultCode == EditScreen.DELETE) finish();
 		else update();
 	}
 	
@@ -103,7 +104,8 @@ public class ViewScreen extends Activity {
 	 */
 	private void update() {
 		Category cat = Category.getCategory(mItem.getCategory().getName(), this);
-		mItem = cat.getItems().get(mIndex);
+		mItem = cat.getItem(mIndex);
+		if(mItem == null) throw new IllegalStateException("Index points to an item that doesn't exist!");
 		
 		((TextView) findViewById(R.id.name)).setText(mItem.getName());
         
