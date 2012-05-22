@@ -3,6 +3,10 @@ package we.should.search;
 import java.util.ArrayList;
 import java.util.List;
 
+import we.should.CustomDialog;
+import we.should.list.Item;
+
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
@@ -16,7 +20,8 @@ import com.google.android.maps.OverlayItem;
  */
 public class CustomPinPoint extends ItemizedOverlay<OverlayItem>{
 	private List<OverlayItem> pinpoints = new ArrayList<OverlayItem>();
-	//private Context c;
+	private Item item;
+	private Context context;
 	/**
 	 * Creating a pinpoint with drawable
 	 */
@@ -28,9 +33,10 @@ public class CustomPinPoint extends ItemizedOverlay<OverlayItem>{
 	 * @param m - Drawable 
 	 * @param context - context will be useful on onTap
 	 */
-	public CustomPinPoint(Drawable m, Context context) {
+	public CustomPinPoint(Drawable m, Context context, Item item) {
 		this(m);
-		//this.c = context;//@param context - context will be useful on onTap
+		this.context = context;
+		this.item = item;
 	}
 	
 	/**
@@ -47,7 +53,10 @@ public class CustomPinPoint extends ItemizedOverlay<OverlayItem>{
 	@Override
 	protected boolean onTap(int index) { 
 		//OverlayItem overlay = pinpoints.get(index);
-		return super.onTap(index);
+		//overlay.getPoint();
+		Dialog dialog = new CustomDialog(context, item, 0, 0);
+		dialog.show();
+		return true;
 	}
 
 	/**

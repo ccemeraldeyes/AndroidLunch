@@ -3,11 +3,15 @@
     android:id="@android:id/tabhost"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
+           
+    
+    
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:padding="5dp">
+
         <com.google.android.maps.MapView
 		    android:id="@+id/mapview"
 		    android:layout_width="fill_parent"
@@ -16,6 +20,13 @@
 		    android:layout_weight="1"
 	     	android:state_enabled="true"
 		    android:apiKey="0vP08l5PbglWjRr57dC3YMejBwVm1beO9_BtklA" />
+        
+        <ImageButton android:layout_width="37dp"
+            	android:contentDescription="zoom image"
+				android:layout_marginLeft="1dp"
+				android:layout_height="37dp" 
+				android:id="@+id/my_location_button"
+				android:src="@drawable/my_location"></ImageButton>
         <HorizontalScrollView
                 android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
