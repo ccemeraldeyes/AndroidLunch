@@ -99,6 +99,8 @@ public class NewCategory extends Activity {
 		if (Category.getCategory(mName.getText().toString(), this) != null) {
 			Toast.makeText(this, "There is already a category called "
 					+ mName.getText().toString(), duration).show();
+			saveable = false;
+			
 		}
 		
 		if (saveable) {
@@ -114,7 +116,12 @@ public class NewCategory extends Activity {
 				fields.add(new Field(pf.name, FieldType.get(pf.type)));
 			}
 			fields.add(Field.COMMENT);
-			(new GenericCategory(mName.getText().toString(), fields, this)).save();
+			try{
+				(new GenericCategory(mName.getText().toString(), fields, this)).save();
+			} catch(IllegalArgumentException e) {
+				//Toast
+				
+			}
 			finish();
 		} else {
 			findViewById(R.id.fullLayout).invalidate();

@@ -149,7 +149,7 @@ public abstract class Category {
 			 String name = c.getString(1);
 			 String color = c.getString(2);
 			 String schema = c.getString(3);
-			 if (name.equals("Movies")){
+			 if (name.equals(Category.Special.Movies.toString())){
 				 cat = new Movies(ctx);
 			 } else {
 				JSONArray schemaList;
@@ -201,4 +201,8 @@ public abstract class Category {
 		}
 		return cat;
 	}
+	public enum Special {
+		Movies, Referrals;
+	}
+
 }

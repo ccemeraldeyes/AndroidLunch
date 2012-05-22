@@ -193,7 +193,7 @@ public abstract class Item {
 			} else {
 				cat = cats.get(catId);
 			}
-			if (cat.getName().equals("Movies")) {
+			if (cat.getName().equals(Category.Special.Movies.toString())) {
 				i = new MovieItem(cat, ctx);
 			} else {
 				i = new GenericItem(cat, ctx);
