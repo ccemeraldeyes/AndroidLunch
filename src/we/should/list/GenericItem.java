@@ -167,7 +167,7 @@ public class GenericItem extends Item {
 		if(this.getFields().contains(key)){
 			if(key.equals(Field.ADDRESS)){
 				Address add = getGeoData(value);
-				String newValue = addressToJSON(add).toString();
+				String newValue = addressToJSON(add, value).toString();
 				values.put(key, newValue);
 			} else {
 				values.put(key, value);
@@ -277,10 +277,10 @@ public class GenericItem extends Item {
 		}
 		return newTags;
 	}
-	private JSONObject addressToJSON(Address a){
+	private JSONObject addressToJSON(Address a, String addressString){
 		JSONObject out = new JSONObject();
 		try{
-			out.put("address", a.getAddressLine(0));
+			out.put("address", addressString);
 			try{
 				out.put("lat", a.getLatitude());
 				out.put("long", a.getLongitude());
