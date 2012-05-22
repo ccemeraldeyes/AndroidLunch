@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
@@ -238,8 +239,11 @@ public class EditScreen extends Activity {
 			return;
 		}
 		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-		if(mLookup != null && !mLookup.getStatus().equals(Status.FINISHED))
-			mLookup.cancel(true);
+		if(mLookup != null) {
+			if(!mLookup.getStatus().equals(Status.FINISHED)) {
+				mLookup.cancel(true);
+			}
+		} 
 		mLookup = new DoSuggestionLookup(locationManager, this);
 		mLookup.execute(constraint);
 //		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -274,7 +278,7 @@ public class EditScreen extends Activity {
 	 * Save the data then exit. If there is an error, Toast it and do nothing.
 	 */
 	private void save() {
-		for (Field f : mData.keySet()) {
+		for (Field f : mItem.getFields()) {
 			mItem.set(f, mData.get(f));
 		}
 		mItem.set(Field.NAME, mName.getText().toString());
@@ -377,13 +381,12 @@ public class EditScreen extends Activity {
 			if (!mItem.getFields().contains(Field.ADDRESS)) {
 				return places;
 			}
-			//LocationManager locationManager = (LocationManager) EditScreen.getSystemService(Context.LOCATION_SERVICE);
 			Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			if (location == null) {
 				return places;
 			}
 			try {
-				places = (new PlaceRequest()).searchByLocation(location, params[0]);
+				if(!isCancelled()) places = (new PlaceRequest()).searchByLocation(location, params[0]);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return places;
@@ -391,7 +394,7 @@ public class EditScreen extends Activity {
 			return places;
 		}
 		protected void onPostExecute(List<Place> result){
-			if(result != null) mName.setAdapter(new PlaceAdapter(ctx, result));
+			if(result != null && !isCancelled()) mName.setAdapter(new PlaceAdapter(ctx, result));
 		}
 		
 	}
