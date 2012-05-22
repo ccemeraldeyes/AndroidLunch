@@ -32,6 +32,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
@@ -361,6 +362,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			
 			final List<Item> itemsList = cat.getItems();
 			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
+			
+			// click list item to change map view to show item & current location
 			lv.setOnItemClickListener(new OnItemClickListener() {
 			    public void onItemClick(AdapterView<?> parent, View view,
 			        int position, long id) {
@@ -389,6 +392,22 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			    }
 			  });
 			
+			/** Long click to got to item information page
+			 *
+			 *  @author Troy using Will's old regular click code
+			 */
+			lv.setOnItemLongClickListener(new OnItemLongClickListener() {
+			    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+		    		 Item item = itemsList.get(position);
+		    		 Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
+		    		 intent.putExtra(CATEGORY, item.getCategory().getName());
+		    		 intent.putExtra(INDEX, position);
+		    		 startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());			    
+		    		 return true;
+			    }
+			    
+			  });
+		
 			return lv;
 		}
 		
