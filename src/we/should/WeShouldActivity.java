@@ -124,7 +124,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         });
         
         db = new WSdb(this);
-        //Testing
         myLocationOverlay = new MyLocationOverlay(this, map);
         map.getOverlays().add(myLocationOverlay);
         //Getting current location.
@@ -142,6 +141,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	}
     	
     	List<Item> items = null;
+    	//TODO: Lawrence String color = null; get color of category or tag
     	switch (mSortType) {
     	case Category:
     		items = mCategories.get(name).getItems();
@@ -150,7 +150,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		items = new ArrayList<Item>(Item.getItemsOfTag(mTags.get(name), this));
     		break;
     	}
-		Drawable customPin = getResources().getDrawable(R.drawable.google_place); //default for now.
+		Drawable customPin = getResources().getDrawable(R.drawable.google_place); //TODO: Lawrence dynamically create colored pin of category or tag color
     	for (Item item : items) {
     		Set<Address> addrs = item.getAddresses();
     		for(Address addr : addrs) {
@@ -237,7 +237,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 
 	@Override
 	protected void onPause() {
-		//TODO: remember to stop all asynTask before exit!!!!
+		//TODO: Lawrence remember to stop all asynTask before exit!!!!
 		super.onPause();
 		myLocationOverlay.disableMyLocation();
 		lm.removeUpdates(this);

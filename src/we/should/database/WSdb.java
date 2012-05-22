@@ -10,14 +10,13 @@ import android.util.Log;
 
 /**
  * WeShould Database class - contains database methods used in the 
- * 							 WeShould Android Application<br/>
+ * 							 WeShould Android Application
  * 
  * @author  Troy Schuring
  * 			UW CSE403 SP12
  */
 
 //TODO: inserts return ID or 0 if fail... verify returns line#=ID
-//TODO: question... should I remove categoryupdate?
 
 public class WSdb {
 	private SQLiteDatabase db; 
