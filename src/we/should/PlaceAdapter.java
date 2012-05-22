@@ -29,6 +29,10 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 		mContext = context;
 		mPlaces = places;
 	}
+	//D.S
+	public Place getItem(int position){
+		return mPlaces.get(position);
+	}
 	
 	@Override
 	public Filter getFilter() {
