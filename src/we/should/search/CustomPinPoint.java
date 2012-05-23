@@ -8,7 +8,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.Point;
 
@@ -17,6 +16,10 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.Projection;
 
+/**
+ * A CustomPinPoint on the map.
+ * @author Lawrence
+ */
 public class CustomPinPoint extends Overlay {
 	private Item item;
 	private GeoPoint point;
@@ -32,7 +35,9 @@ public class CustomPinPoint extends Overlay {
 		this.color = color;
 	}
 	
-	
+	/**
+	 * Draw a Pin.
+	 */
 	@Override
 	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
 		super.draw(canvas, mapView, shadow);
@@ -61,9 +66,16 @@ public class CustomPinPoint extends Overlay {
 	    canvas.drawText(item.getName(), p.x, p.y, textPaint);
 	}
 
-
+	/**
+	 * Detect the tap on the image.
+	 */
 	@Override
 	public boolean onTap(GeoPoint clickpoint, MapView mapView) {
+		// This can be used to find the distance.
+		// float[] results = new float[1];
+		// Location.distanceBetween(myLoc.getLatitudeE6(),myLoc.getLongitudeE6()
+		// ,placeLocation.getLatitudeE6(), placeLocation.getLongitudeE6()
+		// ,results);
 		Point p1 = new Point();
 		Point p2 = new Point();
 		projection.toPixels(clickpoint, p1);
@@ -77,23 +89,4 @@ public class CustomPinPoint extends Overlay {
 			return super.onTap(clickpoint, mapView);
 		}
 	}
-
-
-//	@Override
-//	public boolean onTap(GeoPoint p, MapView mapView) {
-//		// This can be used to find the distance.
-//		// float[] results = new float[1];
-//		// Location.distanceBetween(myLoc.getLatitudeE6(),myLoc.getLongitudeE6()
-//		// ,placeLocation.getLatitudeE6(), placeLocation.getLongitudeE6()
-//		// ,results);
-//		if(p.equals(this.point)) {
-//			Dialog dialog = new CustomDialog(context, item, 0, 0);
-//			dialog.show();
-//			return true;
-//		} else {
-//			return super(p, mapView);
-//		}
-//	}
-	
-	
 }
