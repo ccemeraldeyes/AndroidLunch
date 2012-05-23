@@ -20,6 +20,7 @@ import we.should.search.CustomPinPoint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Criteria;
@@ -51,6 +52,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
+import com.google.android.maps.Projection;
 
 public class WeShouldActivity extends MapActivity implements LocationListener {
 	
@@ -93,9 +95,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private MyLocationOverlay myLocationOverlay;
 	private List<Overlay> overlayList;
 	private ImageButton zoomButton;
+	private Projection projection;
+	
 	
 	protected WSdb db;
 	protected String DBFILE;
+	
+	
 	
 	/** An enum describin how we want to group our tabs. **/
 	private static enum SortType {
@@ -111,6 +117,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         map = (MapView) findViewById(R.id.mapview);       
         controller = map.getController();
         overlayList = map.getOverlays();
+        projection = map.getProjection();
+       
         
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         this.zoomButton = (ImageButton) findViewById(R.id.my_location_button);
@@ -167,8 +175,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     				int locY = (int) (addr.getLongitude() * 1E6);
         			GeoPoint placeLocation = new GeoPoint(locX, locY);
         			OverlayItem overlayItem = new OverlayItem(placeLocation, item.getName(), item.get(Field.ADDRESS));
-        			CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this, item);
-        			custom.insertPinpoint(overlayItem);
+        			//CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this, item);
+        			//custom.insertPinpoint(overlayItem);
+        			CustomPinPoint custom = new CustomPinPoint(WeShouldActivity.this, item, placeLocation, this.projection, Color.BLUE);
+        			
         			lstPinPoints.add(custom);
         			overlayList.add(custom);
     			} catch (IllegalStateException ex) {
