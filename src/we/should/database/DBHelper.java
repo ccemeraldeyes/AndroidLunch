@@ -20,7 +20,7 @@ public class DBHelper extends SQLiteOpenHelper{
                     CategoryConst.ID + " integer primary key autoincrement, " +
 	                CategoryConst.NAME + " text UNIQUE not null, " +
                     CategoryConst.COLOR + " text not null, " +
-	                CategoryConst.SCHEMA + " schema text not null);";	
+	                CategoryConst.SCHEMA + " text not null);";	
 	
 	private static final String CREATE_TABLE_ITEM="create table " +			
 	                ItemConst.TBL_NAME + " (" +

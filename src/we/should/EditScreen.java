@@ -212,9 +212,12 @@ public class EditScreen extends Activity {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (ActivityKey.get(requestCode)) {
 		case SET_TAGS:
-			if (resultCode == RESULT_OK) {
+			if (resultCode == RESULT_OK || resultCode == RESULT_FIRST_USER) {
 				mTags = (Set<Tag>) data.getSerializableExtra(WeShouldActivity.TAGS);
 				mTagsView.setText(Tag.getFormatted(mTags));
+			}
+			if (resultCode == RESULT_FIRST_USER) {
+				save();
 			}
 			break;
 		}
@@ -246,17 +249,7 @@ public class EditScreen extends Activity {
 		} 
 		mLookup = new DoSuggestionLookup(locationManager, this);
 		mLookup.execute(constraint);
-//		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-//		if (location == null) {
-//			return;
-//		}
-//		try {
-//			List<Place> places = (new PlaceRequest()).searchByLocation(location, constraint);
-//			mName.setAdapter(new PlaceAdapter(this, places));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return;
-//		}
+
 	}
 	
 	/**

@@ -1,20 +1,10 @@
 package we.should;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
 import we.should.communication.GetReferralsService;
 import android.accounts.Account;
@@ -82,7 +72,7 @@ public class Splash extends Activity {
 		String accountName = (String) mAccountsSpinner.getSelectedItem();
 		editor.putString(WeShouldActivity.ACCOUNT_NAME, accountName);
 		editor.commit();
-		
+
 		afterLogin();
 	}
 	
