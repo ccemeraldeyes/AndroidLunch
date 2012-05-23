@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapView;
@@ -28,6 +29,7 @@ public class CustomPinPoint extends Overlay {
 	private Context context;
 	
 	public CustomPinPoint(Context c, Item item, GeoPoint p, Projection projection, int color) {
+		Log.v("customPinPoint","color="+color);
 		this.context = c;
 		this.item = item;
 		this.point = p;
