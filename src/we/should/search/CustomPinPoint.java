@@ -63,16 +63,37 @@ public class CustomPinPoint extends Overlay {
 
 
 	@Override
-	public boolean onTap(GeoPoint p, MapView mapView) {
-		// This can be used to find the distance.
-		// float[] results = new float[1];
-		// Location.distanceBetween(myLoc.getLatitudeE6(),myLoc.getLongitudeE6()
-		// ,placeLocation.getLatitudeE6(), placeLocation.getLongitudeE6()
-		// ,results);
-		Dialog dialog = new CustomDialog(context, item, 0, 0);
-		dialog.show();
-		return true;
+	public boolean onTap(GeoPoint clickpoint, MapView mapView) {
+		Point p1 = new Point();
+		Point p2 = new Point();
+		projection.toPixels(clickpoint, p1);
+		projection.toPixels(point, p2);
+		if(p1.x > p2.x - 10 && p1.x < p2.x + 10 &&
+				p1.y > p2.y - 15 && p1.y < p2.y + 5) {
+			Dialog dialog = new CustomDialog(context, item, 0, 0);
+			dialog.show();
+			return true;
+		} else {		
+			return super.onTap(clickpoint, mapView);
+		}
 	}
+
+
+//	@Override
+//	public boolean onTap(GeoPoint p, MapView mapView) {
+//		// This can be used to find the distance.
+//		// float[] results = new float[1];
+//		// Location.distanceBetween(myLoc.getLatitudeE6(),myLoc.getLongitudeE6()
+//		// ,placeLocation.getLatitudeE6(), placeLocation.getLongitudeE6()
+//		// ,results);
+//		if(p.equals(this.point)) {
+//			Dialog dialog = new CustomDialog(context, item, 0, 0);
+//			dialog.show();
+//			return true;
+//		} else {
+//			return super(p, mapView);
+//		}
+//	}
 	
 	
 }
