@@ -92,17 +92,12 @@ public abstract class Category {
 	public abstract List<Item> getItems();
 	
 	/**
-	 * 
+	 * Returns the item with the given index
 	 * @param index
 	 * @return
 	 */
-	public Item getItem(int index) {
-		List<Item> items = getItems();
-		for(Item i : items){
-			if(i.getId() == index) return i;
-		}
-		return null;
-	}
+	public abstract Item getItem(int index);
+	
 	/**
 	 * Returns a new item in this Category. This item is not added until Item.save() is called.
 	 * @return a new Item(C)

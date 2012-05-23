@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import we.should.communication.GetReferralsService;
 import we.should.database.WSdb;
 import we.should.list.Category;
 import we.should.list.Field;
@@ -14,14 +13,11 @@ import we.should.list.GenericCategory;
 import we.should.list.Item;
 import we.should.list.Movies;
 import we.should.list.Referrals;
-
 import we.should.list.Tag;
 import we.should.search.CustomPinPoint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Location;
@@ -35,7 +31,6 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -51,7 +46,6 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
-import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
 
 public class WeShouldActivity extends MapActivity implements LocationListener {
@@ -86,7 +80,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/** A map that maps the name of each tag to its values. **/
 	private Map<String, Tag> mTags;
 	
-	/** A mapping from id's to categorys, used for submenu creation. **/
+	/** A mapping from id's to categories, used for submenu creation. **/
 	private Map<Integer, Category> mMenuIDs;
 	private MapView map;
 	private LocationManager lm;
@@ -97,13 +91,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private ImageButton zoomButton;
 	private Projection projection;
 	
-	
 	protected WSdb db;
 	protected String DBFILE;
 	
-	
-	
-	/** An enum describin how we want to group our tabs. **/
+	/** An enum describing how we want to group our tabs. **/
 	private static enum SortType {
 		Category, Tag;
 	}
@@ -114,6 +105,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
         map = (MapView) findViewById(R.id.mapview);       
         controller = map.getController();
         overlayList = map.getOverlays();
@@ -166,7 +158,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		items = new ArrayList<Item>(Item.getItemsOfTag(mTags.get(name), this));
     		break;
     	}
-		Drawable customPin = getResources().getDrawable(R.drawable.google_place); //TODO: Lawrence dynamically create colored pin of category or tag color
     	for (Item item : items) {
     		Set<Address> addrs = item.getAddresses();
     		for(Address addr : addrs) {
@@ -174,9 +165,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     				int locX = (int) (addr.getLatitude() * 1E6);
     				int locY = (int) (addr.getLongitude() * 1E6);
         			GeoPoint placeLocation = new GeoPoint(locX, locY);
-        			OverlayItem overlayItem = new OverlayItem(placeLocation, item.getName(), item.get(Field.ADDRESS));
-        			//CustomPinPoint custom = new CustomPinPoint(customPin, WeShouldActivity.this, item);
-        			//custom.insertPinpoint(overlayItem);
         			CustomPinPoint custom = new CustomPinPoint(WeShouldActivity.this, item, placeLocation, this.projection, Color.BLUE);
         			
         			lstPinPoints.add(custom);
@@ -380,6 +368,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			
 			final List<Item> itemsList = cat.getItems();
 			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
+
 			
 			// regular click to launch item information page
 			lv.setOnItemClickListener(
@@ -395,6 +384,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					}
 				}
 			);
+
 			
 			// long click to view item & current location in map
 			lv.setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -496,6 +486,4 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	    controller.animateTo(location);
 	    controller.setZoom(17);
 	}
-	
-
 }
