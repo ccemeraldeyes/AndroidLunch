@@ -25,6 +25,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,8 +34,8 @@ import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
@@ -70,6 +72,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	
 	/** The TabHost that cycles between tabs. **/
 	private TabHost mTabHost;
+	
+	/** The adapter in the view of the current tab. **/
+	private ItemAdapter mAdapter;
 	
 	/** How we want to sort said tabs. **/
 	private SortType mSortType;
@@ -329,6 +334,40 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	}
 	
 	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main_context_menu, menu);
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem menuItem) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuItem.getMenuInfo();
+		Item item = mAdapter.getItem(info.position);
+		switch(menuItem.getItemId()) {
+		case R.id.view:
+			Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
+			intent.putExtra(CATEGORY, item.getCategory().getName());
+			intent.putExtra(INDEX, item.getId());
+			startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
+			break;
+		case R.id.edit:
+			intent = new Intent(getApplicationContext(), EditScreen.class);
+			intent.putExtra(CATEGORY, item.getCategory().getName());
+			intent.putExtra(INDEX, item.getId());
+			startActivityForResult(intent, ActivityKey.EDIT_ITEM.ordinal());
+			break;
+		case R.id.delete:
+			mAdapter.remove(item);
+			item.delete();
+			break;
+		default:
+			return super.onContextItemSelected(menuItem);
+		}
+		return true;
+	}
+	
+	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		updateTabs();
 	}
@@ -367,28 +406,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			}
 			
 			final List<Item> itemsList = cat.getItems();
-			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
-
+			mAdapter = new ItemAdapter(WeShouldActivity.this, itemsList);
+			lv.setAdapter(mAdapter);
+			registerForContextMenu(lv);
 			
-			// regular click to launch item information page
-			lv.setOnItemClickListener(
-				new OnItemClickListener() {
-					public void onItemClick(AdapterView<?> parent, View view,
-					        int position, long id) {
-					
-						Item item = itemsList.get(position);
-						Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
-						intent.putExtra(CATEGORY, item.getCategory().getName());
-						intent.putExtra(INDEX, item.getId());
-						startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());	
-					}
-				}
-			);
-
-			
-			// long click to view item & current location in map
-			lv.setOnItemLongClickListener(new OnItemLongClickListener() {
-				public boolean onItemLongClick(AdapterView<?> parent,
+			// click to view item & current location in map
+			lv.setOnItemClickListener(new OnItemClickListener() {
+				public void onItemClick(AdapterView<?> parent,
 						View view, int position, long id) {
 					
 			    	Item item = itemsList.get(position);
@@ -409,7 +433,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		        		    break;
 			    		}
 				    }
-			    	return true;
 			    }
 			});
 			return lv;
@@ -434,17 +457,35 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			}
 			
 			final List<Item> itemsList = new ArrayList<Item>(Item.getItemsOfTag(tag, ctx));
-			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
+			mAdapter = new ItemAdapter(WeShouldActivity.this, itemsList);
+			lv.setAdapter(mAdapter);
+			registerForContextMenu(lv);
+			
+			// click to view item & current location in map
 			lv.setOnItemClickListener(new OnItemClickListener() {
-			    public void onItemClick(AdapterView<?> parent, View view,
-			        int position, long id) {
+				public void onItemClick(AdapterView<?> parent,
+						View view, int position, long id) {
+					
 			    	Item item = itemsList.get(position);
-					Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
-					intent.putExtra(CATEGORY, item.getCategory().getName());
-					intent.putExtra(INDEX, item.getId());
-					startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
+			    	Set<Address> addrs = item.getAddresses();
+			    
+			    	for(Address addr : addrs) {
+			    		if(addr.hasLatitude() && addr.hasLongitude()) {
+					    	int locX = (int) (addr.getLatitude() * 1E6);
+		    				int locY = (int) (addr.getLongitude() * 1E6);
+		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
+		        			GeoPoint myLoc = getDeviceLocation();
+		        			
+		        			if(myLoc == null) {
+		        				zoomLocation(placeLocation);
+		        			} else {
+		        				zoomToTwoPoint(placeLocation, myLoc);
+		        			}
+		        		    break;
+			    		}
+				    }
 			    }
-			  });
+			});
 			
 			return lv;
 		}
