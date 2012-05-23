@@ -110,8 +110,11 @@ public class SetTags extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.set:
+			save(RESULT_OK);
+			break;
 		case R.id.save:
-			save();
+			save(RESULT_FIRST_USER);
 			break;
 		}
 		return true;
@@ -127,14 +130,14 @@ public class SetTags extends Activity {
 	 * This method is a bit misnamed.  It actually just returns the list of tags
 	 * that the user wanted to add.
 	 */
-	public void save() {
+	public void save(int result) {
 		Set<Tag> ret = new HashSet<Tag>();
 		for (String name : mTags.keySet()) {
 			ret.add(new Tag(0, name, mTags.get(name)));
 		}
 		Intent intent = new Intent();
 		intent.putExtra(WeShouldActivity.TAGS, (Serializable) ret);
-		setResult(RESULT_OK, intent);
+		setResult(result, intent);
 		finish();
 	}
 }
