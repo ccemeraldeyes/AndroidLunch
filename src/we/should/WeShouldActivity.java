@@ -13,10 +13,6 @@ import we.should.list.GenericCategory;
 import we.should.list.Item;
 import we.should.list.Movies;
 import we.should.list.Referrals;
-<<<<<<< HEAD
-=======
-
->>>>>>> aef9bb262980bd42e583eb1b2c3f8e64e0df4d9f
 import we.should.list.Tag;
 import we.should.search.CustomPinPoint;
 import android.content.Context;
@@ -29,15 +25,12 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -87,7 +80,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/** A map that maps the name of each tag to its values. **/
 	private Map<String, Tag> mTags;
 	
-	/** A mapping from id's to categorys, used for submenu creation. **/
+	/** A mapping from id's to categories, used for submenu creation. **/
 	private Map<Integer, Category> mMenuIDs;
 	private MapView map;
 	private LocationManager lm;
@@ -100,7 +93,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	protected WSdb db;
 	protected String DBFILE;
 	
-	/** An enum describin how we want to group our tabs. **/
+	/** An enum describing how we want to group our tabs. **/
 	private static enum SortType {
 		Category, Tag;
 	}
