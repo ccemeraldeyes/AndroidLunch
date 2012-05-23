@@ -28,17 +28,14 @@ import android.util.Log;
  */
 public class GenericCategory extends Category {
 
-	private List<Item> items; 
-	private boolean sync = false;
+
 	
 	public GenericCategory(String name, List<Field> fields, Context ctx) {
 		super(name, fields, ctx);
-		items = new LinkedList<Item>();
 		checkRep();
 	}
 	protected GenericCategory(String name, JSONArray a, Context ctx) throws JSONException{
 		super(name, a, ctx);
-		items = new LinkedList<Item>();
 		checkRep();
 	}
 	/**
@@ -46,54 +43,11 @@ public class GenericCategory extends Category {
 	 * Throws an assertion error if it is violated.
 	 */
 	private void checkRep(){
-		for(Item i : items){
+		for(Item i : this.items){
 			assert(i.getCategory() == this);
 		}
 	}
-	@Override
-	public List<Item> getItems() {
-		if (!sync && ctx != null && id != 0) {
-			Map<Integer, JSONObject> itemData = getItemData();
-			for (int i : itemData.keySet()){
-				Item nIt = this.newItem();
-				try {
-					nIt.DBtoData(itemData.get(i));
-					if(!this.items.contains(nIt)) this.items.add(nIt);
-				} catch (JSONException e) {
-					Log.w("GenericCategory.getItems()", "Couldn't fill data from DB " + itemData.get(i).toString());
-				}
-				nIt.id = i;
-				if(!this.items.contains(nIt)) this.items.add(nIt);
-				
-			}
-			sync = true;
-		}
-		return this.items;
-	}
-	/**
-	 * Returns a list of JSONObjects formed from item rows
-	 * stored in the DB for this category
-	 * @return list of item JSONObjects
-	 */
-	protected Map<Integer, JSONObject> getItemData(){
-		Map<Integer, JSONObject> out = new LinkedHashMap<Integer, JSONObject>();
-		WSdb db = new WSdb(ctx);
-		db.open();
-		Cursor cur = db.getItemsOfCategory(this.id);
-		while (cur.moveToNext()) {
-			JSONObject data = null;
-			try {
-				data = new JSONObject(cur.getString(3));
-				out.put(cur.getInt(0), data);
-			} catch (JSONException e) {
-				Log.e("GenericCategory.getItems()", "Database data string improperly formatted");
-			}
-		}
-		cur.close(); // T.S.
-		db.close();
-		return out;
-	}
-
+	
 	@Override
 	public Item newItem() {
 		Item i = new GenericItem(this, ctx);

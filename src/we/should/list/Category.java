@@ -3,12 +3,15 @@ package we.should.list;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import we.should.database.WSdb;
 import android.content.Context;
@@ -34,6 +37,8 @@ public abstract class Category {
 	protected int id;
 	protected String color = DEFAULT_COLOR; //test value
 	protected List<Field> fields;
+	protected List<Item> items; 
+	protected boolean sync = false;
 
 	
 	/**
@@ -48,6 +53,7 @@ public abstract class Category {
 		this.color = Category.DEFAULT_COLOR;
 		this.ctx = ctx;
 		this.id = 0;
+		items = new LinkedList<Item>();
 	}
 	protected Category(String name, List<Field> fields, Context ctx){
 		this(name, ctx);
@@ -89,7 +95,50 @@ public abstract class Category {
 	 * newItem() and then saved with Item.save().
 	 * @return the set of items in this
 	 */
-	public abstract List<Item> getItems();
+	public List<Item> getItems() {
+		if (!sync && ctx != null && id != 0) {
+			Map<Integer, JSONObject> itemData = getItemData();
+			for (int i : itemData.keySet()){
+				Item nIt = newItem();
+				try {
+					nIt.DBtoData(itemData.get(i));
+					if(!this.items.contains(nIt)) this.items.add(nIt);
+				} catch (JSONException e) {
+					Log.w("GenericCategory.getItems()", "Couldn't fill data from DB " + itemData.get(i).toString());
+				}
+				nIt.id = i;
+				if(!this.items.contains(nIt)) this.items.add(nIt);
+				nIt.added = true;
+				
+			}
+			sync = true;
+		}
+		return this.items;
+	}
+	/**
+	 * Returns a list of JSONObjects formed from item rows
+	 * stored in the DB for this category
+	 * @return list of item JSONObjects
+	 */
+	protected Map<Integer, JSONObject> getItemData(){
+		Map<Integer, JSONObject> out = new LinkedHashMap<Integer, JSONObject>();
+		WSdb db = new WSdb(ctx);
+		db.open();
+		Cursor cur = db.getItemsOfCategory(this.id);
+		while (cur.moveToNext()) {
+			JSONObject data = null;
+			try {
+				data = new JSONObject(cur.getString(3));
+				out.put(cur.getInt(0), data);
+			} catch (JSONException e) {
+				Log.e("GenericCategory.getItems()", "Database data string improperly formatted");
+			}
+		}
+		cur.close(); // T.S.
+		db.close();
+		return out;
+	}
+
 	
 	/**
 	 * 
