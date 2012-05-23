@@ -13,6 +13,10 @@ import we.should.list.GenericCategory;
 import we.should.list.Item;
 import we.should.list.Movies;
 import we.should.list.Referrals;
+<<<<<<< HEAD
+=======
+
+>>>>>>> aef9bb262980bd42e583eb1b2c3f8e64e0df4d9f
 import we.should.list.Tag;
 import we.should.search.CustomPinPoint;
 import android.content.Context;
@@ -370,6 +374,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			
 			final List<Item> itemsList = cat.getItems();
 			lv.setAdapter(new ItemAdapter(WeShouldActivity.this, itemsList));
+
 			
 			// regular click to launch item information page
 			lv.setOnItemClickListener(
@@ -385,6 +390,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					}
 				}
 			);
+
 			
 			// long click to view item & current location in map
 			lv.setOnItemLongClickListener(new OnItemLongClickListener() {

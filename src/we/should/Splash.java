@@ -72,6 +72,10 @@ public class Splash extends Activity {
 		String accountName = (String) mAccountsSpinner.getSelectedItem();
 		editor.putString(WeShouldActivity.ACCOUNT_NAME, accountName);
 		editor.commit();
+<<<<<<< HEAD
+=======
+		afterLogin();
+>>>>>>> aef9bb262980bd42e583eb1b2c3f8e64e0df4d9f
 	}
 	
 	/**

@@ -64,11 +64,19 @@ public class GenericCategory extends Category {
 				}
 				nIt.id = i;
 				if(!this.items.contains(nIt)) this.items.add(nIt);
-				
+				nIt.added = true;
 			}
 			sync = true;
 		}
 		return this.items;
+	}
+	@Override
+	public Item getItem(int index) {
+		List<Item> items = getItems();
+		for(Item i : items){
+			if(i.getId() == index) return i;
+		}
+		return null;
 	}
 	/**
 	 * Returns a list of JSONObjects formed from item rows
