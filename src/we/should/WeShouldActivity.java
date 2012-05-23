@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import we.should.communication.GetReferralsService;
+import we.should.communication.RestoreService;
 import we.should.database.WSdb;
 import we.should.list.Category;
 import we.should.list.Field;
@@ -295,6 +296,12 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.restore:
+			SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
+			Intent service = new Intent(this, RestoreService.class);
+			service.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
+			startService(service);
+			break;
 		case R.id.help:
 			Intent intent = new Intent(this, HelpScreen.class);
 			intent.putExtra(HELP_TEXT, R.string.help_home);
