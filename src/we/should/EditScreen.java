@@ -227,32 +227,48 @@ public class EditScreen extends Activity {
 	 * Pulls up the set tags menu.
 	 */
 	private void setTags() {
-		final CharSequence[] items = {"Red", "Green", "Blue"};
+		// Set up the tag names
+		final List<Tag> tags = new ArrayList<Tag>(Tag.getTags(this));
+		final CharSequence[] tagNames = new CharSequence[tags.size()];
+		int i = 0;
+		for (Tag t : tags) {
+			tagNames[i] = t.toString();
+			i++;
+		}
+		
+		// Set up our storage for which tags the user has selected
+		final Set<Tag> selectedTags = new HashSet<Tag>(mTags);
+		boolean[] checkedItems = new boolean[tagNames.length];
+		for (Tag t : mTags) {
+			checkedItems[tags.indexOf(t)] = true;
+		}
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Pick a color");
-		builder.setMultiChoiceItems(items, null, new DialogInterface.OnMultiChoiceClickListener() {
-			public void onClick(DialogInterface dialog, int which, boolean checked) {
-				
+		builder.setTitle("Set Tags");
+		builder.setMultiChoiceItems(tagNames, checkedItems,
+				new DialogInterface.OnMultiChoiceClickListener() {
+			public void onClick(DialogInterface dialog, int which,
+					boolean checked) {
+				if (checked) {
+					selectedTags.add(tags.get(which));
+				} else {
+					selectedTags.remove(tags.get(which));
+				}
 			}
 		});
 		
 		// We need to set new to null because we override it later
 		builder.setNeutralButton("New", null);
+		
 		builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
-			
 			public void onClick(DialogInterface dialog, int which) {
-				// TODO Auto-generated method stub
-				
+				mTags = selectedTags;
+				mTagsView.setText(Tag.getFormatted(mTags));
 			}
 		});
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			
-			public void onClick(DialogInterface dialog, int which) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
+		
+		// We don't need to do anything special on cancel
+		builder.setNegativeButton("Cancel", null);
 		AlertDialog alert = builder.create();
 		alert.show();
 		
