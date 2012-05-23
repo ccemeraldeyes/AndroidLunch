@@ -227,11 +227,50 @@ public class EditScreen extends Activity {
 	 * Pulls up the set tags menu.
 	 */
 	private void setTags() {
-		Intent intent = new Intent(EditScreen.this, SetTags.class); //was SetTags.class
+		final CharSequence[] items = {"Red", "Green", "Blue"};
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Pick a color");
+		builder.setMultiChoiceItems(items, null, new DialogInterface.OnMultiChoiceClickListener() {
+			public void onClick(DialogInterface dialog, int which, boolean checked) {
+				
+			}
+		});
 		
-		// Why do we have to use .toArray() here?  Because Eclipse sucks.
-		intent.putExtra(WeShouldActivity.TAGS, (Serializable) mTags);
-		startActivityForResult(intent, ActivityKey.SET_TAGS.ordinal());
+		// We need to set new to null because we override it later
+		builder.setNeutralButton("New", null);
+		builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		AlertDialog alert = builder.create();
+		alert.show();
+		
+		alert.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				final CharSequence[] items = {"Red", "Green", "Blue"};
+
+				AlertDialog.Builder builder = new AlertDialog.Builder(EditScreen.this);
+				builder.setTitle("Pick a color");
+				builder.setSingleChoiceItems(items, -1, new DialogInterface.OnClickListener() {
+				    public void onClick(DialogInterface dialog, int item) {
+				        Toast.makeText(getApplicationContext(), items[item], Toast.LENGTH_SHORT).show();
+				    }
+				});
+				AlertDialog alert2 = builder.create();
+				alert2.show();
+			}	
+		});
 	}
 	
 	/**
