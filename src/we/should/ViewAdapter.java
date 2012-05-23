@@ -81,8 +81,8 @@ public class ViewAdapter extends ArrayAdapter<Field> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		Field field = mFields.get(position);
 		ViewHolder holder = null;
-		int type = getItemViewType(position);
-		FieldType enumType = FieldType.get(type);
+		//int type = getItemViewType(position);
+		FieldType enumType = field.getType();
 		
 		if (convertView == null) {
 			holder = new ViewHolder();
@@ -101,7 +101,7 @@ public class ViewAdapter extends ArrayAdapter<Field> {
 			}
 			holder.name = (TextView) convertView.findViewById(R.id.name);
 			holder.value = convertView.findViewById(R.id.value);
-			loadData(mFields.get(position), holder.value);
+			loadData(field, holder.value);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();

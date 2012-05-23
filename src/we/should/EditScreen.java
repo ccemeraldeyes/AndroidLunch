@@ -249,17 +249,7 @@ public class EditScreen extends Activity {
 		} 
 		mLookup = new DoSuggestionLookup(locationManager, this);
 		mLookup.execute(constraint);
-//		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-//		if (location == null) {
-//			return;
-//		}
-//		try {
-//			List<Place> places = (new PlaceRequest()).searchByLocation(location, constraint);
-//			mName.setAdapter(new PlaceAdapter(this, places));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return;
-//		}
+
 	}
 	
 	/**
