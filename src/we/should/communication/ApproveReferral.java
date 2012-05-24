@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class ApproveReferral extends Activity {
 	
@@ -87,7 +88,15 @@ public class ApproveReferral extends Activity {
 				
 				for(Referral r: approvedList){
 					ReferralItem ref = refs.newItem(r.getData());
-					ref.save();
+
+					try{
+						ref.save();
+					} catch(Exception e) {
+						Toast.makeText(c, e.getMessage(), Toast.LENGTH_SHORT).show();
+						return;
+					}
+					
+
 				}
 				
 				finish();

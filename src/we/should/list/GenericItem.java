@@ -132,7 +132,7 @@ public class GenericItem extends Item {
 		if(key.equals(Field.TAGS)){
 			throw new IllegalArgumentException("Use the getTags() method to access the tags of this.");
 		}
-		if(this.getFields().contains(key)) {
+		if(getFields().contains(key)) {
 			if(key.equals(Field.ADDRESS)){
 				try {
 					JSONObject o = new JSONObject(values.get(key));
@@ -209,9 +209,10 @@ public class GenericItem extends Item {
 				throw new IllegalStateException("There is already an item of that name!");
 			} catch (IllegalArgumentException e) {
 				throw new IllegalArgumentException("Illegal field values!");
+			} finally{
+				db.close();
 			}
 			updateTagLinks(db);
-			db.close();
 		}
 		checkRep();
 	}
