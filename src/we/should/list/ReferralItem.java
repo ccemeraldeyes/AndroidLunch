@@ -1,5 +1,7 @@
 package we.should.list;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,7 +20,8 @@ import android.content.Context;
 
 public class ReferralItem extends GenericItem {
 	
-	
+	private List<Field> fields;
+
 
 	/**
 	 * Creates a new Referral Item from the JSON object passed to it
@@ -43,6 +46,16 @@ public class ReferralItem extends GenericItem {
 		out.remove(Field.TAGS); //Remove special field
 		return out;
 	}
-	
-
+	@SuppressWarnings("unchecked")
+	protected void DBtoData(JSONObject d) throws JSONException{
+		this.fields = new LinkedList<Field>();
+		super.DBtoData(d);
+		Iterator<String> keys = d.keys();
+		String k;
+		while(keys.hasNext()){
+			k = keys.next();
+			fields.add(new Field(k));
+		}
+		Collections.sort(fields);
+	}
 }

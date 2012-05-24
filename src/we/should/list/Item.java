@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,6 +50,7 @@ public abstract class Item {
 	protected Item(Context ctx){
 		this.ctx = ctx;
 		this.id = 0;
+		this.values = new TreeMap<Field, String>();
 	}
 	/**
 	 * @return a set of Address objects corresponding to the location(s) of this.
@@ -243,7 +245,8 @@ public abstract class Item {
 	 */
 	public JSONObject dataToDB(){
 		JSONObject out = new JSONObject();
-		for(Entry<Field, String> e : values.entrySet()){
+		Set<Entry<Field, String>> entries = values.entrySet();
+		for(Entry<Field, String> e : entries){
 			try {
 				out.put(e.getKey().toDB(), e.getValue());
 			} catch (JSONException err) {

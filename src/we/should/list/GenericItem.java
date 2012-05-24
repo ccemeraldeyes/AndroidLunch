@@ -2,7 +2,6 @@ package we.should.list;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -42,7 +41,6 @@ public class GenericItem extends Item {
 	protected GenericItem(Category c, Context ctx) {
 		super(ctx);
 		this.c = c;
-		values = new LinkedHashMap<Field, String>();
 		List<Field> fields = this.getFields();
 		for(Field i : fields){
 			if (i.getType().equals(FieldType.CheckBox)) {
