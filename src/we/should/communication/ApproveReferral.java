@@ -78,21 +78,16 @@ public class ApproveReferral extends Activity {
 		mSave.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View v) {
-				// get which items are approved from the referraladapter
 				
 				List<Referral> approvedList = mAdapter.getApprovedList();
 				
-				//send approved/rejected to remote db and delete
+				//TODO: send approved/rejected to remote db and delete
 				
 				Referrals refs = Referrals.getReferralCategory(c);
 				
-				// save them
 				for(Referral r: approvedList){
-					//get JSON object (store in referral)
 					ReferralItem ref = refs.newItem(r.getData());
 					ref.save();
-					
-
 				}
 				
 				finish();
