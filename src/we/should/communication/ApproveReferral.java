@@ -72,6 +72,7 @@ public class ApproveReferral extends Activity {
 			}
 		
 		}
+		Log.v("REFERRAL LIST", list.toString());
 		mAdapter = new ReferralAdapter(this, list);
 		lv.setAdapter(mAdapter);
 		

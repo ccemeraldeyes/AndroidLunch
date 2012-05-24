@@ -69,7 +69,7 @@ public class PlaceRequest {
 				}
 				return places;
 			} else {
-				Log.v(LOG_KEY, "query status fail");
+				Log.v(LOG_KEY, obj.getString("status"));
 			}
 		} catch (Exception e) {
 			Log.v(LOG_KEY, e.getMessage());
