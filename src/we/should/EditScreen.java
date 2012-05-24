@@ -2,45 +2,31 @@ package we.should;
 
 
 import java.io.IOException;
-import java.io.Serializable;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import java.util.concurrent.ExecutionException;
-import java.util.regex.Pattern;
-
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpParams;
-
-import java.util.Set;
-
 
 import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.Item;
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import we.should.list.Tag;
 import we.should.search.DetailPlace;
 import we.should.search.Place;
 import we.should.search.PlaceRequest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -50,21 +36,22 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 import android.os.Bundle;
-
-import android.util.Log;
-import android.util.Patterns;
-
 import android.text.Editable;
 import android.text.TextWatcher;
-
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -95,6 +82,10 @@ public class EditScreen extends Activity {
 	
 	/** Which tags are set to true. **/
 	private Set<Tag> mTags;
+	
+	/** All of the tags that have been added by addTag, plus tags from
+	 * before. **/
+	private List<Tag> mAllTags;
 	
 	/** Async location lookup **/
 	private AsyncTask<String, Void, List<Place>> mLookup;
@@ -161,7 +152,7 @@ public class EditScreen extends Activity {
 		TextView tagsText = (TextView) findViewById(R.id.tags_text);
 		tagsText.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
-				setTags();
+				modifyTags();
 			}
 		});
 
@@ -170,19 +161,19 @@ public class EditScreen extends Activity {
 		mTagsView.setText(Tag.getFormatted(mTags));
 		mTagsView.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
-				setTags();
+				modifyTags();
 			}
 		});
 		
 		mDelete = (Button) findViewById(R.id.deleteItem);
 		if (!mItem.isAdded()) mDelete.setVisibility(View.GONE);
 		else mDelete.setOnClickListener(new View.OnClickListener() {
-			
-			
 			public void onClick(View v) {
 				delete();
 			}
 		});
+		
+		mAllTags = new ArrayList<Tag>(Tag.getTags(this));
 	}
 	
 	@Override
@@ -224,14 +215,113 @@ public class EditScreen extends Activity {
 	}
 	
 	/**
+	 * Asks the user whether they want to add a new tag or edit the current
+	 * ones.
+	 */
+	private void modifyTags() {
+		final CharSequence[] items = {"Create new tag", "Set tags"};
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setItems(items, new DialogInterface.OnClickListener() {
+		    public void onClick(DialogInterface dialog, int item) {
+		    	// Yes, I know this is brittle.  Sorry.
+		        if (item == 0) {
+		        	addTag();
+		        } else {
+		        	setTags();
+		        }
+		    }
+		});
+		builder.show();
+	}
+	
+	/**
+	 * Creates a new tag and adds it to this item.
+	 */
+	private void addTag() {
+		final Set<String> tagNames = new HashSet<String>();
+		for (Tag t : Tag.getTags(this)) {
+			tagNames.add(t.toString());
+		}
+		AlertDialog.Builder builder;
+
+		LayoutInflater inflater = getLayoutInflater();
+		View layout = inflater.inflate(R.layout.add_tag, null);
+
+		final EditText name = (EditText) layout.findViewById(R.id.name);
+		final Spinner color = (Spinner) layout.findViewById(R.id.color);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
+				android.R.layout.simple_spinner_item,
+				new ArrayList<String>(Tag.getAllTagColors().keySet()));
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		color.setAdapter(adapter);
+
+		builder = new AlertDialog.Builder(this);
+		builder.setView(layout);
+		builder.setTitle("Add a new tag");
+		builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				String nameStr = name.getText().toString();
+				if (tagNames.contains(nameStr)) {
+					Toast.makeText(EditScreen.this,
+							"A tag with this name already exists",
+							Toast.LENGTH_LONG).show();
+					addTag();
+					return;
+				}
+				String colorStr = (String) color.getSelectedItem();
+				mAllTags.add(0, new Tag(0, nameStr, colorStr));
+				mTags.add(new Tag(0, name.getText().toString(), colorStr));
+				mTagsView.setText(Tag.getFormatted(mTags));
+			}
+		});
+		builder.setNegativeButton("Cancel", null);
+		builder.show();
+	}
+	
+	/**
 	 * Pulls up the set tags menu.
 	 */
 	private void setTags() {
-		Intent intent = new Intent(EditScreen.this, SetTags.class); //was SetTags.class
+		// Set up the tag names
+		final CharSequence[] tagNames = new CharSequence[mAllTags.size()];
+		int i = 0;
+		for (Tag t : mAllTags) {
+			tagNames[i] = t.toString();
+			i++;
+		}
 		
-		// Why do we have to use .toArray() here?  Because Eclipse sucks.
-		intent.putExtra(WeShouldActivity.TAGS, (Serializable) mTags);
-		startActivityForResult(intent, ActivityKey.SET_TAGS.ordinal());
+		// Set up our storage for which tags the user has selected
+		final Set<Tag> selectedTags = new HashSet<Tag>(mTags);
+		boolean[] checkedItems = new boolean[tagNames.length];
+		for (Tag t : mTags) {
+			checkedItems[mAllTags.indexOf(t)] = true;
+		}
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Set Tags");
+		builder.setMultiChoiceItems(tagNames, checkedItems,
+				new DialogInterface.OnMultiChoiceClickListener() {
+			public void onClick(DialogInterface dialog, int which,
+					boolean checked) {
+				if (checked) {
+					selectedTags.add(mAllTags.get(which));
+				} else {
+					selectedTags.remove(mAllTags.get(which));
+				}
+			}
+		});
+		
+		builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				mTags = selectedTags;
+				mTagsView.setText(Tag.getFormatted(mTags));
+			}
+		});
+		
+		// We don't need to do anything special on cancel
+		builder.setNegativeButton("Cancel", null);
+		builder.show();
 	}
 	
 	/**
