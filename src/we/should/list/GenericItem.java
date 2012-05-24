@@ -203,6 +203,7 @@ public class GenericItem extends Item {
 						this.id = (int) db.insertItem(this.getName(), 
 							this.c.id, dataToDB().toString());
 				}
+				updateTagLinks(db);
 			} catch (SQLiteConstraintException e) {
 				throw new IllegalStateException("There is already an item of that name!");
 			} catch (IllegalArgumentException e) {
@@ -210,7 +211,6 @@ public class GenericItem extends Item {
 			} finally{
 				db.close();
 			}
-			updateTagLinks(db);
 		}
 		checkRep();
 	}
