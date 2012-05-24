@@ -9,20 +9,26 @@ import we.should.list.Field;
 
 
 /**
- * Detail place is an extension to place.  It has more information about a place.
- * including phoneNumber, website, url, address, international_phoneNumber.
+ * Detail place is an extension to place.  It has more information 
+ * about a place including phoneNumber, website, url, address, 
+ * international_phoneNumber.
  * 
- * Before using the DetailPlace, be sure to check whether or not the  DetailPlace is valid.
- * When there is error in parsing the JSONObject, call the isValid() method to determine that
+ * Before using the DetailPlace, be sure to check whether or not the
+ * DetailPlace is valid. When there is error in parsing the JSONObject, 
+ * call the isValid() method to determine that
  * 
- * To construct a Detailplace, you need a JSONObject from a DetailPlaceQuery on Google API.
- * 
- * @thorws JSONException - if the JSONObject pass through the constructor fail.
  * @author Lawrence
  */
 public class DetailPlace extends Place{
-	private String phoneNumber, website, url, address, international_phoneNumber;
+	private String phoneNumber, website, url, address, 
+	               international_phoneNumber;
 	
+	/**
+	 * To construct a Detailplace, you need a 
+	 * 
+	 * @param obj JSONObject from a DetailPlaceQuery on Google API.
+	 * @thorws JSONException - if obj fails.
+	 */
 	public DetailPlace(JSONObject obj) throws JSONException {
 		super(obj);
 		phoneNumber = obj.optString("formatted_phone_number", null);
@@ -33,7 +39,6 @@ public class DetailPlace extends Place{
 	}
 	
 	/**
-	 * To get the Local Phone Number
 	 * @return String - local phone number
 	 */
 	public String getLocalPhoneNumber() {
@@ -41,8 +46,7 @@ public class DetailPlace extends Place{
 	}
 	
 	/**
-	 * To get the international Phone Number
-	 * @return String - the internation phone number
+	 * @return String - the international phone number
 	 */
 	public String getInternational_phoneNumber() {
 		return international_phoneNumber;
@@ -70,8 +74,7 @@ public class DetailPlace extends Place{
 	}
 
 	/**
-	 * Returns the fields of this DetailPlace as a field map.
-	 * @return see above you loony
+	 * @return the fields of this DetailPlace as a field map.
 	 */
 	public Map<Field, String> asFieldMap() {
 		Map<Field, String> map = new HashMap<Field, String>();

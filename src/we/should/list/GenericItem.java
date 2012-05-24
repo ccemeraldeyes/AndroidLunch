@@ -114,7 +114,8 @@ public class GenericItem extends Item {
 				WSdb db = new WSdb(ctx);
 				db.open();
 				db.deleteItem(this.id);
-				Set<Tag> tags = getTags();
+				Set<Tag> tags = getTags();	
+				//TODO:  database deletes all item-tags on item delete.  Should I change? -- Troy
 				for(Tag t: tags){
 					db.deleteItemTagRel(this.id, t.getId());
 				}

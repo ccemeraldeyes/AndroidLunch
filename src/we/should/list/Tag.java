@@ -32,6 +32,7 @@ public class Tag implements Serializable {
 	 * Creates a new tag object with the given name and DB id
 	 * @param id
 	 * @param tag
+	 * @param color
 	 */
 	public Tag(int id, String tag, String color){
 		this.id = id;
