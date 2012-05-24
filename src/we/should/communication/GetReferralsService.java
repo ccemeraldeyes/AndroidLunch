@@ -70,12 +70,11 @@ public class GetReferralsService extends IntentService {
 			
 			InputStream is = response.getEntity().getContent();
 			
-			byte[] buf = new byte[4096];
-			is.read(buf);
-			
-			Log.v("REFERRAL RESPONSE", new String(buf));
-
-			resp = new JSONObject(new String(buf));
+			byte[] buf = new byte[4096]; //Buffer too short?
+			int read = is.read(buf);
+			Log.v("REFERRAL RESPONSE", new String(buf, 0, read));
+			String raw = new String(buf, 0, read);
+			resp = new JSONObject(raw);
 			data = resp.getJSONArray("referrals"); 
 			
 			
