@@ -99,7 +99,7 @@ public class PlaceRequest {
 				Log.v(LOG_KEY, "query status fail");
 			}
 		} catch (Exception e) {
-			Log.v(LOG_KEY, e.getMessage());
+			Log.e(LOG_KEY, e.getMessage());
 		}
 		return null;
 	}
@@ -112,7 +112,9 @@ public class PlaceRequest {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	private JSONObject executeQuery(URI url) throws JSONException, ClientProtocolException, IOException, URISyntaxException {
+	private JSONObject executeQuery(URI url) 
+			throws JSONException, ClientProtocolException, 
+			IOException, URISyntaxException {
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpGet request = new HttpGet(url);
 		ResponseHandler<String> handler = new BasicResponseHandler();
@@ -125,13 +127,14 @@ public class PlaceRequest {
 	 * Build the url for the searchByLocation query
 	 * 
 	 * @param myLocation - given the location to search
-	 * @param searchName - the name to filter the results 
-	 * searchName is filter such that only places contains the exactly searchName in its name will be return
-	 * 
+	 * @param searchName - the name to filter the results.  searchName 
+	 *   is filter such that only places contains the exactly 
+	 *   searchName in its name will be return
 	 * @return url for the searchByLocation query
 	 * @throws URISyntaxException 
 	 */
-    private URI buildURLForGooglePlaces(Location myLocation, String searchName) throws URISyntaxException{
+    private URI buildURLForGooglePlaces(Location myLocation, String searchName) 
+    		throws URISyntaxException{
         String baseUrl = PLACES_SEARCH_URL;
         String lat = String.valueOf(myLocation.getLatitude());
         String lon = String.valueOf(myLocation.getLongitude());
@@ -143,7 +146,8 @@ public class PlaceRequest {
     }
     
     /**
-     * @param referenceString - the reference obtain by Place Object which get it by performing a searchByLocation query
+     * @param referenceString - the reference obtain by Place Object 
+     *   which get it by performing a searchByLocation query
      * @return url for the placeDetail query
      */
     private URI buildURLForDetailPlace(String referenceString) throws URISyntaxException {

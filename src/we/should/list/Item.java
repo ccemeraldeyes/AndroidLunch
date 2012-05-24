@@ -178,7 +178,7 @@ public abstract class Item {
 				cat.id = catId;
 				cat.color = color;
 				cats.put(catId, cat);
-				c.close(); // TS
+				c.close();
 			} else {
 				cat = cats.get(catId);
 			}

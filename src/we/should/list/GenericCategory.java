@@ -97,7 +97,7 @@ public class GenericCategory extends Category {
 				Log.e("GenericCategory.getItems()", "Database data string improperly formatted");
 			}
 		}
-		cur.close(); // T.S.
+		cur.close();
 		db.close();
 		return out;
 	}

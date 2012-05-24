@@ -70,6 +70,8 @@ public class CustomPinPoint extends Overlay {
 
 	/**
 	 * Detect the tap on the image.
+	 * @param clickpoint
+	 * @param mapView
 	 */
 	@Override
 	public boolean onTap(GeoPoint clickpoint, MapView mapView) {

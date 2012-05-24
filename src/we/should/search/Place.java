@@ -8,7 +8,8 @@ import org.json.JSONObject;
  * It will parse the JSONObject and provide method to address information.
  * 
  * Before using the Place, be sure to check whether or not the Place is valid.
- * When there is error in parsing the JSONObject. call the isValid() method to determine if Place is valid.
+ * When there is error in parsing the JSONObject. call the isValid() method to 
+ * determine if Place is valid.
  * 
  * @throws JSONException - if the JSONObject pass through the constructor fail.
  * @author Lawrence
