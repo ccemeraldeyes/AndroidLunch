@@ -80,7 +80,7 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 			String query = constraint.toString().toLowerCase().substring(0, constraint.length() - 2);//Looser filtering
 			for (Place p : mPlaces) {
 				String name = p.getName().toLowerCase();
-				if (name.contains(query) || query.contains(name)) {
+				if (filter(name, query) || filter(query, name) || name.contains(query) || query.contains(name)) {
 					list.add(p);
 				}
 			}
@@ -88,13 +88,22 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 			filterResults.count = list.size();
 			return filterResults;
 		}
-
+		private boolean filter(String name, String query){
+			boolean out = false;
+			String[] qS = query.split(" ");
+			for(String s : qS){
+				out = name.contains(s);
+				if(out) return out;
+			}
+			return out;
+		}
 		@Override
 		protected void publishResults(CharSequence constraint,
 				FilterResults results) {
 			clear();
 			@SuppressWarnings("unchecked")
 			List<Place> list = (List<Place>) results.values;
+			if(list == null) return;
 			for (Place p : list) {
 				add(p);
 			}
