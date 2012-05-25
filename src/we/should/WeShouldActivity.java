@@ -122,7 +122,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         updateTabs();        
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
 			public void onTabChanged(String tabId) {
-				updatePins(tabId.trim());
+				updateView(tabId.trim());
+				
 			}
 		});
         
@@ -130,7 +131,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			public void onClick(View arg0) {
 				GeoPoint loc = getDeviceLocation();
 				if(loc != null) {
-					zoomLocation(getDeviceLocation());
+					zoomLocation(loc);
 				}
 			}
         });
@@ -146,11 +147,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         map.postInvalidate();    
     }
 
-    protected void updatePins(String name) {
-    	//clear the pin everytime we load a new tab.
-    	for(CustomPinPoint pin : lstPinPoints) {
-    		overlayList.remove(pin);
-    	}
+    protected void updateView(String name) {
     	
     	List<Item> items = null;
     	
@@ -167,7 +164,16 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		color = mTags.get(name).getColor();
     		break;
     	}
+    	mAdapter = new ItemAdapter(WeShouldActivity.this, items);
+    	updatePins(color, items);
     	
+    	
+	}
+    private void updatePins(String color, List<Item> items){
+    	//clear the pin everytime we load a new tab.
+    	for(CustomPinPoint pin : lstPinPoints) {
+    		overlayList.remove(pin);
+    	}
     	if(color == null || items == null) {
     		throw new RuntimeException("fail to get item from category or tags");
     	}
@@ -183,8 +189,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 				}
     		}
     	}
-	}
-    
+    	
+    }
     /**
      * Updates the tabs depending on what we want to sort by.
      */
@@ -197,7 +203,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		updateTabsTag();
     		break;
     	}
-    	updatePins(mTabHost.getCurrentTabTag().trim());
+    	updateView(mTabHost.getCurrentTabTag().trim());
     }
 
 	/**
@@ -368,7 +374,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	        	public void onClick(DialogInterface dialog, int which) {
 	    			mAdapter.remove(mItem);
 	                mItem.delete();
-	                updatePins(mTabHost.getCurrentTabTag().trim());
+	                updateView(mTabHost.getCurrentTabTag().trim());
 	            }
 
 	        })
