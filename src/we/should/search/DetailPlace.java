@@ -9,6 +9,8 @@ import we.should.list.Field;
 
 
 /**
+ * DetailPlace is immutable.
+ * 
  * Detail place is an extension to place.  It has more information 
  * about a place including phoneNumber, website, url, address, 
  * international_phoneNumber.
@@ -82,5 +84,23 @@ public class DetailPlace extends Place{
 		map.put(Field.WEBSITE, getWebSite());
 		map.put(Field.PHONENUMBER, getLocalPhoneNumber());
 		return map;
+	}
+	
+	/**
+	 * they are the same, if their reference is the same
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if(o != null && getClass() == o.getClass()) {
+			DetailPlace p = (DetailPlace) o;
+			return super.equals(p) && p.phoneNumber.equals(this.phoneNumber)
+				&& p.website.equals(this.website)
+				&& p.url.equals(this.url)
+				&& p.address.equals(this.address)
+				&& p.international_phoneNumber.equals(this.international_phoneNumber);
+				
+		} else {
+			return false;
+		}
 	}
 }

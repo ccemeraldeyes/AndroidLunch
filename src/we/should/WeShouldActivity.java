@@ -559,7 +559,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @param zoom to a point that capture the two points.
 	 */
 	private void zoomToTwoPoint(GeoPoint point, GeoPoint point2) {
-		int padding = 10;
+		int padding = 50;
 		int maxX = Math.max(point.getLatitudeE6(), point2.getLatitudeE6());
 		int minX = Math.min(point.getLatitudeE6(), point2.getLatitudeE6());
 		int maxY = Math.max(point.getLongitudeE6(), point2.getLongitudeE6());
