@@ -129,6 +129,12 @@ public abstract class Item {
 	 */
 	public abstract Set<Tag> getTags();
 	
+	
+	
+	
+	public abstract void setTags(Set<Tag> tags);
+	
+	
 	/**
 	 * Adds a tag string to this item. If s matches an
 	 * existing tag, it will not be added

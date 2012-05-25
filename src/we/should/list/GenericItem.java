@@ -38,6 +38,7 @@ import android.util.Log;
 public class GenericItem extends Item {
 	public static final Locale DEFAULT_LOCALE = Locale.US; 
 	protected Category c;
+	private Set<Tag> deleteCache;
 		
 	protected GenericItem(Category c, Context ctx) {
 		super(ctx);
@@ -50,6 +51,7 @@ public class GenericItem extends Item {
 				values.put(i, "");
 			}
 		}
+		deleteCache = new HashSet<Tag>();
 		checkRep();
 	}
 	/**
@@ -205,6 +207,7 @@ public class GenericItem extends Item {
 						this.id = (int) db.insertItem(this.getName(), 
 							this.c.id, dataToDB().toString());
 				}
+				updateTagLinks(db);
 			} catch (SQLiteConstraintException e) {
 				throw new IllegalStateException("There is already an item of that name!");
 			} catch (IllegalArgumentException e) {
@@ -212,13 +215,22 @@ public class GenericItem extends Item {
 			} finally{
 				db.close();
 			}
-			updateTagLinks(db);
 		}
 		checkRep();
 	}
 
+	
 	@Override
-	public Set<Tag> getTags() {
+	public void addTag(String tag, String color) {
+		Set<Tag> tags = this.getTags();
+		if (!tags.contains(new Tag(0,tag, color))){
+			tags.add(new Tag(0, tag, color));
+			JSONArray newTags = tagsToJSON(tags);
+			values.put(Field.TAGS, newTags.toString());
+		}
+	}
+	@Override
+	public Set<Tag> getTags(){
 		String tags = this.values.get(Field.TAGS);
 		if(tags == null) tags = "";
 		Set<Tag> result = new HashSet<Tag>();
@@ -234,23 +246,29 @@ public class GenericItem extends Item {
 		return result;
 	}
 	@Override
-	public void addTag(String tag, String color) {
-		Set<Tag> tags = this.getTags();
-		if (!tags.contains(new Tag(0,tag, color))){
-			tags.add(new Tag(0, tag, color));
-			JSONArray newTags = tagsToJSON(tags);
-			values.put(Field.TAGS, newTags.toString());
+	public void setTags(Set<Tag> tags){
+		Set<Tag> cur = getTags();
+		for(Tag t: cur){
+			if(!tags.contains(t)){
+				deleteCache.add(t);
+			}
 		}
+		JSONArray val = tagsToJSON(tags);
+		values.put(Field.TAGS, val.toString());
 	}
+	
 	private void saveTagsToDB(WSdb db){
 		Set<Tag> thisTags = this.getTags();
 		List<Tag> dbTags = Tag.getTags(ctx);
+		for(Tag t : deleteCache){
+			db.deleteItemTagRel(id, t.getId());
+		}
 		for(Tag t : thisTags) {
 			int tagID;
 			if (!dbTags.contains(t)) {
-				tagID = (int) db.insertTag(t.toString(), "abc123");//TODO: Davis tags include colors				
+				tagID = (int) db.insertTag(t.toString(), t.getColor());//TODO: Davis tags include colors				
 			} else {
-				tagID = dbTags.get(dbTags.indexOf(t)).getId();
+				tagID = dbTags.get(dbTags.indexOf(t)).getId(); //If this tag already exists, it is linked to the db row
 			}
 			t.setId(tagID);
 		}
