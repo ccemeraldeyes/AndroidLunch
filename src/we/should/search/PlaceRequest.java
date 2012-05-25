@@ -55,8 +55,9 @@ public class PlaceRequest {
 			throw new IllegalArgumentException("input is null");
 		}
 		
-		Log.v(LOG_KEY, "Start SearchByLocation");
+		Log.v(LOG_KEY, "Start SearchByLocation: " + searchname +".");
 		try {
+			searchname = searchname.trim();
 			URI url = buildURLForGooglePlaces(l, searchname);
 			JSONObject obj = executeQuery(url);
 			//make sure status is okay before we get the results
@@ -69,6 +70,9 @@ public class PlaceRequest {
 					places.add(new Place(place));
 				}
 				return places;
+			} else if(obj.getString("status").equals("ZERO_RESULTS")){
+				Log.v(LOG_KEY, "zero results");
+				return null;
 			} else {
 				Log.v(LOG_KEY, "query status fail");
 			}
@@ -144,9 +148,10 @@ public class PlaceRequest {
         String lat = String.valueOf(myLocation.getLatitude());
         String lon = String.valueOf(myLocation.getLongitude());
         String url = baseUrl + "location=" + lat + "," + lon + "&" +
-                     "rankby=distance" + "&" + "sensor=false" +
+                     "rankby=distance" + "&" + "sensor=true" +
                      "&" + "name=" + searchName +
                      "&" + "key=" + keyString;
+    	Log.v(LOG_KEY, "build string url is: " + url);
         return new URI(SCHEME, url, null);
     }
     
