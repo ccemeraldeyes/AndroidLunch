@@ -165,6 +165,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		break;
     	}
     	mAdapter = new ItemAdapter(WeShouldActivity.this, items);
+    	mAdapter.notifyDataSetChanged();
     	updatePins(color, items);
     	
     	
@@ -203,7 +204,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		updateTabsTag();
     		break;
     	}
-    	updateView(mTabHost.getCurrentTabTag().trim());
     }
 
 	/**
@@ -374,7 +374,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	        	public void onClick(DialogInterface dialog, int which) {
 	    			mAdapter.remove(mItem);
 	                mItem.delete();
-	                updateView(mTabHost.getCurrentTabTag().trim());
+	                updateTabs();
 	            }
 
 	        })
