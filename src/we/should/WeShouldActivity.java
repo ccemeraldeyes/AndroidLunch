@@ -150,15 +150,21 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	List<Item> items = null;
     	
     	//TODO: Lawrence String color = null; get color of category or tag
-    	String color = mCategories.get(name).getColor();
+    	String color = null;
 		
     	switch (mSortType) {
     	case Category:
     		items = mCategories.get(name).getItems();
+    		color = mCategories.get(name).getColor();
     		break;
     	case Tag:
     		items = new ArrayList<Item>(Item.getItemsOfTag(mTags.get(name), this));
+    		color = mTags.get(name).getColor();
     		break;
+    	}
+    	
+    	if(color == null || items == null) {
+    		throw new RuntimeException("fail to get item from category or tags");
     	}
     	
     	for (Item item : items) {
@@ -559,13 +565,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @param zoom to a point that capture the two points.
 	 */
 	private void zoomToTwoPoint(GeoPoint point, GeoPoint point2) {
-		int padding = 50;
 		int maxX = Math.max(point.getLatitudeE6(), point2.getLatitudeE6());
 		int minX = Math.min(point.getLatitudeE6(), point2.getLatitudeE6());
 		int maxY = Math.max(point.getLongitudeE6(), point2.getLongitudeE6());
 		int minY = Math.min(point.getLongitudeE6(), point2.getLongitudeE6());
-		controller.zoomToSpan(maxX - minX + padding, maxY - minY + padding);
-		controller.animateTo(new GeoPoint((minX + maxX) / 2, (minY + maxY) / 2));		
+		controller.zoomToSpan(maxX - minX, maxY - minY);
+		controller.animateTo(new GeoPoint((minX + maxX) / 2, (minY + maxY) / 2));
+		controller.zoomOut();
 	}
 	
 	/**
