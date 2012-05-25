@@ -75,7 +75,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private final Category MOVIES = new Movies(this);
 	private final Category REFERRALS = new Referrals(this);
 
-	
+	/** for Map **/
+	public static double DISTANCETOMILES =  0.000621371192;
 	private static final List<CustomPinPoint> lstPinPoints = new ArrayList<CustomPinPoint>();
 	
 	/** The TabHost that cycles between tabs. **/
@@ -106,7 +107,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private List<Overlay> overlayList;
 	private ImageButton zoomButton;
 	
-	protected WSdb db;
+	//protected WSdb db;
 	protected String DBFILE;
 	
 	/** An enum describing how we want to group our tabs. **/
@@ -145,7 +146,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			}
         });
         
-        db = new WSdb(this);
+        
         myLocationOverlay = new MyLocationOverlay(this, map);
         map.getOverlays().add(myLocationOverlay);
         //Getting current location.
@@ -155,7 +156,12 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         }
         map.postInvalidate();    
     }
-
+    
+    //TODO: L - comments
+    /**
+     * 
+     * @param name
+     */
     protected void updateView(String name) {
     	
     	List<Item> items = null;
@@ -179,6 +185,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	
     	
 	}
+    
+    //TODO: L - comments
+    /**
+     * 
+     * @param color
+     * @param items
+     */
     private void updatePins(String color, List<Item> items){
     	//clear the pin everytime we load a new tab.
     	for(CustomPinPoint pin : lstPinPoints) {
@@ -201,6 +214,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	}
     	
     }
+    
     /**
      * Updates the tabs depending on what we want to sort by.
      */
@@ -471,7 +485,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			    }
 
 				
-				//updating the yellowPin when item is clicked.
+				/**
+				 * updating the yellowPin when item is clicked.
+				 * @param placeLocation
+				 */				
 				private void updateYellowPin(GeoPoint placeLocation) {
 					CustomPinPoint replaceToColorPin = null;
 					CustomPinPoint replaceToYellowPin = null;
@@ -509,7 +526,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		}
 	}
 	
-	//updating the yellowPin when item is click.
+	
+	/**
+	 * updating the yellowPin when item is clicked.
+	 * @param placeLocation
+	 */
 	private void updateYellowPin(GeoPoint placeLocation) {
 		CustomPinPoint replaceToColorPin = null;
 		CustomPinPoint replaceToYellowPin = null;
@@ -593,6 +614,14 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		}
 	}
 	
+	//TODO: L - comment
+	/**
+	 * 
+	 * @param point
+	 * @param color
+	 * @param item
+	 * @param isSelected
+	 */
 	private void addPin(GeoPoint point, String color, Item item, boolean isSelected) {
 		if(point == null || color == null || item == null) {
 			throw new IllegalArgumentException("input to addPin is null");
@@ -632,8 +661,12 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		}
 	}
 	
+	//TODO: L - comment
 	/**
-	 * @param zoom to a view that captures two points.
+	 * zoom to a view that captures two points.
+	 * 
+	 * @param point
+	 * @param point2
 	 */
 	private void zoomToTwoPoint(GeoPoint point, GeoPoint point2) {
 		int maxX = Math.max(point.getLatitudeE6(), point2.getLatitudeE6());
@@ -647,13 +680,22 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/**
 	 * if location is valid, make a point and zoom user to that location.
 	 * if the location isn't valid, it display error message with toast. 
+	 * 
+	 * @param location
 	 */
 	private void zoomLocation(GeoPoint location) {
 	    controller.animateTo(location);
 	    controller.setZoom(17);
 	}
 	
-	public static double DISTANCETOMILES =  0.000621371192;
+	
+	//TODO: L - comment
+	/**
+	 * 
+	 * @param p1
+	 * @param p2
+	 * @return
+	 */
 	private double distanceBetween(GeoPoint p1, GeoPoint p2) {
 		if(p1 == null || p2 == null) {
 			throw new IllegalArgumentException("GeoPoint are null");
@@ -668,7 +710,12 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		return Double.valueOf(twoDForm.format(loc1.distanceTo(loc2) * DISTANCETOMILES));
 	}
 	
-	
+	//TODO: L - Comment
+	/**
+	 * 
+	 * @param color
+	 * @return
+	 */
 	private Drawable getDrawable(String color) {
 		if(color.equals("yellow")) {//TODO: suppose to be hex , just for the special case of highlighting.
 			return getResources().getDrawable(R.drawable.yellow);
