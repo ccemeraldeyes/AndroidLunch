@@ -39,7 +39,7 @@ public class CustomPinPoint extends ItemizedOverlay<OverlayItem> {
 	 */
 	@Override
 	protected boolean onTap(int index) {
-		Dialog popup = new CustomDialog(context, item, this.distance, 0);
+		Dialog popup = new CustomDialog(context, item, this.distance);
 		popup.show();
 		return true;
 	}

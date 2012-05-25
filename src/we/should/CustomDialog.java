@@ -13,13 +13,12 @@ import we.should.list.Item;
 public class CustomDialog extends Dialog {
 	private Item item;
 	private double distance;
-	private int position;
-	public CustomDialog(Context context, Item item, double distance, int position ) {
+	public CustomDialog(Context context, Item item, double distance ) {
 		super(context);
 		this.item = item;
 		this.distance = distance;
-		this.position = position;
 	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.customdialog);
