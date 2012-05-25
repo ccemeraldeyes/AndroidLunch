@@ -458,44 +458,43 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			    		}
 				    }
 			    }
-				
-				//updating the yellowPin when item is click.
-				private void updateYellowPin(GeoPoint placeLocation) {
-					CustomPinPoint replaceToColorPin = null;
-					CustomPinPoint replaceToYellowPin = null;
-					for(CustomPinPoint customPin : lstPinPoints) {
-						if(customPin.contains(placeLocation)) {
-							replaceToYellowPin = customPin;
-						}
-						if(customPin.isSelected()) {
-							replaceToColorPin = customPin;
-						}
-						if(replaceToColorPin != null && replaceToYellowPin != null) {
-							break;
-						}
-					}
-					
-					if(replaceToColorPin != null) {
-						overlayList.remove(replaceToColorPin);
-						lstPinPoints.remove(replaceToColorPin);
-						addPin(replaceToColorPin.getPoint(), 
-								replaceToColorPin.getColor(), 
-								replaceToColorPin.getItem(), false);
-					}
-					
-					if(replaceToYellowPin != null) {
-						overlayList.remove(replaceToYellowPin);
-						lstPinPoints.remove(replaceToYellowPin);
-						addPin(replaceToYellowPin.getPoint(),
-								replaceToYellowPin.getColor(),
-								replaceToYellowPin.getItem(), true);
-					}
-				}
 			});
 			return lv;
 		}
 	}
 	
+	//updating the yellowPin when item is click.
+	private void updateYellowPin(GeoPoint placeLocation) {
+		CustomPinPoint replaceToColorPin = null;
+		CustomPinPoint replaceToYellowPin = null;
+		for(CustomPinPoint customPin : lstPinPoints) {
+			if(customPin.contains(placeLocation)) {
+				replaceToYellowPin = customPin;
+			}
+			if(customPin.isSelected()) {
+				replaceToColorPin = customPin;
+			}
+			if(replaceToColorPin != null && replaceToYellowPin != null) {
+				break;
+			}
+		}
+		
+		if(replaceToColorPin != null) {
+			overlayList.remove(replaceToColorPin);
+			lstPinPoints.remove(replaceToColorPin);
+			addPin(replaceToColorPin.getPoint(), 
+					replaceToColorPin.getColor(), 
+					replaceToColorPin.getItem(), false);
+		}
+		
+		if(replaceToYellowPin != null) {
+			overlayList.remove(replaceToYellowPin);
+			lstPinPoints.remove(replaceToYellowPin);
+			addPin(replaceToYellowPin.getPoint(),
+					replaceToYellowPin.getColor(),
+					replaceToYellowPin.getItem(), true);
+		}
+	}
 	/**
 	 * This class populates each tab with items from that tab's tag.
 	 * 
@@ -532,12 +531,12 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		    				int locY = (int) (addr.getLongitude() * 1E6);
 		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
 		        			GeoPoint myLoc = getDeviceLocation();
-		        			
 		        			if(myLoc == null) {
 		        				zoomLocation(placeLocation);
 		        			} else {
 		        				zoomToTwoPoint(placeLocation, myLoc);
 		        			}
+		        			updateYellowPin(placeLocation);
 		        		    break;
 			    		}
 				    }
