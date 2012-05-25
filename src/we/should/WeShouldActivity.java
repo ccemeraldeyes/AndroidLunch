@@ -394,19 +394,15 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		updateTabs();
 	}
-
-	public void onLocationChanged(Location location) {
-		//we do nothing when user change the location of the map
-	}
+	
+	//Do nothing when user change the location of the map
+	public void onLocationChanged(Location location) {}
 	
 	//Do nothing when the provider of the location listener(GPS or internet)
 	//disable or enable or statuschanged.
-	public void onProviderDisabled(String provider) {
-	}
-	public void onProviderEnabled(String provider) {
-	}
-	public void onStatusChanged(String provider, int status, Bundle extras) {
-	}
+	public void onProviderDisabled(String provider) {}
+	public void onProviderEnabled(String provider) {}
+	public void onStatusChanged(String provider, int status, Bundle extras) {}
 
 	@Override
 	protected boolean isRouteDisplayed() {
@@ -459,7 +455,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 				    }
 			    }
 				
-				//updating the yellowPin when item is click.
+				//updating the yellowPin when item is clicked.
 				private void updateYellowPin(GeoPoint placeLocation) {
 					CustomPinPoint replaceToColorPin = null;
 					CustomPinPoint replaceToYellowPin = null;
@@ -588,7 +584,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	}
 	
 	/**
-	 * @param zoom to a point that capture the two points.
+	 * @param zoom to a view that captures two points.
 	 */
 	private void zoomToTwoPoint(GeoPoint point, GeoPoint point2) {
 		int maxX = Math.max(point.getLatitudeE6(), point2.getLatitudeE6());
@@ -600,7 +596,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	}
 	
 	/**
-	 * if location is valid, make a pint and zoom user to that location.
+	 * if location is valid, make a point and zoom user to that location.
 	 * if the location isn't valid, it display error message with toast. 
 	 */
 	private void zoomLocation(GeoPoint location) {

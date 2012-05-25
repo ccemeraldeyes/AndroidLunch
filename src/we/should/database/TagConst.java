@@ -12,6 +12,6 @@ public class TagConst {
 								TBL_NAME="tag",				// table name
 								ID="id",					// unique id
 								NAME="name",				// tag name
-								COLOR="color";
+								COLOR="color";				// color of map pins
 }
 
