@@ -196,6 +196,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
      * Updates the tabs depending on what we want to sort by.
      */
     private void updateTabs() {
+    	String tabId = mTabHost.getCurrentTabTag();
     	switch (mSortType) {
     	case Category:
     		updateTabsCategory();
@@ -204,6 +205,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		updateTabsTag();
     		break;
     	}
+    	mTabHost.setCurrentTabByTag(tabId);
     }
 
 	/**
