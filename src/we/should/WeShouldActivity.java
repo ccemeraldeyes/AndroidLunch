@@ -409,19 +409,15 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		updateTabs();
 	}
-
-	public void onLocationChanged(Location location) {
-		//we do nothing when user change the location of the map
-	}
+	
+	//Do nothing when user change the location of the map
+	public void onLocationChanged(Location location) {}
 	
 	//Do nothing when the provider of the location listener(GPS or internet)
 	//disable or enable or statuschanged.
-	public void onProviderDisabled(String provider) {
-	}
-	public void onProviderEnabled(String provider) {
-	}
-	public void onStatusChanged(String provider, int status, Bundle extras) {
-	}
+	public void onProviderDisabled(String provider) {}
+	public void onProviderEnabled(String provider) {}
+	public void onStatusChanged(String provider, int status, Bundle extras) {}
 
 	@Override
 	protected boolean isRouteDisplayed() {
@@ -473,8 +469,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			    		}
 				    }
 			    }
+
 				
-				//updating the yellowPin when item is click.
+				//updating the yellowPin when item is clicked.
 				private void updateYellowPin(GeoPoint placeLocation) {
 					CustomPinPoint replaceToColorPin = null;
 					CustomPinPoint replaceToYellowPin = null;
@@ -506,11 +503,44 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 								replaceToYellowPin.getItem(), true);
 					}
 				}
+
 			});
 			return lv;
 		}
 	}
 	
+	//updating the yellowPin when item is click.
+	private void updateYellowPin(GeoPoint placeLocation) {
+		CustomPinPoint replaceToColorPin = null;
+		CustomPinPoint replaceToYellowPin = null;
+		for(CustomPinPoint customPin : lstPinPoints) {
+			if(customPin.contains(placeLocation)) {
+				replaceToYellowPin = customPin;
+			}
+			if(customPin.isSelected()) {
+				replaceToColorPin = customPin;
+			}
+			if(replaceToColorPin != null && replaceToYellowPin != null) {
+				break;
+			}
+		}
+		
+		if(replaceToColorPin != null) {
+			overlayList.remove(replaceToColorPin);
+			lstPinPoints.remove(replaceToColorPin);
+			addPin(replaceToColorPin.getPoint(), 
+					replaceToColorPin.getColor(), 
+					replaceToColorPin.getItem(), false);
+		}
+		
+		if(replaceToYellowPin != null) {
+			overlayList.remove(replaceToYellowPin);
+			lstPinPoints.remove(replaceToYellowPin);
+			addPin(replaceToYellowPin.getPoint(),
+					replaceToYellowPin.getColor(),
+					replaceToYellowPin.getItem(), true);
+		}
+	}
 	/**
 	 * This class populates each tab with items from that tab's tag.
 	 * 
@@ -547,12 +577,12 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		    				int locY = (int) (addr.getLongitude() * 1E6);
 		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
 		        			GeoPoint myLoc = getDeviceLocation();
-		        			
 		        			if(myLoc == null) {
 		        				zoomLocation(placeLocation);
 		        			} else {
 		        				zoomToTwoPoint(placeLocation, myLoc);
 		        			}
+		        			updateYellowPin(placeLocation);
 		        		    break;
 			    		}
 				    }
@@ -603,7 +633,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	}
 	
 	/**
-	 * @param zoom to a point that capture the two points.
+	 * @param zoom to a view that captures two points.
 	 */
 	private void zoomToTwoPoint(GeoPoint point, GeoPoint point2) {
 		int maxX = Math.max(point.getLatitudeE6(), point2.getLatitudeE6());
@@ -615,7 +645,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	}
 	
 	/**
-	 * if location is valid, make a pint and zoom user to that location.
+	 * if location is valid, make a point and zoom user to that location.
 	 * if the location isn't valid, it display error message with toast. 
 	 */
 	private void zoomLocation(GeoPoint location) {

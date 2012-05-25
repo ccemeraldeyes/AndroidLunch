@@ -7,11 +7,17 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-
 /**
  * Helper object to create, open, and/or manage a database.
  * @author UW CSE403 SP12
+ * 
+ * Rep Invariant: the constraints upheld by the database are defined
+ * in the create table strings.  
  */
+
+//TODO: finish rep invariant
+
+
 public class DBHelper extends SQLiteOpenHelper{
 
 	// Create table strings
@@ -114,7 +120,6 @@ public class DBHelper extends SQLiteOpenHelper{
 		Log.v("DBHelper.dropAllTables", "Dropping all tables");
 	
 		try {
-
 			// drop order matters to avoid database constraint exception
 			db.execSQL("drop table if exists "+ Item_TagConst.TBL_NAME);
 			db.execSQL("drop table if exists "+ ItemConst.TBL_NAME);

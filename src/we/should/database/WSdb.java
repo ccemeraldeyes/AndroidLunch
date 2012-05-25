@@ -16,7 +16,7 @@ import android.util.Log;
  * 			UW CSE403 SP12
  */
 
-//TODO: inserts return ID or 0 if fail... verify returns line#=ID
+//TODO: rep invariant
 
 public class WSdb {
 	private SQLiteDatabase db; 
