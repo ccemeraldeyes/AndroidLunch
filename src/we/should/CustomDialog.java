@@ -23,6 +23,7 @@ public class CustomDialog extends Dialog {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.customdialog);
+		setTitle("Item Info");
 		TextView tvName = (TextView) findViewById(R.id.tvPopupName);
 		TextView tvDistance = (TextView) findViewById(R.id.tvPopupDis);
 		TextView tvAddr = (TextView) findViewById(R.id.tvPopUpAddr);
