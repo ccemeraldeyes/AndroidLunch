@@ -77,9 +77,10 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 				filterResults.count = mPlaces.size();
 				return filterResults;
 			}
-			String query = constraint.toString().toLowerCase();
+			String query = constraint.toString().toLowerCase().substring(0, constraint.length() - 2);//Looser filtering
 			for (Place p : mPlaces) {
-				if (p.getName().toLowerCase().contains(query)) {
+				String name = p.getName().toLowerCase();
+				if (name.contains(query) || query.contains(name)) {
 					list.add(p);
 				}
 			}

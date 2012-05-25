@@ -1,18 +1,10 @@
 package we.should.search;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.location.Location;
@@ -96,7 +88,7 @@ public class PlaceRequest extends Search{
 	 * @param reference - the reference String return from querying searchByLocation.
 	 * @return DetailPlace if success, null if fail
 	 */
-	public DetailPlace searchPlaceDetail(String reference) {
+	public DetailPlace searchDetail(String reference) {
 		if(reference == null) {
 			throw new IllegalArgumentException("reference string is null");
 		}

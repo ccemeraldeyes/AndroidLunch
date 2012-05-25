@@ -15,9 +15,9 @@ import android.util.Log;
 
 public class MovieRequest extends Search {
 	private final String SCHEME = "http";
-	private final String PLACES_SEARCH_URL =  "http://www.imdbapi.com/?t=";
+	private final String PLACES_SEARCH_URL =  "//www.imdbapi.com/?t=";
 	public final String LOG_KEY = "WeShould.MovieRequest";
-	private Map<String, IMDBRecord> cache; //TODO;
+	private IMDBRecord cache = null;
 	
 	public MovieRequest() {}
 	
@@ -36,19 +36,10 @@ public class MovieRequest extends Search {
 		JSONObject response = new JSONObject();
 		try {
 			response = Search.executeQuery(request);
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+		} catch (Exception e) {
+			Log.i(LOG_KEY, "Movie lookup failed.");
+		}
+		Log.v(LOG_KEY, response.toString());
 		try {
 			Place m = new IMDBRecord(response);
 			out.add(m);
@@ -60,7 +51,7 @@ public class MovieRequest extends Search {
 		
 		
 	}
-	public DetailPlace searchPlaceDetail(String reference) {
+	public DetailPlace searchDetail(String reference) {
 		List<Place> out = search(reference);
 		DetailPlace ret = null;
 		if(out.size() > 0){

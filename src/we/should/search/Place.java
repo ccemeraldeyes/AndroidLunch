@@ -20,7 +20,7 @@ public class Place {
 	private double latitude, longitude, rating;
 	protected String icon, id, name, vicinity, reference;
 	public Place(JSONObject obj) throws JSONException {
-		getLocation(obj);
+		//getLocation(obj);
 		icon = obj.optString("icon", null);
 		id = obj.optString("id", null);
 		name = obj.optString("name", null);
