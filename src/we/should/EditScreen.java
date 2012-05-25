@@ -316,6 +316,7 @@ public class EditScreen extends Activity {
 			public void onClick(DialogInterface dialog, int which) {
 				mTags = selectedTags;
 				mTagsView.setText(Tag.getFormatted(mTags));
+				mItem.setTags(new HashSet<Tag>(mTags));
 			}
 		});
 		
