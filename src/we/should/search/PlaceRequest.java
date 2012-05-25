@@ -51,9 +51,10 @@ public class PlaceRequest {
 	//Possible feature:
 	//Note that Location can be get by getting the Device Location, on when user click on the map, we can get the location.
 	public List<Place> searchByLocation(Location l, String searchname) throws Exception{
-		if(l == null) {
-			throw new IllegalArgumentException("Location is null");
+		if(l == null || searchname == null) {
+			throw new IllegalArgumentException("input is null");
 		}
+		
 		Log.v(LOG_KEY, "Start SearchByLocation");
 		try {
 			URI url = buildURLForGooglePlaces(l, searchname);
@@ -88,6 +89,10 @@ public class PlaceRequest {
 	 * @return DetailPlace if success, null if fail
 	 */
 	public DetailPlace searchPlaceDetail(String reference) {
+		if(reference == null) {
+			throw new IllegalArgumentException("reference string is null");
+		}
+		
 		try {		
 			URI url = buildURLForDetailPlace(reference);
 			JSONObject obj = executeQuery(url);

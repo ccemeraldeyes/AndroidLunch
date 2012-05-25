@@ -148,6 +148,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	}
     	
     	List<Item> items = null;
+    	
     	//TODO: Lawrence String color = null; get color of category or tag
     	String color = mCategories.get(name).getColor();
 		
@@ -349,6 +350,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		case R.id.delete:
 			mAdapter.remove(item);
 			item.delete();
+	    	updatePins(mTabHost.getCurrentTabTag().trim());
 			break;
 		default:
 			return super.onContextItemSelected(menuItem);
@@ -512,7 +514,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			
 			return lv;
 		}
-		
 	}
 	
 	private void addPin(GeoPoint point, String color, Item item, boolean isSelected) {
