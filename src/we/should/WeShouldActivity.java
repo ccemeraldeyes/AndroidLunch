@@ -8,7 +8,6 @@ import java.util.Set;
 
 import we.should.communication.RestoreService;
 
-import we.should.database.WSdb;
 import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.GenericCategory;
@@ -128,7 +127,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
 			public void onTabChanged(String tabId) {
 				updateView(tabId.trim());
-				
 			}
 		});
         
@@ -140,7 +138,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 				}
 			}
         });
-        
         
         myLocationOverlay = new MyLocationOverlay(this, map);
         map.getOverlays().add(myLocationOverlay);
@@ -516,6 +513,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					replaceToYellowPin.getItem(), true);
 		}
 	}
+	
 	/**
 	 * This class populates each tab with items from that tab's tag.
 	 * 
@@ -575,6 +573,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @param item - the item the pin representing
 	 * @param isSelected - true, if user is current viewing the pin
 	 * 			- false otherwise.
+	 * @throws IllegalArgumentException on null input.
 	 */
 	private void addPin(GeoPoint point, String color, Item item, boolean isSelected) {
 		if(point == null || color == null || item == null) {
@@ -621,8 +620,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * 
 	 * @param point - point 1 to be include in the view
 	 * @param point2 - point2 to be include in the view
+	 * 	 
+	 * @throws IllegalArgumentException when the point is null
 	 */
 	private void zoomToTwoPoint(GeoPoint point, GeoPoint point2) {
+		if(point == null || point2 == null) {
+			throw new IllegalArgumentException("GeoPoint are null");
+		}
 		int maxX = Math.max(point.getLatitudeE6(), point2.getLatitudeE6());
 		int minX = Math.min(point.getLatitudeE6(), point2.getLatitudeE6());
 		int maxY = Math.max(point.getLongitudeE6(), point2.getLongitudeE6());
@@ -634,7 +638,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/**
 	 * if location is valid, make a point and zoom user to that location.
 	 * if the location isn't valid, it display error message with toast. 
-	 * 
 	 * @param location
 	 */
 	private void zoomLocation(GeoPoint location) {
@@ -647,6 +650,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @param p1 - point1
 	 * @param p2 - point2
 	 * @return the distance between the two points in miles.
+	 * @throws IllegalArgumentException when the point is null
 	 */
 	private double distanceBetween(GeoPoint p1, GeoPoint p2) {
 		if(p1 == null || p2 == null) {
@@ -671,8 +675,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private Drawable getDrawable(String color) {
 		if(color == null || color.length() != 6) {
 			throw new IllegalArgumentException("color is null or " +
-					"	color string is suppose to be six characters");
+					"color string is suppose to be six characters");
 		}
+		
 		if(color.equals("FFFF00")) {//TODO: suppose to be hex , just for the special case of highlighting.
 			return getResources().getDrawable(R.drawable.yellow);
 		} else if(color.equals("00FF00")) {
