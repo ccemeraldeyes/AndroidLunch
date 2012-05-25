@@ -29,7 +29,6 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 		mContext = context;
 		mPlaces = places;
 	}
-	//D.S
 	public Place getItem(int position){
 		return mPlaces.get(position);
 	}
@@ -50,7 +49,7 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 			
 			placeRow = new PlaceRow();
 			placeRow.name = (TextView) row.findViewById(R.id.name);
-			placeRow.vicinity = (TextView) row.findViewById(R.id.vicinity);
+			placeRow.detail = (TextView) row.findViewById(R.id.detail);
 			row.setTag(placeRow);
 		} else {
 			placeRow = (PlaceRow) row.getTag();
@@ -58,13 +57,13 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 		
 		Place place = mPlaces.get(position);
 		placeRow.name.setText(place.getName());
-		placeRow.vicinity.setText(place.getVicinity());
+		placeRow.detail.setText(place.getDetail());
 		return row;
 	}
 	
 	private static class PlaceRow {
 		TextView name;
-		TextView vicinity;
+		TextView detail;
 	}
 	
 	private class PlaceFilter extends Filter {

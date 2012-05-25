@@ -18,14 +18,14 @@ import org.json.JSONObject;
  */
 public class Place {
 	private double latitude, longitude, rating;
-	private String icon, id, name, vicinity, reference;
+	protected String icon, id, name, vicinity, reference;
 	public Place(JSONObject obj) throws JSONException {
 		getLocation(obj);
-		icon = obj.getString("icon");
-		id = obj.getString("id");
-		name = obj.getString("name");
-		vicinity  = obj.getString("vicinity");
-		reference = obj.getString("reference");
+		icon = obj.optString("icon", null);
+		id = obj.optString("id", null);
+		name = obj.optString("name", null);
+		vicinity  = obj.optString("vicinity", null);
+		reference = obj.optString("reference", null);
 	}
 	
 	/**
@@ -95,6 +95,13 @@ public class Place {
 	 */
 	public String getVicinity() {
 		return vicinity;
+	}
+	/**
+	 * Returns a qualifying detail string description of this.
+	 * @return
+	 */
+	public String getDetail() {
+		return getVicinity();
 	}
 	
 	/**

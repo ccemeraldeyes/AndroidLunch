@@ -25,7 +25,7 @@ import android.util.Log;
  * It is an object create by AsynTask in Activity to perform query on Google Place API.
  * @author Lawrence
  */
-public class PlaceRequest {
+public class PlaceRequest extends Search{
 	/**
 	 * PlaceRequest.searchTypes defines what type of Place are you searching for.
 	 * available types for the search can be find in https://developers.google.com/maps/documentation/places/supported_types
@@ -37,7 +37,11 @@ public class PlaceRequest {
 	private static final String PLACES_SEARCH_URL =  "//maps.googleapis.com/maps/api/place/search/json?";
 	private static final String PLACES_DETAIL_SEARCH = "//maps.googleapis.com/maps/api/place/details/json?";
 	public static final String LOG_KEY = "WeShould.search";
-	public PlaceRequest() {
+	
+	private Location l;
+	
+	public PlaceRequest(Location l) {
+		this.l = l;
 	}
 	
 	
@@ -50,7 +54,7 @@ public class PlaceRequest {
 	 */
 	//Possible feature:
 	//Note that Location can be get by getting the Device Location, on when user click on the map, we can get the location.
-	public List<Place> searchByLocation(Location l, String searchname) throws Exception{
+	public List<Place> search(String searchname) throws Exception{
 		if(l == null || searchname == null) {
 			throw new IllegalArgumentException("input is null");
 		}
@@ -59,7 +63,7 @@ public class PlaceRequest {
 		try {
 			searchname = searchname.trim();
 			URI url = buildURLForGooglePlaces(l, searchname);
-			JSONObject obj = executeQuery(url);
+			JSONObject obj = Search.executeQuery(url);
 			//make sure status is okay before we get the results
 			if(obj.getString("status").equals("OK")) {			
 				JSONArray jsonPlaces = obj.getJSONArray("results");
@@ -99,7 +103,7 @@ public class PlaceRequest {
 		
 		try {		
 			URI url = buildURLForDetailPlace(reference);
-			JSONObject obj = executeQuery(url);
+			JSONObject obj = Search.executeQuery(url);
 			if(obj.getString("status").equals("OK")) {	
 				//making a new DetailPlace
 				JSONObject data = obj.getJSONObject("result");
@@ -114,22 +118,7 @@ public class PlaceRequest {
 	}
 	
 	
-	/**
-	 * @param url - the url to execute.
-	 * @return a JSONObject from Google Place API
-	 * @throws JSONException
-	 * @throws ClientProtocolException
-	 * @throws IOException
-	 */
-	private JSONObject executeQuery(URI url) 
-			throws JSONException, ClientProtocolException, 
-			IOException, URISyntaxException {
-		HttpClient httpclient = new DefaultHttpClient();
-		HttpGet request = new HttpGet(url);
-		ResponseHandler<String> handler = new BasicResponseHandler();
-		String result = httpclient.execute(request, handler);
-		return new JSONObject (result);
-	}
+	
 	
 
 	/** 

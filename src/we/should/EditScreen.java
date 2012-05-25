@@ -346,7 +346,7 @@ public class EditScreen extends Activity {
 	 * Fills in any fields from the selected place.
 	 */
 	private void fillFields(Place place) {
-		DetailPlace detailPlace = (new PlaceRequest()).searchPlaceDetail(place.getReference());
+		DetailPlace detailPlace = (new PlaceRequest(null)).searchPlaceDetail(place.getReference());
 		Map<Field, String> fieldMap = detailPlace.asFieldMap();
 		for (Field f : fieldMap.keySet()) {
 			if (fieldMap.get(f) != null) {
@@ -469,7 +469,7 @@ public class EditScreen extends Activity {
 				return places;
 			}
 			try {
-				if(!isCancelled()) places = (new PlaceRequest()).searchByLocation(location, params[0]);
+				if(!isCancelled()) places = (new PlaceRequest(location)).search(params[0]);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return places;
