@@ -152,16 +152,14 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         map.postInvalidate();    
     }
     
-    //TODO: L - comments
     /**
-     * 
-     * @param name
+     * updating the view, updating the item adapter as well as all the pins.
+     * @param name - the name of the tag or category.
      */
     protected void updateView(String name) {
     	
     	List<Item> items = null;
     	
-    	//TODO: Lawrence String color = null; get color of category or tag
     	String color = null;
 		
     	switch (mSortType) {
@@ -177,15 +175,14 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	mAdapter = new ItemAdapter(WeShouldActivity.this, items);
     	mAdapter.notifyDataSetChanged();
     	updatePins(color, items);
-    	
-    	
 	}
     
-    //TODO: L - comments
     /**
+     * This method remove all the pin in current map 
+     * and create a list of pins base on the item it is given.
      * 
-     * @param color
-     * @param items
+     * @param color - a color string, 6 character long represent r, g, b
+     * @param items - the items that needed to create the pin for.
      */
     private void updatePins(String color, List<Item> items){
     	//clear the pin everytime we load a new tab.
@@ -571,13 +568,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		}
 	}
 	
-	//TODO: L - comment
 	/**
-	 * 
-	 * @param point
-	 * @param color
-	 * @param item
-	 * @param isSelected
+	 * helper method to add a pin to the map.
+	 * @param point - the point that you want to add the pin
+	 * @param color - 6 character color string, with r, g, b represent the color of the pin
+	 * @param item - the item the pin representing
+	 * @param isSelected - true, if user is current viewing the pin
+	 * 			- false otherwise.
 	 */
 	private void addPin(GeoPoint point, String color, Item item, boolean isSelected) {
 		if(point == null || color == null || item == null) {
@@ -587,7 +584,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		double distance = distanceBetween(getDeviceLocation(), point);
 		Drawable drawable;
 		if(isSelected) {
-			drawable = getDrawable("yellow");
+			drawable = getDrawable("FFFF00");
 		} else {
 			drawable = getDrawable(color);
 		}
@@ -618,12 +615,12 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		}
 	}
 	
-	//TODO: L - comment
 	/**
 	 * zoom to a view that captures two points.
+	 * google support zoomToSpan, try their best to fit two points in the same view.
 	 * 
-	 * @param point
-	 * @param point2
+	 * @param point - point 1 to be include in the view
+	 * @param point2 - point2 to be include in the view
 	 */
 	private void zoomToTwoPoint(GeoPoint point, GeoPoint point2) {
 		int maxX = Math.max(point.getLatitudeE6(), point2.getLatitudeE6());
@@ -646,12 +643,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	}
 	
 	
-	//TODO: L - comment
 	/**
-	 * 
-	 * @param p1
-	 * @param p2
-	 * @return
+	 * @param p1 - point1
+	 * @param p2 - point2
+	 * @return the distance between the two points in miles.
 	 */
 	private double distanceBetween(GeoPoint p1, GeoPoint p2) {
 		if(p1 == null || p2 == null) {
@@ -667,17 +662,28 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		return Double.valueOf(twoDForm.format(loc1.distanceTo(loc2) * DISTANCETOMILES));
 	}
 	
-	//TODO: L - Comment
+	
 	/**
-	 * 
-	 * @param color
-	 * @return
+	 * Getting the drawable base by the color string.
+	 * @param color - string with six characters format, represent r, g, b
+	 * @return Drawable the pin represent for that color.
 	 */
 	private Drawable getDrawable(String color) {
-		if(color.equals("yellow")) {//TODO: suppose to be hex , just for the special case of highlighting.
-			return getResources().getDrawable(R.drawable.yellow);
+		if(color == null || color.length() != 6) {
+			throw new IllegalArgumentException("color is null or " +
+					"	color string is suppose to be six characters");
 		}
-		return getResources().getDrawable(R.drawable.red);
+		if(color.equals("FFFF00")) {//TODO: suppose to be hex , just for the special case of highlighting.
+			return getResources().getDrawable(R.drawable.yellow);
+		} else if(color.equals("00FF00")) {
+			return getResources().getDrawable(R.drawable.green);
+		} else if(color.equals("0000FF")) {
+			return getResources().getDrawable(R.drawable.blue);
+		} else if(color.equals("FF00FF")) {
+			return getResources().getDrawable(R.drawable.purple);
+		} else {
+			return getResources().getDrawable(R.drawable.red);
+		}
 	}
 	
 	
