@@ -117,6 +117,7 @@ public class GetReferralsService extends IntentService {
 			
 			notificationIntent.putExtra("data", data.toString());
 	
+			Log.v("AFTER EXTRAS INSERT", notificationIntent.getStringExtra("data"));
 			
 			PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 	
