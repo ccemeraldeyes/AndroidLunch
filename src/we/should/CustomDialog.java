@@ -27,16 +27,16 @@ public class CustomDialog extends Dialog {
 		TextView tvDistance = (TextView) findViewById(R.id.tvPopupDis);
 		TextView tvAddr = (TextView) findViewById(R.id.tvPopUpAddr);
 		Button moreInfo = (Button) findViewById(R.id.btnMoreInfo);
-		tvName.setText("Name: " + item.getName());
-		tvDistance.setText("Distance: " + distance + " miles");
+		tvName.setText(item.getName());
+		tvDistance.setText(distance + " miles away");
 		String addr = item.get(Field.ADDRESS);
-		tvAddr.setText("Address: " + addr);
+		tvAddr.setText(addr);
 		moreInfo.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-//				Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
-//	    		intent.putExtra(WeShouldActivity.CATEGORY, item.getCategory().getName());
-//	    		intent.putExtra(WeShouldActivity.INDEX, position);
-//	    		startActivity(intent, ActivityKey.VIEW_ITEM.ordinal());
+				Intent intent = new Intent(CustomDialog.this.getContext(), ViewScreen.class);
+	    		intent.putExtra(WeShouldActivity.CATEGORY, item.getCategory().getName());
+	    		intent.putExtra(WeShouldActivity.INDEX, item.getId());
+	    		CustomDialog.this.startActivity(intent);
 			}
 			
 		});
@@ -45,6 +45,11 @@ public class CustomDialog extends Dialog {
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		return super.onTouchEvent(event);
+	}
+	private void startActivity(Intent i){
+		this.dismiss();
+		getContext().startActivity(i);
+
 	}
 	
 	

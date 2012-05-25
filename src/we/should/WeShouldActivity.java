@@ -270,6 +270,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		super.onResume();
 		myLocationOverlay.enableMyLocation();
 		lm.requestLocationUpdates(towers, 500, 1, this);
+		updateView(mTabHost.getCurrentTabTag());
 	}
 	
 	@Override
