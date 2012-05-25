@@ -28,7 +28,7 @@ public class CustomDialog extends Dialog {
 		TextView tvAddr = (TextView) findViewById(R.id.tvPopUpAddr);
 		Button moreInfo = (Button) findViewById(R.id.btnMoreInfo);
 		tvName.setText("Name: " + item.getName());
-		tvDistance.setText("Distance: " + distance);
+		tvDistance.setText("Distance: " + distance + " miles");
 		String addr = item.get(Field.ADDRESS);
 		tvAddr.setText("Address: " + addr);
 		moreInfo.setOnClickListener(new View.OnClickListener() {

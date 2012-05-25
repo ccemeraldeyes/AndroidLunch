@@ -51,11 +51,13 @@ public class PlaceRequest {
 	//Possible feature:
 	//Note that Location can be get by getting the Device Location, on when user click on the map, we can get the location.
 	public List<Place> searchByLocation(Location l, String searchname) throws Exception{
-		if(l == null) {
-			throw new IllegalArgumentException("Location is null");
+		if(l == null || searchname == null) {
+			throw new IllegalArgumentException("input is null");
 		}
-		Log.v(LOG_KEY, "Start SearchByLocation");
+		
+		Log.v(LOG_KEY, "Start SearchByLocation: " + searchname +".");
 		try {
+			searchname = searchname.trim();
 			URI url = buildURLForGooglePlaces(l, searchname);
 			JSONObject obj = executeQuery(url);
 			//make sure status is okay before we get the results
@@ -68,6 +70,9 @@ public class PlaceRequest {
 					places.add(new Place(place));
 				}
 				return places;
+			} else if(obj.getString("status").equals("ZERO_RESULTS")){
+				Log.v(LOG_KEY, "zero results");
+				return null;
 			} else {
 				Log.v(LOG_KEY, "query status fail");
 			}
@@ -88,6 +93,10 @@ public class PlaceRequest {
 	 * @return DetailPlace if success, null if fail
 	 */
 	public DetailPlace searchPlaceDetail(String reference) {
+		if(reference == null) {
+			throw new IllegalArgumentException("reference string is null");
+		}
+		
 		try {		
 			URI url = buildURLForDetailPlace(reference);
 			JSONObject obj = executeQuery(url);
@@ -139,9 +148,10 @@ public class PlaceRequest {
         String lat = String.valueOf(myLocation.getLatitude());
         String lon = String.valueOf(myLocation.getLongitude());
         String url = baseUrl + "location=" + lat + "," + lon + "&" +
-                     "rankby=distance" + "&" + "sensor=false" +
+                     "rankby=distance" + "&" + "sensor=true" +
                      "&" + "name=" + searchName +
                      "&" + "key=" + keyString;
+    	Log.v(LOG_KEY, "build string url is: " + url);
         return new URI(SCHEME, url, null);
     }
     
