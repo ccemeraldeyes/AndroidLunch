@@ -16,24 +16,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Name:"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#ff6b6b6b"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textSize="8pt" />
 
     <TextView
         android:id="@+id/tvPopupDis"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Distance:"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#ff6b6b6b"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textSize="8pt" />
 
     <TextView
         android:id="@+id/tvPopUpAddr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Address:"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#ff6b6b6b"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textSize="8pt" />
 
     <Button
         android:id="@+id/btnMoreInfo"
