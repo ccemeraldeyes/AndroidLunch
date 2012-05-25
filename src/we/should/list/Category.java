@@ -55,6 +55,7 @@ public abstract class Category {
 		this.id = 0;
 		items = new LinkedList<Item>();
 	}
+	
 	protected Category(String name, List<Field> fields, Context ctx){
 		this(name, ctx);
 		if (fields == null) this.fields = Field.getDefaultFields();

@@ -1,5 +1,5 @@
 package we.should;
-
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +8,7 @@ import java.util.Set;
 
 import we.should.communication.GetReferralsService;
 import we.should.communication.RestoreService;
+
 import we.should.database.WSdb;
 import we.should.list.Category;
 import we.should.list.Field;
@@ -17,19 +18,22 @@ import we.should.list.Movies;
 import we.should.list.Referrals;
 import we.should.list.Tag;
 import we.should.search.CustomPinPoint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
 import android.graphics.Color;
 
+
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -53,7 +57,7 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.Overlay;
-import com.google.android.maps.Projection;
+import com.google.android.maps.OverlayItem;
 
 public class WeShouldActivity extends MapActivity implements LocationListener {
 	
@@ -69,7 +73,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	
 	private final Category RESTAURANTS = new GenericCategory(Category.Special.Restaurants.toString(), Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
-
 	private final Category REFERRALS = new Referrals(this);
 
 	
@@ -90,6 +93,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/** A map that maps the name of each tag to its values. **/
 	private Map<String, Tag> mTags;
 	
+	/** A global reference to the selected Item **/
+	private Item mItem;
+	
 	/** A mapping from id's to categories, used for submenu creation. **/
 	private Map<Integer, Category> mMenuIDs;
 	private MapView map;
@@ -99,7 +105,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private MyLocationOverlay myLocationOverlay;
 	private List<Overlay> overlayList;
 	private ImageButton zoomButton;
-	private Projection projection;
 	
 	protected WSdb db;
 	protected String DBFILE;
@@ -119,8 +124,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         map = (MapView) findViewById(R.id.mapview);       
         controller = map.getController();
         overlayList = map.getOverlays();
-        projection = map.getProjection();
-       
         
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         this.zoomButton = (ImageButton) findViewById(R.id.my_location_button);
@@ -128,7 +131,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         updateTabs();        
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
 			public void onTabChanged(String tabId) {
-				updatePins(tabId.trim());
+				updateView(tabId.trim());
+				
 			}
 		});
         
@@ -136,7 +140,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			public void onClick(View arg0) {
 				GeoPoint loc = getDeviceLocation();
 				if(loc != null) {
-					zoomLocation(getDeviceLocation());
+					zoomLocation(loc);
 				}
 			}
         });
@@ -152,45 +156,56 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         map.postInvalidate();    
     }
 
-    protected void updatePins(String name) {
+    protected void updateView(String name) {
+    	
+    	List<Item> items = null;
+    	
+    	//TODO: Lawrence String color = null; get color of category or tag
+    	String color = null;
+		
+    	switch (mSortType) {
+    	case Category:
+    		items = mCategories.get(name).getItems();
+    		color = mCategories.get(name).getColor();
+    		break;
+    	case Tag:
+    		items = new ArrayList<Item>(Item.getItemsOfTag(mTags.get(name), this));
+    		color = mTags.get(name).getColor();
+    		break;
+    	}
+    	mAdapter = new ItemAdapter(WeShouldActivity.this, items);
+    	mAdapter.notifyDataSetChanged();
+    	updatePins(color, items);
+    	
+    	
+	}
+    private void updatePins(String color, List<Item> items){
     	//clear the pin everytime we load a new tab.
     	for(CustomPinPoint pin : lstPinPoints) {
     		overlayList.remove(pin);
     	}
-    	
-    	List<Item> items = null;
-    	//TODO: Lawrence String color = null; get color of category or tag
-    	switch (mSortType) {
-    	case Category:
-    		items = mCategories.get(name).getItems();
-    		break;
-    	case Tag:
-    		items = new ArrayList<Item>(Item.getItemsOfTag(mTags.get(name), this));
-    		break;
+    	if(color == null || items == null) {
+    		throw new RuntimeException("fail to get item from category or tags");
     	}
+    	
     	for (Item item : items) {
     		Set<Address> addrs = item.getAddresses();
     		for(Address addr : addrs) {
-    			try {
+				if(addr.hasLatitude() && addr.hasLongitude()) {
     				int locX = (int) (addr.getLatitude() * 1E6);
     				int locY = (int) (addr.getLongitude() * 1E6);
         			GeoPoint placeLocation = new GeoPoint(locX, locY);
-        			CustomPinPoint custom = new CustomPinPoint(WeShouldActivity.this, item, placeLocation, this.projection, Color.BLUE);
-        			
-        			lstPinPoints.add(custom);
-        			overlayList.add(custom);
-    			} catch (IllegalStateException ex) {
-    				Log.v("UPDATEMAPVIEW", item.getName() + "'s address doesn't have lat or lng value");
-    			}
-
+        			addPin(placeLocation, color, item, false);
+				}
     		}
     	}
-	}
-    
+    	
+    }
     /**
      * Updates the tabs depending on what we want to sort by.
      */
     private void updateTabs() {
+    	String tabId = mTabHost.getCurrentTabTag();
     	switch (mSortType) {
     	case Category:
     		updateTabsCategory();
@@ -199,7 +214,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		updateTabsTag();
     		break;
     	}
-    	updatePins(mTabHost.getCurrentTabTag().trim());
+    	mTabHost.setCurrentTabByTag(tabId);
     }
 
 	/**
@@ -254,7 +269,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 
 	@Override
 	protected void onPause() {
-		//TODO: Lawrence remember to stop all asynTask before exit!!!!
 		super.onPause();
 		myLocationOverlay.disableMyLocation();
 		lm.removeUpdates(this);
@@ -265,6 +279,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		super.onResume();
 		myLocationOverlay.enableMyLocation();
 		lm.requestLocationUpdates(towers, 500, 1, this);
+		updateView(mTabHost.getCurrentTabTag());
 	}
 	
 	@Override
@@ -272,7 +287,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		menu.clear();
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
-		
 		// Set up the toggle item
 		MenuItem toggle = menu.findItem(R.id.toggle);
 		switch (mSortType) {
@@ -354,23 +368,36 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	@Override
 	public boolean onContextItemSelected(MenuItem menuItem) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuItem.getMenuInfo();
-		Item item = mAdapter.getItem(info.position);
+		mItem = mAdapter.getItem(info.position);
 		switch(menuItem.getItemId()) {
 		case R.id.view:
 			Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
-			intent.putExtra(CATEGORY, item.getCategory().getName());
-			intent.putExtra(INDEX, item.getId());
+			intent.putExtra(CATEGORY, mItem.getCategory().getName());
+			intent.putExtra(INDEX, mItem.getId());
 			startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 			break;
 		case R.id.edit:
 			intent = new Intent(getApplicationContext(), EditScreen.class);
-			intent.putExtra(CATEGORY, item.getCategory().getName());
-			intent.putExtra(INDEX, item.getId());
+			intent.putExtra(CATEGORY, mItem.getCategory().getName());
+			intent.putExtra(INDEX, mItem.getId());
 			startActivityForResult(intent, ActivityKey.EDIT_ITEM.ordinal());
 			break;
 		case R.id.delete:
-			mAdapter.remove(item);
-			item.delete();
+			new AlertDialog.Builder(this)
+	        .setIcon(android.R.drawable.ic_dialog_alert)
+	        .setTitle(R.string.delete_item)
+	        .setMessage(R.string.delete_item_confirm)
+	        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+	        	
+	        	public void onClick(DialogInterface dialog, int which) {
+	    			mAdapter.remove(mItem);
+	                mItem.delete();
+	                updateTabs();
+	            }
+
+	        })
+	        .setNegativeButton(R.string.no, null)
+	        .show();
 			break;
 		default:
 			return super.onContextItemSelected(menuItem);
@@ -387,8 +414,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		//we do nothing when user change the location of the map
 	}
 	
-	//We will handle this later.
-	public void onProviderDisabled(String provider) {		
+	//Do nothing when the provider of the location listener(GPS or internet)
+	//disable or enable or statuschanged.
+	public void onProviderDisabled(String provider) {
 	}
 	public void onProviderEnabled(String provider) {
 	}
@@ -424,27 +452,60 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			// click to view item & current location in map
 			lv.setOnItemClickListener(new OnItemClickListener() {
 				public void onItemClick(AdapterView<?> parent,
-						View view, int position, long id) {
-					
+						View view, int position, long id) {				
 			    	Item item = itemsList.get(position);
-			    	Set<Address> addrs = item.getAddresses();
-			    
+			    	Set<Address> addrs = item.getAddresses();			    
 			    	for(Address addr : addrs) {
 			    		if(addr.hasLatitude() && addr.hasLongitude()) {
 					    	int locX = (int) (addr.getLatitude() * 1E6);
 		    				int locY = (int) (addr.getLongitude() * 1E6);
 		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
 		        			GeoPoint myLoc = getDeviceLocation();
-		        			
+		        			//Loop through the pins, remove the normal pin and add yellow pin.
+		        			//and replace any yellow pin back to normal pin.      			
 		        			if(myLoc == null) {
 		        				zoomLocation(placeLocation);
 		        			} else {
 		        				zoomToTwoPoint(placeLocation, myLoc);
-		        			}
+		        			}	        			
+		        			updateYellowPin(placeLocation);
 		        		    break;
 			    		}
 				    }
 			    }
+				
+				//updating the yellowPin when item is click.
+				private void updateYellowPin(GeoPoint placeLocation) {
+					CustomPinPoint replaceToColorPin = null;
+					CustomPinPoint replaceToYellowPin = null;
+					for(CustomPinPoint customPin : lstPinPoints) {
+						if(customPin.contains(placeLocation)) {
+							replaceToYellowPin = customPin;
+						}
+						if(customPin.isSelected()) {
+							replaceToColorPin = customPin;
+						}
+						if(replaceToColorPin != null && replaceToYellowPin != null) {
+							break;
+						}
+					}
+					
+					if(replaceToColorPin != null) {
+						overlayList.remove(replaceToColorPin);
+						lstPinPoints.remove(replaceToColorPin);
+						addPin(replaceToColorPin.getPoint(), 
+								replaceToColorPin.getColor(), 
+								replaceToColorPin.getItem(), false);
+					}
+					
+					if(replaceToYellowPin != null) {
+						overlayList.remove(replaceToYellowPin);
+						lstPinPoints.remove(replaceToYellowPin);
+						addPin(replaceToYellowPin.getPoint(),
+								replaceToYellowPin.getColor(),
+								replaceToYellowPin.getItem(), true);
+					}
+				}
 			});
 			return lv;
 		}
@@ -500,10 +561,29 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			
 			return lv;
 		}
-		
 	}
 	
-	/*
+	private void addPin(GeoPoint point, String color, Item item, boolean isSelected) {
+		if(point == null || color == null || item == null) {
+			throw new IllegalArgumentException("input to addPin is null");
+		}
+		
+		double distance = distanceBetween(getDeviceLocation(), point);
+		Drawable drawable;
+		if(isSelected) {
+			drawable = getDrawable("yellow");
+		} else {
+			drawable = getDrawable(color);
+		}
+		
+		CustomPinPoint custom = new CustomPinPoint(drawable, this, item, distance, isSelected, color);
+		OverlayItem overlay = new OverlayItem(point, item.getName(), item.getName());
+		custom.addOverlay(overlay);
+		lstPinPoints.add(custom);
+		overlayList.add(custom);
+	}
+	
+	/**
 	 * @return the location of the device
 	 */
 	private GeoPoint getDeviceLocation() {
@@ -522,15 +602,19 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		}
 	}
 	
+	/**
+	 * @param zoom to a point that capture the two points.
+	 */
 	private void zoomToTwoPoint(GeoPoint point, GeoPoint point2) {
 		int maxX = Math.max(point.getLatitudeE6(), point2.getLatitudeE6());
 		int minX = Math.min(point.getLatitudeE6(), point2.getLatitudeE6());
 		int maxY = Math.max(point.getLongitudeE6(), point2.getLongitudeE6());
 		int minY = Math.min(point.getLongitudeE6(), point2.getLongitudeE6());
 		controller.zoomToSpan(maxX - minX, maxY - minY);
-		controller.animateTo(new GeoPoint((minX + maxX) / 2, (minY + maxY) / 2));		
+		controller.animateTo(new GeoPoint((minX + maxX) / 2, (minY + maxY) / 2));
 	}
-	/*
+	
+	/**
 	 * if location is valid, make a pint and zoom user to that location.
 	 * if the location isn't valid, it display error message with toast. 
 	 */
@@ -538,4 +622,29 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	    controller.animateTo(location);
 	    controller.setZoom(17);
 	}
+	
+	public static double DISTANCETOMILES =  0.000621371192;
+	private double distanceBetween(GeoPoint p1, GeoPoint p2) {
+		if(p1 == null || p2 == null) {
+			throw new IllegalArgumentException("GeoPoint are null");
+		}
+		Location loc1 = new Location("");
+		Location loc2 = new Location("");
+		loc1.setLatitude(p1.getLatitudeE6() / 1E6);
+		loc1.setLongitude(p1.getLongitudeE6() / 1E6);
+		loc2.setLatitude(p2.getLatitudeE6() / 1E6);
+		loc2.setLongitude(p2.getLongitudeE6() / 1E6);
+		DecimalFormat twoDForm = new DecimalFormat("#.##");
+		return Double.valueOf(twoDForm.format(loc1.distanceTo(loc2) * DISTANCETOMILES));
+	}
+	
+	
+	private Drawable getDrawable(String color) {
+		if(color.equals("yellow")) {//TODO: suppose to be hex , just for the special case of highlighting.
+			return getResources().getDrawable(R.drawable.yellow);
+		}
+		return getResources().getDrawable(R.drawable.red);
+	}
+	
+	
 }

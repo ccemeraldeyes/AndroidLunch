@@ -1,8 +1,11 @@
 package we.should.list;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 /**
  * 
  * @author Davis Shepherd
@@ -10,18 +13,30 @@ import java.util.List;
  * in each item/category. It contains simply a name and a field type.
  *
  */
-public class Field {
+public class Field implements Comparable{
 	
-	public static final Field NAME = new Field("name", FieldType.TextField);
-	public static final Field WEBSITE = new Field("website", FieldType.TextField);
-	public static final Field PHONENUMBER = new Field("phone number", FieldType.PhoneNumber);
-	public static final Field ADDRESS = new Field("address", FieldType.MultilineTextField);
-	public static final Field RATING = new Field("rating", FieldType.Rating);
-	public static final Field COMMENT = new Field("comment", FieldType.MultilineTextField);
-	public static final Field TAGS = new Field("tags", FieldType.MultilineTextField);
- 
+	public static final Field NAME = new Field("name", FieldType.TextField, 0);
+	public static final Field WEBSITE = new Field("website", FieldType.TextField, 1);
+	public static final Field PHONENUMBER = new Field("phone number", FieldType.PhoneNumber, 2);
+	public static final Field ADDRESS = new Field("address", FieldType.MultilineTextField, 3);
+	public static final Field RATING = new Field("rating", FieldType.Rating, 4);
+	public static final Field COMMENT = new Field("comment", FieldType.MultilineTextField, 5);
+	public static final Field TAGS = new Field("tags", FieldType.MultilineTextField, 6);
+	
+	private static Map<String, Field> fieldMap;
+	static {
+		Map<String, Field> map = new HashMap<String, Field>();
+		List<Field> fields = getAllFields();
+		for(Field f : fields){
+			map.put(f.name, f);
+		}
+		fieldMap = Collections.unmodifiableMap(map);
+	}
+	private static final int DEFAULT_ORDER = -1;
+	
 	private FieldType type;
 	private String name;
+	private int order;
 	
 	/**
 	 * Creates a new field object with the given name and fieldType
@@ -31,6 +46,11 @@ public class Field {
 	public Field(String name, FieldType f){
 		this.type = f;
 		this.name = name;
+		this.order = DEFAULT_ORDER;
+	}
+	private Field(String name, FieldType f, int order){
+		this(name, f);
+		this.order = order;
 	}
 	/**
 	 * Creates a new field object matching the string desc
@@ -41,8 +61,13 @@ public class Field {
 		String[] sp = desc.split(":");
 		try{
 			this.type = FieldType.values()[Integer.parseInt(sp[1])];
+			this.order = Integer.parseInt(sp[2]);
 		} catch(NumberFormatException e) {
 			throw new IllegalArgumentException("The input string: " + desc + " is improperly formatted!");
+		} catch(IndexOutOfBoundsException e){
+			Field def = fieldMap.get(this.type);
+			if(def != null) this.order = def.order;
+			else this.order = DEFAULT_ORDER;
 		}
 		this.name = sp[0];
 	}
@@ -70,7 +95,18 @@ public class Field {
 	 */
 	protected String toDB(){
 		int fieldType = this.type.ordinal();
-		return this.name + ":" + fieldType;
+		return this.name + ":" + fieldType + ":"  + order;
+	}
+	public static List<Field> getAllFields(){
+		List<Field> out = new LinkedList<Field>();
+		out.add(NAME);
+		out.add(WEBSITE);
+		out.add(PHONENUMBER);
+		out.add(ADDRESS);
+		out.add(RATING);
+		out.add(COMMENT);
+		out.add(TAGS);
+		return out;
 	}
 	/**
 	 * Returns a list of the static default variables.
@@ -131,5 +167,13 @@ public class Field {
 	@Override
 	public int hashCode(){
 		return this.name.hashCode()*10 + this.type.ordinal();
+	}
+	public int compareTo(Object another) {
+		if (this == another) return 0;
+		Field o = (Field) another;
+		if(o.order == this.order) return this.name.compareTo(o.name);
+		if(o.order == DEFAULT_ORDER) return -1;
+		if(this.order == DEFAULT_ORDER) return 1;
+		return this.order - o.order;
 	}
 }

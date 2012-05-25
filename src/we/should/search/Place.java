@@ -3,12 +3,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
+ * Place is immutable.
+ * 
  * To construct a Place, you need to pass in a JSONObject 
  * come back from querying google place search by location and name.
  * It will parse the JSONObject and provide method to address information.
  * 
  * Before using the Place, be sure to check whether or not the Place is valid.
- * When there is error in parsing the JSONObject. call the isValid() method to determine if Place is valid.
+ * When there is error in parsing the JSONObject. call the isValid() method to 
+ * determine if Place is valid.
  * 
  * @throws JSONException - if the JSONObject pass through the constructor fail.
  * @author Lawrence
@@ -101,5 +104,20 @@ public class Place {
 	public String toString() {
 		return getName();
 	}
+
+	/**
+	 * they are the same, if their reference is the same
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if(o != null && getClass() == o.getClass()) {
+			Place p = (Place) o;
+			return p != null && p.reference.equals(this.reference);
+		} else {
+			return false;
+		}
+	}
+	
+	
 
 }
