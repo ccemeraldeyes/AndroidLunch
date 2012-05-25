@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import we.should.communication.GetReferralsService;
 import we.should.communication.RestoreService;
 
 import we.should.database.WSdb;
@@ -22,11 +21,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-
 import android.content.SharedPreferences;
-import android.graphics.Color;
-
-
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Criteria;
@@ -469,40 +464,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			    		}
 				    }
 			    }
-
-				
-				//updating the yellowPin when item is clicked.
-				private void updateYellowPin(GeoPoint placeLocation) {
-					CustomPinPoint replaceToColorPin = null;
-					CustomPinPoint replaceToYellowPin = null;
-					for(CustomPinPoint customPin : lstPinPoints) {
-						if(customPin.contains(placeLocation)) {
-							replaceToYellowPin = customPin;
-						}
-						if(customPin.isSelected()) {
-							replaceToColorPin = customPin;
-						}
-						if(replaceToColorPin != null && replaceToYellowPin != null) {
-							break;
-						}
-					}
-					
-					if(replaceToColorPin != null) {
-						overlayList.remove(replaceToColorPin);
-						lstPinPoints.remove(replaceToColorPin);
-						addPin(replaceToColorPin.getPoint(), 
-								replaceToColorPin.getColor(), 
-								replaceToColorPin.getItem(), false);
-					}
-					
-					if(replaceToYellowPin != null) {
-						overlayList.remove(replaceToYellowPin);
-						lstPinPoints.remove(replaceToYellowPin);
-						addPin(replaceToYellowPin.getPoint(),
-								replaceToYellowPin.getColor(),
-								replaceToYellowPin.getItem(), true);
-					}
-				}
 
 			});
 			return lv;
