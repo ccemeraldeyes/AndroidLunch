@@ -1,5 +1,6 @@
 package we.should.communication;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,9 +43,7 @@ public class GetReferralsService extends IntentService {
 		Bundle extras = intent.getExtras();
 		String username = extras.getString(WeShouldActivity.ACCOUNT_NAME);
 		
-		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();
-//		HttpPost httppost = new HttpPost("http://23.23.237.174/check-referrals");
 
 	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 	    nameValuePairs.add(new BasicNameValuePair("user_email", username));
@@ -52,32 +52,38 @@ public class GetReferralsService extends IntentService {
 		
 		HttpGet httpget = new HttpGet("http://23.23.237.174/check-referrals?"+paramString);
 		
+		JSONObject resp = new JSONObject();
+		JSONArray data = new JSONArray();
+		
 		try {
-		    // Add your data
-//		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-//		    nameValuePairs.add(new BasicNameValuePair("user_email", WeShouldActivity.ACCOUNT_NAME));
-//		    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-//
-//		    // Execute HTTP Post Request
-//		    HttpResponse response = httpclient.execute(httppost);
-		    //response.getEntity().
 			
 			HttpResponse response = httpclient.execute(httpget);
 			
 			InputStream is = response.getEntity().getContent();
 			
-			byte[] buf = new byte[4096];
-			is.read(buf);
 
-			JSONObject resp = new JSONObject(new String(buf));
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			
+			int i=0;
+			while(i != -1){
+				i = is.read();
+				baos.write(i);
+			}
+			
+			
+			
+			byte[] buf = baos.toByteArray(); //TODO: figure out how to not hardcode this
+			//is.read(buf);
 			
 			Log.v("REFERRAL RESPONSE", new String(buf));
+
+			resp = new JSONObject(new String(buf));
+
+			data = resp.getJSONArray("referrals"); 
+			
 		    
 		    Log.v("GETREFERRALSSERVICE", "Checking for new referrals");
 		    
-		    //TODO: check for new referrals. maybe just save new items but flag them?
-		    //then present them for approval to user
-		    //redirect to new page before main
 
 		} catch (ClientProtocolException e) {
 		    // TODO Auto-generated catch block
@@ -88,11 +94,9 @@ public class GetReferralsService extends IntentService {
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			Log.v("GET REFFERAL SERVICE", "JSON EXCEPTION "+e.getMessage());
 		}
-		
 
-		//IF RESPONSE HAS NEW ITEMS
-		//SET ITEMS AS EXTRAS IN APPROVEREFERRAL ACTIVITY
 		
 		String ns = Context.NOTIFICATION_SERVICE;
 		NotificationManager nm = (NotificationManager) getSystemService(ns);
@@ -104,15 +108,23 @@ public class GetReferralsService extends IntentService {
 		
 		Context context = getApplicationContext();
 		CharSequence contentTitle = "New referrals!";
-		CharSequence contentText = "You have [X] new referrals awaiting your approval.";
-		Intent notificationIntent = new Intent(this, ApproveReferral.class);
-		//THIS IS WHERE TO SET THE EXTRAS I THINK
 		
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-		notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-		notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
-		nm.notify(ActivityKey.NEW_REFERRAL.ordinal(), notification);
+		Log.v("REFERRAL DATA", data.toString());
+		
+		if(data.length() >0){
+			CharSequence contentText = "You have "+data.length()+" new referrals awaiting your approval.";
+			Intent notificationIntent = new Intent(this, ApproveReferral.class);
+			
+			notificationIntent.putExtra("data", data.toString());
+	
+			Log.v("AFTER EXTRAS INSERT", notificationIntent.getStringExtra("data"));
+			
+			PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+	
+			notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
+			nm.notify(ActivityKey.NEW_REFERRAL.ordinal(), notification);
+		} 
 	}
 
 }

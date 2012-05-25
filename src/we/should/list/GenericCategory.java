@@ -28,17 +28,14 @@ import android.util.Log;
  */
 public class GenericCategory extends Category {
 
-	private List<Item> items; 
-	private boolean sync = false;
+
 	
 	public GenericCategory(String name, List<Field> fields, Context ctx) {
 		super(name, fields, ctx);
-		items = new LinkedList<Item>();
 		checkRep();
 	}
 	protected GenericCategory(String name, JSONArray a, Context ctx) throws JSONException{
 		super(name, a, ctx);
-		items = new LinkedList<Item>();
 		checkRep();
 	}
 	/**
@@ -46,10 +43,11 @@ public class GenericCategory extends Category {
 	 * Throws an assertion error if it is violated.
 	 */
 	private void checkRep(){
-		for(Item i : items){
+		for(Item i : this.items){
 			assert(i.getCategory() == this);
 		}
 	}
+
 	@Override
 	public List<Item> getItems() {
 		if (!sync && ctx != null && id != 0) {
@@ -101,6 +99,7 @@ public class GenericCategory extends Category {
 		db.close();
 		return out;
 	}
+
 
 	@Override
 	public Item newItem() {

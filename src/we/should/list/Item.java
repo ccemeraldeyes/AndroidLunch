@@ -121,7 +121,7 @@ public abstract class Item {
 	 * @modifies this.C
 	 * @throws IllegalStateException
 	 */
-	public abstract void save();
+	public abstract void save() throws IllegalStateException;
 	
 	/**
 	 * Returns the set of tags assigned to this item

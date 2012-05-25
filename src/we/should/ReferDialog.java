@@ -103,14 +103,15 @@ public class ReferDialog extends Activity {
 		    nameValuePairs.add(new BasicNameValuePair("user_email", email));
 		    nameValuePairs.add(new BasicNameValuePair("email_list", emails));
 		    
-		    List<Field> fields = item.getFields();
-		    String itemdata = "";
-		    for(Field f: fields){
-		    	itemdata+=f.getName()+": "+item.get(f)+",";
-		    }
+//		    List<Field> fields = item.getFields();
+//		    String itemdata = "";
+//		    for(Field f: fields){
+//		    	itemdata+=f.getName()+": "+item.get(f)+",";
+//		    }
 		    	
-		    Log.v("REFERRAL DATA", itemdata);
-		    nameValuePairs.add(new BasicNameValuePair("item_data", itemdata));
+		    //Log.v("REFERRAL DATA", itemdata);
+		    nameValuePairs.add(new BasicNameValuePair("item_data", mItem.dataToDB().toString()));
+		    nameValuePairs.add(new BasicNameValuePair("item_name", mItem.getName()));
 		    //httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 		    
 		    String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");

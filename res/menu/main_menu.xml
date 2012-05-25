@@ -11,4 +11,6 @@
               
           </menu>
     </item>
+    <item android:id="@+id/restore"
+          android:title="Restore" />
 </menu>

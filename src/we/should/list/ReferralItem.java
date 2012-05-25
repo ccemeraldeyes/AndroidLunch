@@ -19,6 +19,7 @@ import android.content.Context;
 
 public class ReferralItem extends GenericItem {
 	
+
 	private List<Field> fields;
 
 
@@ -38,11 +39,12 @@ public class ReferralItem extends GenericItem {
 		} catch (JSONException e) {
 			throw new IllegalArgumentException("JSONObject Improperlly formatted!");
 		}
-		this.fields = new LinkedList<Field>(this.values.keySet());
 	}
 	@Override
 	public List<Field> getFields(){
-		return this.fields;
+		List<Field> out = new LinkedList<Field>(this.values.keySet());
+		out.remove(Field.TAGS); //Remove special field
+		return out;
 	}
 	protected void DBtoData(JSONObject d) throws JSONException{
 		this.fields = new LinkedList<Field>();
