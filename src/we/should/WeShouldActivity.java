@@ -571,7 +571,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		int minY = Math.min(point.getLongitudeE6(), point2.getLongitudeE6());
 		controller.zoomToSpan(maxX - minX, maxY - minY);
 		controller.animateTo(new GeoPoint((minX + maxX) / 2, (minY + maxY) / 2));
-		controller.zoomOut();
 	}
 	
 	/**
@@ -600,7 +599,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	
 	
 	private Drawable getDrawable(String color) {
-		if(color.equals("yellow")) {//suppose to be hex , just for the special case of highlighting.
+		if(color.equals("yellow")) {//TODO: suppose to be hex , just for the special case of highlighting.
 			return getResources().getDrawable(R.drawable.yellow);
 		}
 		return getResources().getDrawable(R.drawable.red);
