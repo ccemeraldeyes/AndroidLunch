@@ -42,7 +42,6 @@ public class GenericItem extends Item {
 	protected GenericItem(Category c, Context ctx) {
 		super(ctx);
 		this.c = c;
-		values = new LinkedHashMap<Field, String>();
 		List<Field> fields = this.getFields();
 		for(Field i : fields){
 			if (i.getType().equals(FieldType.CheckBox)) {
