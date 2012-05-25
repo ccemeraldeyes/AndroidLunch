@@ -15,7 +15,9 @@ import we.should.list.Movies;
 import we.should.list.Referrals;
 import we.should.list.Tag;
 import we.should.search.CustomPinPoint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Address;
@@ -84,6 +86,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	
 	/** A map that maps the name of each tag to its values. **/
 	private Map<String, Tag> mTags;
+	
+	/** A global reference to the selected Item **/
+	private Item mItem;
 	
 	/** A mapping from id's to categories, used for submenu creation. **/
 	private Map<Integer, Category> mMenuIDs;
@@ -343,23 +348,35 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	@Override
 	public boolean onContextItemSelected(MenuItem menuItem) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuItem.getMenuInfo();
-		Item item = mAdapter.getItem(info.position);
+		mItem = mAdapter.getItem(info.position);
 		switch(menuItem.getItemId()) {
 		case R.id.view:
 			Intent intent = new Intent(getApplicationContext(), ViewScreen.class);
-			intent.putExtra(CATEGORY, item.getCategory().getName());
-			intent.putExtra(INDEX, item.getId());
+			intent.putExtra(CATEGORY, mItem.getCategory().getName());
+			intent.putExtra(INDEX, mItem.getId());
 			startActivityForResult(intent, ActivityKey.VIEW_ITEM.ordinal());
 			break;
 		case R.id.edit:
 			intent = new Intent(getApplicationContext(), EditScreen.class);
-			intent.putExtra(CATEGORY, item.getCategory().getName());
-			intent.putExtra(INDEX, item.getId());
+			intent.putExtra(CATEGORY, mItem.getCategory().getName());
+			intent.putExtra(INDEX, mItem.getId());
 			startActivityForResult(intent, ActivityKey.EDIT_ITEM.ordinal());
 			break;
 		case R.id.delete:
-			mAdapter.remove(item);
-			item.delete();
+			new AlertDialog.Builder(this)
+	        .setIcon(android.R.drawable.ic_dialog_alert)
+	        .setTitle(R.string.delete_item)
+	        .setMessage(R.string.delete_item_confirm)
+	        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+	        	
+	        	public void onClick(DialogInterface dialog, int which) {
+	    			mAdapter.remove(mItem);
+	                mItem.delete();
+	            }
+
+	        })
+	        .setNegativeButton(R.string.no, null)
+	        .show();
 			break;
 		default:
 			return super.onContextItemSelected(menuItem);
