@@ -8,7 +8,6 @@ import java.util.Set;
 
 import we.should.communication.RestoreService;
 
-import we.should.database.WSdb;
 import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.GenericCategory;
@@ -128,7 +127,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
 			public void onTabChanged(String tabId) {
 				updateView(tabId.trim());
-				
 			}
 		});
         
@@ -140,7 +138,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 				}
 			}
         });
-        
         
         myLocationOverlay = new MyLocationOverlay(this, map);
         map.getOverlays().add(myLocationOverlay);
@@ -519,6 +516,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					replaceToYellowPin.getItem(), true);
 		}
 	}
+	
 	/**
 	 * This class populates each tab with items from that tab's tag.
 	 * 
@@ -674,7 +672,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @return
 	 */
 	private Drawable getDrawable(String color) {
-		if(color.equals("yellow")) {//TODO: suppose to be hex , just for the special case of highlighting.
+		//TODO: TEMPORARY - ALL PINS ARE RED AND YELLOW FOR RIGHT NOW -TROY WILL FIX
+		if(color.equals("yellow")) {
 			return getResources().getDrawable(R.drawable.yellow);
 		}
 		return getResources().getDrawable(R.drawable.red);
