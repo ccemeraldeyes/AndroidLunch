@@ -20,10 +20,13 @@ import org.apache.http.message.BasicNameValuePair;
 import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.Item;
+import we.should.list.Movies;
 import we.should.list.Tag;
 import we.should.search.DetailPlace;
+import we.should.search.MovieRequest;
 import we.should.search.Place;
 import we.should.search.PlaceRequest;
+import we.should.search.Search;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -83,12 +86,18 @@ public class EditScreen extends Activity {
 	/** Which tags are set to true. **/
 	private Set<Tag> mTags;
 	
+	/** Current Category **/
+	private Category mCat;
+	
 	/** All of the tags that have been added by addTag, plus tags from
 	 * before. **/
 	private List<Tag> mAllTags;
 	
 	/** Async location lookup **/
 	private AsyncTask<String, Void, List<Place>> mLookup;
+	
+	/** Search Object **/
+	private Search mSearch;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -97,13 +106,13 @@ public class EditScreen extends Activity {
 		
 		Bundle extras = getIntent().getExtras();
 		String catName = (String) extras.get(WeShouldActivity.CATEGORY);
-		Category cat = Category.getCategory(catName, this);
+		mCat = Category.getCategory(catName, this);
 		
 		int index = extras.getInt(WeShouldActivity.INDEX);		
 		if (index == -1) {
-			mItem = cat.newItem();
+			mItem = mCat.newItem();
 		} else {
-			mItem = cat.getItem(index);
+			mItem = mCat.getItem(index);
 		}
 		if (mItem == null) throw new IllegalStateException("Index points to non-existent item!");
 		
@@ -174,6 +183,13 @@ public class EditScreen extends Activity {
 		});
 		
 		mAllTags = new ArrayList<Tag>(Tag.getTags(this));
+		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		if(mCat instanceof Movies){
+			mSearch = new MovieRequest();
+		} else {
+			mSearch = new PlaceRequest(location);
+		}
 	}
 	
 	@Override
@@ -329,16 +345,15 @@ public class EditScreen extends Activity {
 	 * Set up the autocomplete list.
 	 */
 	private void setupList(String constraint) {
-		if (!mItem.getFields().contains(Field.ADDRESS)) {
+		if (!mItem.getFields().contains(Field.ADDRESS) && !(mCat instanceof Movies)) {
 			return;
 		}
-		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		if(mLookup != null) {
 			if(!mLookup.getStatus().equals(Status.FINISHED)) {
 				mLookup.cancel(true);
 			}
 		} 
-		mLookup = new DoSuggestionLookup(locationManager, this);
+		mLookup = new DoSuggestionLookup(this, mCat);
 		mLookup.execute(constraint);
 
 	}
@@ -347,7 +362,12 @@ public class EditScreen extends Activity {
 	 * Fills in any fields from the selected place.
 	 */
 	private void fillFields(Place place) {
-		DetailPlace detailPlace = (new PlaceRequest()).searchPlaceDetail(place.getReference());
+		DetailPlace detailPlace;
+		if(mCat instanceof Movies){
+			detailPlace = (new MovieRequest()).searchDetail(place.getName());
+		} else {
+			detailPlace = (new PlaceRequest(null)).searchDetail(place.getReference());
+		}
 		Map<Field, String> fieldMap = detailPlace.asFieldMap();
 		for (Field f : fieldMap.keySet()) {
 			if (fieldMap.get(f) != null) {
@@ -434,24 +454,20 @@ public class EditScreen extends Activity {
 	}
 	private class DoSuggestionLookup extends AsyncTask<String, Void, List<Place>> {
 
-		LocationManager locationManager;
 		Context ctx;
-		public DoSuggestionLookup(LocationManager lm, Context ctx){
-			this.locationManager = lm;
+		Category c;
+		
+		public DoSuggestionLookup(Context ctx, Category c){
 			this.ctx = ctx;
+			this.c = c;
 		}
 		
 		protected List<Place> doInBackground(String... params) {
 			List<Place> places = new ArrayList<Place>();
-			if (!mItem.getFields().contains(Field.ADDRESS)) {
-				return places;
-			}
-			Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			if (location == null) {
-				return places;
-			}
 			try {
-				if(!isCancelled()) places = (new PlaceRequest()).searchByLocation(location, params[0]);
+				if(!isCancelled()){
+					places = mSearch.search(params[0]);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				return places;
