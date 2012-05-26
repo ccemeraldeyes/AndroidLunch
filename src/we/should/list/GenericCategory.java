@@ -1,8 +1,7 @@
 package we.should.list;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -82,7 +81,7 @@ public class GenericCategory extends Category {
 	 * @return list of item JSONObjects
 	 */
 	protected Map<Integer, JSONObject> getItemData(){
-		Map<Integer, JSONObject> out = new LinkedHashMap<Integer, JSONObject>();
+		Map<Integer, JSONObject> out = new HashMap<Integer, JSONObject>();
 		WSdb db = new WSdb(ctx);
 		db.open();
 		Cursor cur = db.getItemsOfCategory(this.id);

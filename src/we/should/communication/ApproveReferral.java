@@ -15,6 +15,7 @@ import we.should.list.ReferralItem;
 import we.should.list.Referrals;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -40,8 +41,8 @@ public class ApproveReferral extends Activity {
 		
 		ListView lv = (ListView) findViewById(R.id.referralList);
 		List<Referral> list = new ArrayList<Referral>();
-		
-		Bundle bundle = this.getIntent().getExtras();
+		Intent intent = this.getIntent();
+		Bundle bundle = intent.getExtras();
 		String dataAsString = bundle.getString("data");
 		
 		Log.v("DATA EXTRA", dataAsString);

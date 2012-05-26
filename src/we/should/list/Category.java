@@ -2,6 +2,7 @@
 package we.should.list;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -66,10 +67,12 @@ public abstract class Category {
 		}
 		this.color = Category.DEFAULT_COLOR;
 	}
+	@SuppressWarnings("unchecked")
 	protected Category(String name, JSONArray a, Context ctx){
 		this(name, ctx);
 		try {
 			this.fields = fieldsFromDB(a);
+			Collections.sort(this.fields);
 		} catch (JSONException e) {
 			this.fields = new LinkedList<Field>();
 			Log.w("Category constructor", "JSONArray passed to constructor has error");

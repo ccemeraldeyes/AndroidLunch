@@ -13,7 +13,9 @@ import java.util.Map;
  * in each item/category. It contains simply a name and a field type.
  *
  */
-public class Field implements Comparable{
+
+public class Field implements Comparable<Field>{
+
 	
 	public static final Field NAME = new Field("name", FieldType.TextField, 0);
 	public static final Field WEBSITE = new Field("website", FieldType.TextField, 1);
@@ -59,17 +61,18 @@ public class Field implements Comparable{
 	 */
 	protected Field(String desc) throws IllegalArgumentException{
 		String[] sp = desc.split(":");
+		this.name = sp[0];
 		try{
 			this.type = FieldType.values()[Integer.parseInt(sp[1])];
 			this.order = Integer.parseInt(sp[2]);
 		} catch(NumberFormatException e) {
 			throw new IllegalArgumentException("The input string: " + desc + " is improperly formatted!");
 		} catch(IndexOutOfBoundsException e){
-			Field def = fieldMap.get(this.type);
+			//Field def = fieldMap.get(this.type);
+			Field def = fieldMap.get(this.name);
 			if(def != null) this.order = def.order;
 			else this.order = DEFAULT_ORDER;
 		}
-		this.name = sp[0];
 	}
 	/**
 	 * @return this.name + " " + this.type;
@@ -96,6 +99,7 @@ public class Field implements Comparable{
 	protected String toDB(){
 		int fieldType = this.type.ordinal();
 		return this.name + ":" + fieldType + ":"  + order;
+
 	}
 	public static List<Field> getAllFields(){
 		List<Field> out = new LinkedList<Field>();
@@ -168,12 +172,20 @@ public class Field implements Comparable{
 	public int hashCode(){
 		return this.name.hashCode()*10 + this.type.ordinal();
 	}
-	public int compareTo(Object another) {
+
+//	public int compareTo(Object another) {
+//		if (this == another) return 0;
+//		Field o = (Field) another;
+//		if(o.order == this.order) return this.name.compareTo(o.name);
+//		if(o.order == DEFAULT_ORDER) return -1;
+//		if(this.order == DEFAULT_ORDER) return 1;
+//		return this.order - o.order;
+		
+	public int compareTo(Field another) {
 		if (this == another) return 0;
-		Field o = (Field) another;
-		if(o.order == this.order) return this.name.compareTo(o.name);
-		if(o.order == DEFAULT_ORDER) return -1;
+		if(another.order == this.order) return this.name.compareTo(another.name);
+		if(another.order == DEFAULT_ORDER) return -1;
 		if(this.order == DEFAULT_ORDER) return 1;
-		return this.order - o.order;
+		return this.order - another.order;
 	}
 }
