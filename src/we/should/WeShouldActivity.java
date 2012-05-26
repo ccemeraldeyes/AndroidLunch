@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import we.should.communication.RestoreService;
-
 import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.GenericCategory;
@@ -28,6 +27,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -157,7 +157,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	
     	List<Item> items = null;
     	
-    	String color = null;
+    	Color color = Color.Red;
 		
     	switch (mSortType) {
     	case Category:
@@ -181,7 +181,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
      * @param color - a color string, 6 character long represent r, g, b
      * @param items - the items that needed to create the pin for.
      */
-    private void updatePins(String color, List<Item> items){
+    private void updatePins(Color color, List<Item> items){
     	//clear the pin everytime we load a new tab.
     	for(CustomPinPoint pin : lstPinPoints) {
     		overlayList.remove(pin);
@@ -575,7 +575,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * 			- false otherwise.
 	 * @throws IllegalArgumentException on null input.
 	 */
-	private void addPin(GeoPoint point, String color, Item item, boolean isSelected) {
+	private void addPin(GeoPoint point, Color color, Item item, boolean isSelected) {
 		if(point == null || color == null || item == null) {
 			throw new IllegalArgumentException("input to addPin is null");
 		}
@@ -583,7 +583,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		double distance = distanceBetween(getDeviceLocation(), point);
 		Drawable drawable;
 		if(isSelected) {
-			drawable = getDrawable("FFFF00");
+			drawable = getDrawable(Color.Yellow);
 		} else {
 			drawable = getDrawable(color);
 		}
@@ -672,24 +672,37 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @param color - string with six characters format, represent r, g, b
 	 * @return Drawable the pin represent for that color.
 	 */
-	private Drawable getDrawable(String color) {
-		if(color == null || color.length() != 6) {
+	private Drawable getDrawable(Color color) {
+		if(color == null) { // || color.length() != 6) {
 			throw new IllegalArgumentException("color is null or " +
 					"color string is suppose to be six characters");
 		}
-		
-		if(color.equals("FFFF00")) {//TODO: suppose to be hex , just for the special case of highlighting.
+		switch(color){
+		case Yellow:
 			return getResources().getDrawable(R.drawable.yellow);
-		} else if(color.equals("00FF00")) {
+		case Green:
 			return getResources().getDrawable(R.drawable.green);
-		} else if(color.equals("0000FF")) {
+		case Blue:
 			return getResources().getDrawable(R.drawable.blue);
-		} else if(color.equals("FF00FF")) {
+		case Purple:
 			return getResources().getDrawable(R.drawable.purple);
-		} else {
+		case Red:
+			return getResources().getDrawable(R.drawable.red);
+		default:
 			return getResources().getDrawable(R.drawable.red);
 		}
+			
+//		if(color.equals("FFFF00")) {//TODO: suppose to be hex , just for the special case of highlighting.
+//			return getResources().getDrawable(R.drawable.yellow);
+//		} else if(color.equals("00FF00")) {
+//			return getResources().getDrawable(R.drawable.green);
+//		} else if(color.equals("0000FF")) {
+//			return getResources().getDrawable(R.drawable.blue);
+//		} else if(color.equals("FF00FF")) {
+//			return getResources().getDrawable(R.drawable.purple);
+//		} else {
+//			return getResources().getDrawable(R.drawable.red);
+//		}
 	}
-	
 	
 }

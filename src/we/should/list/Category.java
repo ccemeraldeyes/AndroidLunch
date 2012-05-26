@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import we.should.Color;
 import we.should.database.WSdb;
 import android.content.Context;
 import android.database.Cursor;
@@ -32,11 +33,11 @@ import android.util.Log;
  *  
  */
 public abstract class Category {
-	public static final String DEFAULT_COLOR = "FFFFFF";
+	public static final Color DEFAULT_COLOR = Color.Red;
 	protected final String name;	
 	protected Context ctx = null;
 	protected int id;
-	protected String color = DEFAULT_COLOR; //test value
+	protected Color color = DEFAULT_COLOR; //test value
 	protected List<Field> fields;
 	protected List<Item> items; 
 	protected boolean sync = false;
@@ -67,6 +68,7 @@ public abstract class Category {
 		}
 		this.color = Category.DEFAULT_COLOR;
 	}
+
 	@SuppressWarnings("unchecked")
 	protected Category(String name, JSONArray a, Context ctx){
 		this(name, ctx);
@@ -83,15 +85,15 @@ public abstract class Category {
 	 * Sets the color representation of this category
 	 * @param color is a hexadecimal representation of the color to set
 	 */
-	public void setColor(String color) {
-		if(color.matches("^[0-9A-Fa-f]+$")) this.color = color;
-		else throw new IllegalArgumentException("Color string " + color + " is not hex!");
+	public void setColor(Color color) {
+		if(color != null) this.color = color;
+		else throw new IllegalArgumentException("Color is null!");
 	}
 	/**
 	 * Returns the hexidecimal representation of this color
 	 * @return the color of this
 	 */
-	public String getColor(){
+	public Color getColor(){
 		return this.color;
 	}
 	/**
@@ -224,7 +226,7 @@ public abstract class Category {
 				}
 			 }
 			 cat.id = id;
-			 cat.color = color;
+			 cat.color = Color.get(color);
 			 out.add(cat);
 		}
 		c.close(); // added by Troy

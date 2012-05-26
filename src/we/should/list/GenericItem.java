@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import we.should.Color;
 import we.should.database.WSdb;
 import android.content.Context;
 import android.database.sqlite.SQLiteConstraintException;
@@ -220,7 +221,7 @@ public class GenericItem extends Item {
 
 	
 	@Override
-	public void addTag(String tag, String color) {
+	public void addTag(String tag, Color color) {
 		Set<Tag> tags = this.getTags();
 		if (!tags.contains(new Tag(0,tag, color))){
 			tags.add(new Tag(0, tag, color));
@@ -265,7 +266,7 @@ public class GenericItem extends Item {
 		for(Tag t : thisTags) {
 			int tagID;
 			if (!dbTags.contains(t)) {
-				tagID = (int) db.insertTag(t.toString(), t.getColor());//TODO: Davis tags include colors				
+				tagID = (int) db.insertTag(t.toString(), t.getColor().toString());//TODO: Davis tags include colors				
 			} else {
 				tagID = dbTags.get(dbTags.indexOf(t)).getId(); //If this tag already exists, it is linked to the db row
 			}

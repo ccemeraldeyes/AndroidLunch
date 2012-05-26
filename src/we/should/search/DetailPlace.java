@@ -22,7 +22,7 @@ import we.should.list.Field;
  * @author Lawrence
  */
 public class DetailPlace extends Place{
-	private String phoneNumber, website, url, address, 
+	protected String phoneNumber, website, url, address, 
 	               international_phoneNumber;
 	
 	/**

@@ -63,12 +63,13 @@ public class Field implements Comparable<Field>{
 		String[] sp = desc.split(":");
 		this.name = sp[0];
 		try{
+			this.name = sp[0];
 			this.type = FieldType.values()[Integer.parseInt(sp[1])];
 			this.order = Integer.parseInt(sp[2]);
 		} catch(NumberFormatException e) {
 			throw new IllegalArgumentException("The input string: " + desc + " is improperly formatted!");
 		} catch(IndexOutOfBoundsException e){
-			//Field def = fieldMap.get(this.type);
+
 			Field def = fieldMap.get(this.name);
 			if(def != null) this.order = def.order;
 			else this.order = DEFAULT_ORDER;

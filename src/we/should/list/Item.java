@@ -24,17 +24,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import we.should.Color;
 import we.should.database.WSdb;
 import android.content.Context;
 import android.database.Cursor;
@@ -131,7 +131,10 @@ public abstract class Item {
 	
 	
 	
-	
+	/**
+	 * Sets the tags in this to match the set passed in tags
+	 * @param tags
+	 */
 	public abstract void setTags(Set<Tag> tags);
 	
 	
@@ -140,7 +143,7 @@ public abstract class Item {
 	 * existing tag, it will not be added
 	 * @param s is the tag to be added
 	 */
-	public abstract void addTag(String tag, String color);
+	public abstract void addTag(String tag, Color color);
 	
 	/**
 	 * Returns the set of Items that have the given tag
@@ -182,7 +185,7 @@ public abstract class Item {
 					}
 				}
 				cat.id = catId;
-				cat.color = color;
+				cat.color = Color.get(color);
 				cats.put(catId, cat);
 				c.close();
 			} else {
