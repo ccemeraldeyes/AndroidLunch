@@ -11,6 +11,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import we.should.Color;
 import we.should.database.WSdb;
 import android.content.Context;
 import android.database.Cursor;
@@ -26,7 +27,7 @@ public class Tag implements Serializable {
 	
 	private int id;
 	private String tag;
-	private String color;
+	private Color color;
 	
 	/**
 	 * Creates a new tag object with the given name and DB id
@@ -34,7 +35,7 @@ public class Tag implements Serializable {
 	 * @param tag
 	 * @param color
 	 */
-	public Tag(int id, String tag, String color){
+	public Tag(int id, String tag, Color color){
 		this.id = id;
 		this.tag = tag.substring(0,Math.min(tag.length(), 32)).trim();
 		this.color = color;
@@ -46,7 +47,7 @@ public class Tag implements Serializable {
 	protected Tag(JSONObject o){
 		try {
 			this.id = o.getInt(idKey);
-			this.color = o.getString(colorKey);
+			this.color = Color.get(o.getString(colorKey));
 			this.tag = o.getString(tagKey);
 		} catch (JSONException e) {
 			throw new IllegalArgumentException("JSON object parameter improperlly formed!");
@@ -88,7 +89,7 @@ public class Tag implements Serializable {
 		db.open();
 		Cursor tags = db.getAllTags();
 		while(tags.moveToNext()){
-			String color = tags.getString(2);
+			Color color = Color.get(tags.getString(2));
 			String tag = tags.getString(1);
 			int id = tags.getInt(0);
 			out.add(new Tag(id, tag, color));
@@ -147,10 +148,10 @@ public class Tag implements Serializable {
 		JSONObject tagString = new JSONObject();
 		tagString.put(Tag.idKey, this.getId());
 		tagString.put(Tag.tagKey, this.toString());
-		tagString.put(Tag.colorKey, this.getColor());
+		tagString.put(Tag.colorKey, this.getColor().toString());
 		return tagString;
 	}
-	public String getColor() {
+	public Color getColor() {
 		return this.color;
 	}
 	

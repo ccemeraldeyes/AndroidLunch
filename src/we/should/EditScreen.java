@@ -269,7 +269,7 @@ public class EditScreen extends Activity {
 					addTag();
 					return;
 				}
-				String colorStr = (String) color.getSelectedItem();
+				Color colorStr = Color.get((String) color.getSelectedItem());
 				mAllTags.add(0, new Tag(0, nameStr, colorStr));
 				mTags.add(new Tag(0, name.getText().toString(), colorStr));
 				mTagsView.setText(Tag.getFormatted(mTags));
