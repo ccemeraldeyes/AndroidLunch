@@ -1,5 +1,8 @@
 package we.should.database;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -22,6 +25,16 @@ public class WSdb {
 	private SQLiteDatabase db; 
 	private final Context context;
 	private DBHelper dbhelper;
+	final String F_SEP = "|"; //field separator
+	
+	//escaped separator expressions for String.split
+	final String F_SEP_SPLIT_EXP = "\\|";
+	final String R_SEP_SPLIT_EXP = "\\|\\|"; // row separator ||
+	final String T_SEP_SPLIT_EXP = "\\|\\|\\|"; // table separator |||
+	final int catFields = 4;
+	final int itemFields = 4;
+	final int tagFields=3;
+	final int item_tagFields=2;
 	
 
 	/**
@@ -150,7 +163,7 @@ public class WSdb {
 	public long insertTag(String name, String color)
 			throws IllegalArgumentException, SQLiteConstraintException{
 		
-		Log.v("WSdb.insertTag","inserting tag" + name);
+		Log.v("WSdb.insertTag","inserting tag " + name + ", ");
 		
 		// check argument for null or empty string
 		if(hasNoChars(name) || hasNoChars(color)){
@@ -372,6 +385,11 @@ public class WSdb {
 			return false;
 		}
 	} 
+	
+	public Cursor getAllItem_Tags(){
+		return db.query(Item_TagConst.TBL_NAME, null, null, null, null,
+				null, null);
+	}
 	
 		
 	/****************************************************************
@@ -701,4 +719,175 @@ public class WSdb {
 		
 		return false;
 	}
+	
+	
+	/****************************************************************
+	 *                     Backup
+	 ***************************************************************/
+	
+	/**
+	 * extracts all data from all tables and stores in a string object
+	 * to send to backup server
+	 * 
+	 * @return String of all data
+	 */
+	public String Backup (){
+		
+		String data="";
+		Cursor c;
+		
+		// parse category
+		c = getAllCategories();
+		while (c.moveToNext()){
+			//id,name,color,schema
+			for(int i=0;i<catFields;i++)
+				data+=c.getString(i) + F_SEP;
+			
+			data += F_SEP;
+		}
+		data += F_SEP;
+		
+		//parse item
+		c = getAllItems();
+		while (c.moveToNext()){
+			//id,name,catId, data
+			for(int i=0;i<itemFields;i++)
+				data+=c.getString(i) + F_SEP;
+			
+			data += F_SEP;
+		}
+		data += F_SEP;
+		
+		// parse tag
+		c = getAllTags();
+		while (c.moveToNext()){
+			//id,name,catId, data
+			for(int i=0;i<tagFields;i++)
+				data+=c.getString(i) + F_SEP;	
+			
+			data += F_SEP;
+		}
+		data += F_SEP;
+		
+		//parse item_tag
+		c = getAllItem_Tags();
+		while (c.moveToNext()){
+			//id,name,catId, data
+			for(int i=0;i<item_tagFields;i++)
+				data+=c.getString(i) + F_SEP;
+			
+			data += F_SEP;
+		}
+		
+		return data;
+	}
+	
+	
+	
+	
+	/****************************************************************
+	 *                     Restore
+	 ***************************************************************/
+	
+	/**
+	 * Restore parses a data string built by Backup and inserts all
+	 * data into the database
+	 * 
+	 * @param data String created by Backup
+	 */
+	public void Restore (String data){
+		Log.v("db.Restore", "Arg data="+data);
+		rebuildTables();
+		
+		// split string by tables
+		String[] tables = data.split(T_SEP_SPLIT_EXP);
+	
+		//split tables into rows
+		String[] catRows=tables[0].split(R_SEP_SPLIT_EXP);
+		String[] itemRows=tables[1].split(R_SEP_SPLIT_EXP);
+		String[] tagRows=tables[2].split(R_SEP_SPLIT_EXP);
+		String[] item_tagRows=tables[3].split(R_SEP_SPLIT_EXP);
+		
+		String fields[]; // array of field values for a row
+		
+		// id refactor maps
+		Map <Integer,Integer> catIdMap=new HashMap<Integer,Integer> ();
+		Map <Integer,Integer> itemIdMap=new HashMap<Integer,Integer> ();
+		Map <Integer,Integer> tagIdMap=new HashMap<Integer,Integer> ();
+
+		
+		// Parse and Insert Categories
+		Log.v("db.Restore","ParseCatetories- " + tables[0]);
+
+		int oldId=0,newId=1;
+		long insertRow;
+		for(int count=0;count < catRows.length; count++,newId++){
+			Log.v("db.Restore","CatRow- " + catRows[count]);
+
+			// split row into fields
+			fields = catRows[count].split(F_SEP_SPLIT_EXP);
+			Log.v("db.Restore","Catfields- " + fields[0] + " | " + fields[1] + " | " + fields[2] + " | " + fields[3]);
+			// refactor id
+			oldId=Integer.valueOf(fields[0]);
+			catIdMap.put(oldId, newId);
+			
+			// insert into database
+			insertRow=insertCategory(fields[1], fields[2], fields[3]);
+			//assert(newId==(int)insertRow);
+		}
+		
+		// Parse and Insert Items
+		Log.v("db.Restore","ParseItems- " + tables[1]);
+		oldId=0;  newId=1;
+		int newCatId;
+		for(int count=0;count < itemRows.length; count++,newId++){
+			// split row into fields
+			fields = itemRows[count].split(F_SEP_SPLIT_EXP);
+			
+			// refactor id
+			oldId=Integer.valueOf(fields[0]);
+			itemIdMap.put(oldId, newId);
+			
+			//get refactored category Id
+			newCatId=catIdMap.get(Integer.valueOf(fields[2]));
+			
+			// insert into database
+			insertRow=insertItem(fields[1], newCatId, fields[3]);
+			assert(newId==(int)insertRow);
+		}
+		
+		
+		// Parse and Insert Tags
+		Log.v("db.Restore","ParseTags- " + tables[2]);
+		oldId=0;  newId=1;
+		for(int count=0; count < tagRows.length; count++,newId++){
+			// split row into fields
+			fields = tagRows[count].split(F_SEP_SPLIT_EXP);
+			
+			// refactor id
+			oldId=Integer.valueOf(fields[0]);
+			tagIdMap.put(oldId, newId);
+			
+			// insert into database
+			insertRow=insertTag(fields[1], fields[2]);
+			assert(newId==(int)insertRow);
+		}
+		
+		// Parse and Insert Item_Tags
+		Log.v("db.Restore","ParseItem_Tags- " + tables[3]);
+		int newItemId,newTagId;
+		for(int count=0;count < itemRows.length; count++,newId++){
+			// split row into fields
+			fields = item_tagRows[count].split(F_SEP_SPLIT_EXP);
+			
+			//get refactored itemId and tagId
+			newItemId = itemIdMap.get(Integer.valueOf(fields[0]));
+			newTagId = tagIdMap.get(Integer.valueOf(fields[1]));
+			
+			// insert into database
+			insertRow=insertItem_Tag(newItemId, newTagId);
+		}
+	}
+	
+	
 }
