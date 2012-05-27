@@ -1,5 +1,8 @@
 package we.should.database;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -22,9 +25,12 @@ public class WSdb {
 	private SQLiteDatabase db; 
 	private final Context context;
 	private DBHelper dbhelper;
-	final String F_SEP = "|";
-	final String L_SEP = "~";
-	final String T_SEP = "|||";
+	final String F_SEP = "|"; //field separator
+	
+	//escaped separator expressions for String.split
+	final String F_SEP_SPLIT_EXP = "\\|";
+	final String R_SEP_SPLIT_EXP = "\\|\\|"; // row separator ||
+	final String T_SEP_SPLIT_EXP = "\\|\\|\\|"; // table separator |||
 	final int catFields = 4;
 	final int itemFields = 4;
 	final int tagFields=3;
@@ -157,7 +163,7 @@ public class WSdb {
 	public long insertTag(String name, String color)
 			throws IllegalArgumentException, SQLiteConstraintException{
 		
-		Log.v("WSdb.insertTag","inserting tag" + name);
+		Log.v("WSdb.insertTag","inserting tag " + name + ", ");
 		
 		// check argument for null or empty string
 		if(hasNoChars(name) || hasNoChars(color)){
@@ -737,9 +743,9 @@ public class WSdb {
 			for(int i=0;i<catFields;i++)
 				data+=c.getString(i) + F_SEP;
 			
-			data += L_SEP;
+			data += F_SEP;
 		}
-		data += T_SEP;
+		data += F_SEP;
 		
 		//parse item
 		c = getAllItems();
@@ -748,9 +754,9 @@ public class WSdb {
 			for(int i=0;i<itemFields;i++)
 				data+=c.getString(i) + F_SEP;
 			
-			data += L_SEP;
+			data += F_SEP;
 		}
-		data += T_SEP;
+		data += F_SEP;
 		
 		// parse tag
 		c = getAllTags();
@@ -759,9 +765,9 @@ public class WSdb {
 			for(int i=0;i<tagFields;i++)
 				data+=c.getString(i) + F_SEP;	
 			
-			data += L_SEP;
+			data += F_SEP;
 		}
-		data += T_SEP;
+		data += F_SEP;
 		
 		//parse item_tag
 		c = getAllItem_Tags();
@@ -770,7 +776,7 @@ public class WSdb {
 			for(int i=0;i<item_tagFields;i++)
 				data+=c.getString(i) + F_SEP;
 			
-			data += L_SEP;
+			data += F_SEP;
 		}
 		
 		return data;
@@ -790,28 +796,96 @@ public class WSdb {
 	 * @param data String created by Backup
 	 */
 	public void Restore (String data){
+		Log.v("db.Restore", "Arg data="+data);
 		rebuildTables();
-		String tables[] = data.split(T_SEP);
+		
+		// split string by tables
+		String[] tables = data.split(T_SEP_SPLIT_EXP);
 	
-		String categories[]=tables[1].split(L_SEP);
-		String items[]=tables[1].split(L_SEP);
-		String tags[]=tables[1].split(L_SEP);
-		String item_tags[]=tables[1].split(L_SEP);
+		//split tables into rows
+		String[] catRows=tables[0].split(R_SEP_SPLIT_EXP);
+		String[] itemRows=tables[1].split(R_SEP_SPLIT_EXP);
+		String[] tagRows=tables[2].split(R_SEP_SPLIT_EXP);
+		String[] item_tagRows=tables[3].split(R_SEP_SPLIT_EXP);
 		
-		for(String c:categories){
-			//parse & insert
+		String fields[]; // array of field values for a row
+		
+		// id refactor maps
+		Map <Integer,Integer> catIdMap=new HashMap<Integer,Integer> ();
+		Map <Integer,Integer> itemIdMap=new HashMap<Integer,Integer> ();
+		Map <Integer,Integer> tagIdMap=new HashMap<Integer,Integer> ();
+
+		
+		// Parse and Insert Categories
+		Log.v("db.Restore","ParseCatetories- " + tables[0]);
+
+		int oldId=0,newId=1;
+		long insertRow;
+		for(int count=0;count < catRows.length; count++,newId++){
+			Log.v("db.Restore","CatRow- " + catRows[count]);
+
+			// split row into fields
+			fields = catRows[count].split(F_SEP_SPLIT_EXP);
+			Log.v("db.Restore","Catfields- " + fields[0] + " | " + fields[1] + " | " + fields[2] + " | " + fields[3]);
+			// refactor id
+			oldId=Integer.valueOf(fields[0]);
+			catIdMap.put(oldId, newId);
+			
+			// insert into database
+			insertRow=insertCategory(fields[1], fields[2], fields[3]);
+			//assert(newId==(int)insertRow);
 		}
 		
-		for(String i:items){
-			//parse & insert
+		// Parse and Insert Items
+		Log.v("db.Restore","ParseItems- " + tables[1]);
+		oldId=0;  newId=1;
+		int newCatId;
+		for(int count=0;count < itemRows.length; count++,newId++){
+			// split row into fields
+			fields = itemRows[count].split(F_SEP_SPLIT_EXP);
+			
+			// refactor id
+			oldId=Integer.valueOf(fields[0]);
+			itemIdMap.put(oldId, newId);
+			
+			//get refactored category Id
+			newCatId=catIdMap.get(Integer.valueOf(fields[2]));
+			
+			// insert into database
+			insertRow=insertItem(fields[1], newCatId, fields[3]);
+			assert(newId==(int)insertRow);
 		}
 		
-		for(String t:tags){
-			//parse & insert
+		
+		// Parse and Insert Tags
+		Log.v("db.Restore","ParseTags- " + tables[2]);
+		oldId=0;  newId=1;
+		for(int count=0; count < tagRows.length; count++,newId++){
+			// split row into fields
+			fields = tagRows[count].split(F_SEP_SPLIT_EXP);
+			
+			// refactor id
+			oldId=Integer.valueOf(fields[0]);
+			tagIdMap.put(oldId, newId);
+			
+			// insert into database
+			insertRow=insertTag(fields[1], fields[2]);
+			assert(newId==(int)insertRow);
 		}
 		
-		for(String it:item_tags){
-			//parse & insert
+		// Parse and Insert Item_Tags
+		Log.v("db.Restore","ParseItem_Tags- " + tables[3]);
+		int newItemId,newTagId;
+		for(int count=0;count < itemRows.length; count++,newId++){
+			// split row into fields
+			fields = item_tagRows[count].split(F_SEP_SPLIT_EXP);
+			
+			//get refactored itemId and tagId
+			newItemId = itemIdMap.get(Integer.valueOf(fields[0]));
+			newTagId = tagIdMap.get(Integer.valueOf(fields[1]));
+			
+			// insert into database
+			insertRow=insertItem_Tag(newItemId, newTagId);
 		}
 	}
 	
