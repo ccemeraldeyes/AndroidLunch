@@ -34,7 +34,9 @@ public class BackupService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		
-		String data = null; //TODO: get data from troy's thing
+		Log.v("BACKUP SERVICE", "starting backup service");
+		
+		String data = ""; //TODO: get data from troy's thing
 		
 		Bundle extras = intent.getExtras();
 		String email = extras.getString(WeShouldActivity.ACCOUNT_NAME);
@@ -59,7 +61,7 @@ public class BackupService extends IntentService {
 			String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
 	
 			
-			HttpGet httpget = new HttpGet("http://23.23.237.174/save-item?"+paramString);
+			HttpGet httpget = new HttpGet("http://23.23.237.174/backup?"+paramString);
 	
 			try {
 				

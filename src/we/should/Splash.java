@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import we.should.communication.BackupService;
 import we.should.communication.GetReferralsService;
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -13,6 +14,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -105,13 +107,15 @@ public class Splash extends Activity {
 
 	protected void afterLogin(){
 		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
-		Intent service = new Intent(this, GetReferralsService.class);
-		service.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
-		startService(service);
+//		Intent service = new Intent(this, GetReferralsService.class);
+//		service.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
+//		startService(service);
 		
-		Intent backupservice = new Intent(this, GetReferralsService.class);
+		Intent backupservice = new Intent(this, BackupService.class);
 		backupservice.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
 		startService(backupservice);
+		
+		Log.v("SPLASH", "started backup service");
 		
 		Intent openStartingPoint = new Intent("we.should.MAIN");
 		startActivity(openStartingPoint);
