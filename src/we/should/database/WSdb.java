@@ -876,7 +876,7 @@ public class WSdb {
 		// Parse and Insert Item_Tags
 		Log.v("db.Restore","ParseItem_Tags- " + tables[3]);
 		int newItemId,newTagId;
-		for(int count=0;count < itemRows.length; count++,newId++){
+		for(int count=0;count < item_tagRows.length; count++,newId++){
 			// split row into fields
 			fields = item_tagRows[count].split(F_SEP_SPLIT_EXP);
 			
