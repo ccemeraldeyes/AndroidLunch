@@ -22,6 +22,13 @@ public class WSdb {
 	private SQLiteDatabase db; 
 	private final Context context;
 	private DBHelper dbhelper;
+	final String F_SEP = "|";
+	final String L_SEP = "~";
+	final String T_SEP = "|||";
+	final int catFields = 4;
+	final int itemFields = 4;
+	final int tagFields=3;
+	final int item_tagFields=2;
 	
 
 	/**
@@ -373,6 +380,11 @@ public class WSdb {
 		}
 	} 
 	
+	public Cursor getAllItem_Tags(){
+		return db.query(Item_TagConst.TBL_NAME, null, null, null, null,
+				null, null);
+	}
+	
 		
 	/****************************************************************
 	 *                         Updates
@@ -701,4 +713,107 @@ public class WSdb {
 		
 		return false;
 	}
+	
+	
+	/****************************************************************
+	 *                     Backup
+	 ***************************************************************/
+	
+	/**
+	 * extracts all data from all tables and stores in a string object
+	 * to send to backup server
+	 * 
+	 * @return String of all data
+	 */
+	public String Backup (){
+		
+		String data="";
+		Cursor c;
+		
+		// parse category
+		c = getAllCategories();
+		while (c.moveToNext()){
+			//id,name,color,schema
+			for(int i=0;i<catFields;i++)
+				data+=c.getString(i) + F_SEP;
+			
+			data += L_SEP;
+		}
+		data += T_SEP;
+		
+		//parse item
+		c = getAllItems();
+		while (c.moveToNext()){
+			//id,name,catId, data
+			for(int i=0;i<itemFields;i++)
+				data+=c.getString(i) + F_SEP;
+			
+			data += L_SEP;
+		}
+		data += T_SEP;
+		
+		// parse tag
+		c = getAllTags();
+		while (c.moveToNext()){
+			//id,name,catId, data
+			for(int i=0;i<tagFields;i++)
+				data+=c.getString(i) + F_SEP;	
+			
+			data += L_SEP;
+		}
+		data += T_SEP;
+		
+		//parse item_tag
+		c = getAllItem_Tags();
+		while (c.moveToNext()){
+			//id,name,catId, data
+			for(int i=0;i<item_tagFields;i++)
+				data+=c.getString(i) + F_SEP;
+			
+			data += L_SEP;
+		}
+		
+		return data;
+	}
+	
+	
+	
+	
+	/****************************************************************
+	 *                     Restore
+	 ***************************************************************/
+	
+	/**
+	 * Restore parses a data string built by Backup and inserts all
+	 * data into the database
+	 * 
+	 * @param data String created by Backup
+	 */
+	public void Restore (String data){
+		rebuildTables();
+		String tables[] = data.split(T_SEP);
+	
+		String categories[]=tables[1].split(L_SEP);
+		String items[]=tables[1].split(L_SEP);
+		String tags[]=tables[1].split(L_SEP);
+		String item_tags[]=tables[1].split(L_SEP);
+		
+		for(String c:categories){
+			//parse & insert
+		}
+		
+		for(String i:items){
+			//parse & insert
+		}
+		
+		for(String t:tags){
+			//parse & insert
+		}
+		
+		for(String it:item_tags){
+			//parse & insert
+		}
+	}
+	
+	
 }
