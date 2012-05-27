@@ -736,8 +736,12 @@ public class WSdb {
 		String data="";
 		Cursor c;
 		
+		
 		// parse category
 		c = getAllCategories();
+		// first value is count - needed for empty table case
+		data+= c.getCount()+F_SEP+F_SEP;
+		
 		while (c.moveToNext()){
 			//id,name,color,schema
 			for(int i=0;i<catFields;i++)
@@ -747,8 +751,12 @@ public class WSdb {
 		}
 		data += F_SEP;
 		
-		//parse item
+		
+		// parse item
 		c = getAllItems();
+		// first value is count - needed for empty table case
+		data+= c.getCount()+F_SEP+F_SEP;
+		
 		while (c.moveToNext()){
 			//id,name,catId, data
 			for(int i=0;i<itemFields;i++)
@@ -758,8 +766,12 @@ public class WSdb {
 		}
 		data += F_SEP;
 		
+		
 		// parse tag
 		c = getAllTags();
+		// first value is count - needed for empty table case
+		data+= c.getCount()+F_SEP+F_SEP;
+		
 		while (c.moveToNext()){
 			//id,name,catId, data
 			for(int i=0;i<tagFields;i++)
@@ -769,8 +781,12 @@ public class WSdb {
 		}
 		data += F_SEP;
 		
+		
 		//parse item_tag
 		c = getAllItem_Tags();
+		// first value is count - needed for empty table case
+		data+= c.getCount()+F_SEP+F_SEP;
+		
 		while (c.moveToNext()){
 			//id,name,catId, data
 			for(int i=0;i<item_tagFields;i++)
@@ -778,7 +794,7 @@ public class WSdb {
 			
 			data += F_SEP;
 		}
-		
+		c.close();
 		return data;
 	}
 	
@@ -795,99 +811,124 @@ public class WSdb {
 	 * 
 	 * @param data String created by Backup
 	 */
-	public void Restore (String data){
+	public boolean Restore (String data){
 		Log.v("db.Restore", "Arg data="+data);
+		
+		if (data==null)
+			return false;
+		
 		rebuildTables();
 		
 		// split string by tables
 		String[] tables = data.split(T_SEP_SPLIT_EXP);
 	
-		//split tables into rows
-		String[] catRows=tables[0].split(R_SEP_SPLIT_EXP);
-		String[] itemRows=tables[1].split(R_SEP_SPLIT_EXP);
-		String[] tagRows=tables[2].split(R_SEP_SPLIT_EXP);
-		String[] item_tagRows=tables[3].split(R_SEP_SPLIT_EXP);
-		
-		String fields[]; // array of field values for a row
+		//used to split table strings into rows and fields
+		String[] catRows,itemRows,tagRows,item_tagRows, fields;
 		
 		// id refactor maps
 		Map <Integer,Integer> catIdMap=new HashMap<Integer,Integer> ();
 		Map <Integer,Integer> itemIdMap=new HashMap<Integer,Integer> ();
 		Map <Integer,Integer> tagIdMap=new HashMap<Integer,Integer> ();
-
 		
-		// Parse and Insert Categories
-		Log.v("db.Restore","ParseCatetories- " + tables[0]);
-
+		
 		int oldId=0,newId=1;
 		long insertRow;
-		for(int count=0;count < catRows.length; count++,newId++){
-			Log.v("db.Restore","CatRow- " + catRows[count]);
+		
+		//parse, refactor ids & insert categories
+		if (tables[0] != null){
+			Log.v("db.Restore","ParseCatetories- " + tables[0]);
+			catRows=tables[0].split(R_SEP_SPLIT_EXP);
+			
+			if (Integer.valueOf(catRows[0])!=0){ // empty table
+				for(int count=1;count < catRows.length; count++,newId++){
+					Log.v("db.Restore","CatRow- " + catRows[count]);
 
-			// split row into fields
-			fields = catRows[count].split(F_SEP_SPLIT_EXP);
-			Log.v("db.Restore","Catfields- " + fields[0] + " | " + fields[1] + " | " + fields[2] + " | " + fields[3]);
-			// refactor id
-			oldId=Integer.valueOf(fields[0]);
-			catIdMap.put(oldId, newId);
+					// split row into fields
+					fields = catRows[count].split(F_SEP_SPLIT_EXP);
+					Log.v("db.Restore","Catfields- " + fields[0] + " | " + fields[1] + " | " + fields[2] + " | " + fields[3]);
+				
+					// refactor id
+					oldId=Integer.valueOf(fields[0]);
+					catIdMap.put(oldId, newId);
 			
-			// insert into database
-			insertRow=insertCategory(fields[1], fields[2], fields[3]);
-			//assert(newId==(int)insertRow);
+					// insert into database
+					insertRow=insertCategory(fields[1], fields[2], fields[3]);
+					//assert(newId==(int)insertRow);
+				}
+			}
+		}	
+		
+		//parse, refactor ids & insert items
+		if (tables[1] != null){
+			Log.v("db.Restore","ParseItems- " + tables[1]);
+			itemRows=tables[1].split(R_SEP_SPLIT_EXP);
+			
+			if (Integer.valueOf(itemRows[0])!=0){ // empty table
+				oldId=0;  newId=1;
+				int newCatId;
+				for(int count=1;count < itemRows.length; count++,newId++){
+					// split row into fields
+					fields = itemRows[count].split(F_SEP_SPLIT_EXP);
+					
+					// refactor id
+					oldId=Integer.valueOf(fields[0]);
+					itemIdMap.put(oldId, newId);
+					
+					//get refactored category Id
+					newCatId=catIdMap.get(Integer.valueOf(fields[2]));
+					
+					// insert into database
+					insertRow=insertItem(fields[1], newCatId, fields[3]);
+					assert(newId==(int)insertRow);
+				}
+			}
 		}
 		
-		// Parse and Insert Items
-		Log.v("db.Restore","ParseItems- " + tables[1]);
-		oldId=0;  newId=1;
-		int newCatId;
-		for(int count=0;count < itemRows.length; count++,newId++){
-			// split row into fields
-			fields = itemRows[count].split(F_SEP_SPLIT_EXP);
-			
-			// refactor id
-			oldId=Integer.valueOf(fields[0]);
-			itemIdMap.put(oldId, newId);
-			
-			//get refactored category Id
-			newCatId=catIdMap.get(Integer.valueOf(fields[2]));
-			
-			// insert into database
-			insertRow=insertItem(fields[1], newCatId, fields[3]);
-			assert(newId==(int)insertRow);
+		
+		
+		//parse, refactor ids & insert Tags
+		if (tables[2] != null){
+			Log.v("db.Restore","ParseTags- " + tables[2]);
+			tagRows=tables[2].split(R_SEP_SPLIT_EXP);
+		
+			if (Integer.valueOf(tagRows[0])!=0){ // empty table
+				oldId=0;  newId=1;
+				for(int count=1; count < tagRows.length; count++,newId++){
+					// split row into fields
+					fields = tagRows[count].split(F_SEP_SPLIT_EXP);
+					
+					// refactor id
+					oldId=Integer.valueOf(fields[0]);
+					tagIdMap.put(oldId, newId);
+					
+					// insert into database
+					insertRow=insertTag(fields[1], fields[2]);
+					assert(newId==(int)insertRow);
+				}
+			}
 		}
 		
 		
-		// Parse and Insert Tags
-		Log.v("db.Restore","ParseTags- " + tables[2]);
-		oldId=0;  newId=1;
-		for(int count=0; count < tagRows.length; count++,newId++){
-			// split row into fields
-			fields = tagRows[count].split(F_SEP_SPLIT_EXP);
+		//parse, refactor ids & insert Item_Tags	
+		if (tables[3] != null){
+			Log.v("db.Restore","ParseItem_Tags- " + tables[3]);
+			item_tagRows=tables[3].split(R_SEP_SPLIT_EXP);
 			
-			// refactor id
-			oldId=Integer.valueOf(fields[0]);
-			tagIdMap.put(oldId, newId);
-			
-			// insert into database
-			insertRow=insertTag(fields[1], fields[2]);
-			assert(newId==(int)insertRow);
+			if (Integer.valueOf(item_tagRows[0])!=0){ // empty table
+				int newItemId,newTagId;
+				for(int count=1;count < item_tagRows.length; count++,newId++){
+					// split row into fields
+					fields = item_tagRows[count].split(F_SEP_SPLIT_EXP);
+					
+					//get refactored itemId and tagId
+					newItemId = itemIdMap.get(Integer.valueOf(fields[0]));
+					newTagId = tagIdMap.get(Integer.valueOf(fields[1]));
+					
+					// insert into database
+					insertRow=insertItem_Tag(newItemId, newTagId);
+				}
+			}
 		}
-		
-		// Parse and Insert Item_Tags
-		Log.v("db.Restore","ParseItem_Tags- " + tables[3]);
-		int newItemId,newTagId;
-		for(int count=0;count < item_tagRows.length; count++,newId++){
-			// split row into fields
-			fields = item_tagRows[count].split(F_SEP_SPLIT_EXP);
-			
-			//get refactored itemId and tagId
-			newItemId = itemIdMap.get(Integer.valueOf(fields[0]));
-			newTagId = tagIdMap.get(Integer.valueOf(fields[1]));
-			
-			// insert into database
-			insertRow=insertItem_Tag(newItemId, newTagId);
-		}
+		return true;
 	}
-	
-	
 }
