@@ -109,6 +109,10 @@ public class Splash extends Activity {
 		service.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
 		startService(service);
 		
+		Intent backupservice = new Intent(this, GetReferralsService.class);
+		backupservice.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
+		startService(backupservice);
+		
 		Intent openStartingPoint = new Intent("we.should.MAIN");
 		startActivity(openStartingPoint);
 	}

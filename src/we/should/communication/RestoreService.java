@@ -35,46 +35,49 @@ public class RestoreService extends IntentService{
 		Bundle extras = intent.getExtras();
 		String username = extras.getString(WeShouldActivity.ACCOUNT_NAME);
 		
-		HttpClient httpclient = new DefaultHttpClient();
+		boolean done = false;
+		String dbstring = "";
+		int index = 0;
+		
+		while(!done){
+		
+			HttpClient httpclient = new DefaultHttpClient();
+	
+		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+		    nameValuePairs.add(new BasicNameValuePair("user_email", username));
+		    nameValuePairs.add(new BasicNameValuePair("index", ""+index+""));
+			
+			String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
+			
+			HttpGet httpget = new HttpGet("http://23.23.237.174/restore?"+paramString);
+						
+			try {
+				
+				HttpResponse response = httpclient.execute(httpget);
+				
+				InputStream is = response.getEntity().getContent();
+				
+				byte[] buf = new byte[4096]; //should be >= response length
+				is.read(buf);
+				
+				Log.v("RESTORE RESPONSE", new String(buf));
+	
 
-	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-	    nameValuePairs.add(new BasicNameValuePair("user_email", username));
-		
-		String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
-		
-		HttpGet httpget = new HttpGet("http://23.23.237.174/restore?"+paramString);
-		
-		JSONObject resp = new JSONObject();
-		JSONArray categories = new JSONArray();
-		
-		try {
+				dbstring += buf.toString();
+				//TODO: do the same for tags and items
+			   		    
+	
+			} catch (ClientProtocolException e) {
+			    // TODO Auto-generated catch block
+				Log.v("GETREFERRALSSERVICE", e.getMessage());
+			} catch (IOException e) {
+			    // TODO Auto-generated catch block
+				Log.v("GETREFERRALSSERVICE", e.getMessage());
+			} 
 			
-			HttpResponse response = httpclient.execute(httpget);
-			
-			InputStream is = response.getEntity().getContent();
-			
-			byte[] buf = new byte[4096];
-			is.read(buf);
-			
-			Log.v("RESTORE RESPONSE", new String(buf));
-
-			resp = new JSONObject(new String(buf));
-			categories = resp.getJSONArray("categories"); 
-			//TODO: do the same for tags and items
-		   		    
-
-		} catch (ClientProtocolException e) {
-		    // TODO Auto-generated catch block
-			Log.v("GETREFERRALSSERVICE", e.getMessage());
-		} catch (IOException e) {
-		    // TODO Auto-generated catch block
-			Log.v("GETREFERRALSSERVICE", e.getMessage());
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			Log.v("GET REFFERAL SERVICE", "JSON EXCEPTION "+e.getMessage());
 		}
 		
+		//do db restore from string
 	}
 
 }
