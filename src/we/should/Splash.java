@@ -111,11 +111,10 @@ public class Splash extends Activity {
 //		service.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
 //		startService(service);
 		
-		Intent backupservice = new Intent(this, BackupService.class);
-		backupservice.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
-		startService(backupservice);
-		
-		Log.v("SPLASH", "started backup service");
+//		Intent backupservice = new Intent(this, BackupService.class);
+//		backupservice.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
+//		startService(backupservice);		
+//		Log.v("SPLASH", "started backup service");
 		
 		Intent openStartingPoint = new Intent("we.should.MAIN");
 		startActivity(openStartingPoint);

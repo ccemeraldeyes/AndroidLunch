@@ -72,7 +72,7 @@ public class GetReferralsService extends IntentService {
 			
 			
 			
-			byte[] buf = baos.toByteArray(); //TODO: figure out how to not hardcode this
+			byte[] buf = baos.toByteArray(); 
 			//is.read(buf);
 			
 			Log.v("REFERRAL RESPONSE", new String(buf));
