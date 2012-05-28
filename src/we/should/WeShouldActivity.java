@@ -562,9 +562,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * 		   - null if not found.
 	 */
 	private CustomPinPoint findPin(GeoPoint placeLocation) {
-		for(CustomPinPoint customPin : lstPinPoints) {
-			if(customPin.contains(placeLocation)) {
-				return customPin;
+		if(placeLocation != null) {
+			for(CustomPinPoint customPin : lstPinPoints) {
+				if(customPin.contains(placeLocation)) {
+					return customPin;
+				}
 			}
 		}
 		return null;
@@ -590,26 +592,28 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @param placeLocation
 	 */
 	private void updateYellowPin(GeoPoint placeLocation) {
-		CustomPinPoint replaceToColorPin = null;
-		CustomPinPoint replaceToYellowPin = null;
-		for(CustomPinPoint customPin : lstPinPoints) {
-			if(customPin.contains(placeLocation)) {
-				replaceToYellowPin = customPin;
+		if(placeLocation != null) {
+			CustomPinPoint replaceToColorPin = null;
+			CustomPinPoint replaceToYellowPin = null;
+			for(CustomPinPoint customPin : lstPinPoints) {
+				if(customPin.contains(placeLocation)) {
+					replaceToYellowPin = customPin;
+				}
+				if(customPin.isSelected()) {
+					replaceToColorPin = customPin;
+				}
+				if(replaceToColorPin != null && replaceToYellowPin != null) {
+					break;
+				}
 			}
-			if(customPin.isSelected()) {
-				replaceToColorPin = customPin;
+			
+			if(replaceToColorPin != null) {
+				replacePin(replaceToColorPin, false);
 			}
-			if(replaceToColorPin != null && replaceToYellowPin != null) {
-				break;
+			
+			if(replaceToYellowPin != null) {
+				replacePin(replaceToYellowPin, true);
 			}
-		}
-		
-		if(replaceToColorPin != null) {
-			replacePin(replaceToColorPin, false);
-		}
-		
-		if(replaceToYellowPin != null) {
-			replacePin(replaceToYellowPin, true);
 		}
 	}
 	
@@ -618,15 +622,17 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * The new pin is exactly the same as the old one, pin maybe 
 	 * selected (yellow pin) or not selected (the color associate with the pin).
 	 * 
-	 * @param Pin - the pin to be replace 
+	 * @param pin - the pin to be replace 
 	 * @param isSelected - whether or not it is selected - yellow pin
 	 */
-	private void replacePin(CustomPinPoint replaceToColorPin, boolean isSelected) {
-		overlayList.remove(replaceToColorPin);
-		lstPinPoints.remove(replaceToColorPin);
-		addPin(replaceToColorPin.getPoint(), 
-				replaceToColorPin.getColor(), 
-				replaceToColorPin.getItem(), isSelected);
+	private void replacePin(CustomPinPoint pin, boolean isSelected) {
+		if(pin != null) {
+			overlayList.remove(pin);
+			lstPinPoints.remove(pin);
+			addPin(pin.getPoint(), 
+					pin.getColor(), 
+					pin.getItem(), isSelected);
+		}
 	}
 	
 	/**
