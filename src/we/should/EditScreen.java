@@ -1,21 +1,12 @@
 package we.should;
 
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
 import we.should.list.Category;
 import we.should.list.Field;
@@ -29,11 +20,9 @@ import we.should.search.PlaceRequest;
 import we.should.search.Search;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -41,7 +30,6 @@ import android.os.AsyncTask.Status;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -52,7 +40,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -278,6 +265,13 @@ public class EditScreen extends Activity {
 		builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				String nameStr = name.getText().toString();
+				if (nameStr.equals("")) {
+					Toast.makeText(EditScreen.this,
+							"Please enter a name for this tag",
+							Toast.LENGTH_LONG).show();
+					addTag();
+					return;
+				}
 				if (tagNames.contains(nameStr)) {
 					Toast.makeText(EditScreen.this,
 							"A tag with this name already exists",
@@ -370,8 +364,12 @@ public class EditScreen extends Activity {
 		}
 		Map<Field, String> fieldMap = detailPlace.asFieldMap();
 		for (Field f : fieldMap.keySet()) {
-			if (fieldMap.get(f) != null) {
-				mData.put(f, fieldMap.get(f));
+			if (mData.containsKey(f)) {
+				if (fieldMap.get(f) != null) {
+					mData.put(f, fieldMap.get(f));
+				} else {
+					mData.put(f, "");
+				}
 			}
 		}
 

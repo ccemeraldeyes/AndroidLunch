@@ -10,21 +10,27 @@ import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.FieldType;
 import we.should.list.GenericCategory;
+import we.should.list.Tag;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 public class NewCategory extends Activity {
 	
 	/** The EditText with the name of the new category. **/
 	private EditText mName;
+	
+	/** The Spinner associated with the category color. **/
+	private Spinner mColor;
 	
 	/** The mappable checkbox. **/
 	private CheckBox mMappable;
@@ -44,6 +50,13 @@ public class NewCategory extends Activity {
         setContentView(R.layout.new_category);
         
         mName = (EditText) findViewById(R.id.name);
+        
+        mColor = (Spinner) findViewById(R.id.color);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
+				android.R.layout.simple_spinner_item,
+				new ArrayList<String>(Tag.getAllTagColors().keySet()));
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mColor.setAdapter(adapter);
         
         mMappable = (CheckBox) findViewById(R.id.mappable);
         
@@ -95,10 +108,15 @@ public class NewCategory extends Activity {
 				saveable = false;
 				Toast.makeText(this, "Duplicate name: " + pf.name, duration).show();
 			}
+			if (pf.name.equals("")) {
+				saveable = false;
+				Toast.makeText(this, "All fields must be named.", duration).show();
+			}
 			if (Field.getReservedNames().contains(pf.name.toLowerCase())) {
 				saveable = false;
 				Toast.makeText(this, "Field name " + pf.name + " is reserved.", duration).show();
 			}
+			names.add(pf.name);
 		}
 		
 		if (Category.getCategory(mName.getText().toString(), this) != null) {
@@ -127,7 +145,10 @@ public class NewCategory extends Activity {
 			fields.add(Field.COMMENT);
 			//fields.add(Field.TAGS);
 			try{
-				(new GenericCategory(mName.getText().toString(), fields, this)).save();
+				Color color = Color.get((String) mColor.getSelectedItem());
+				Category cat = new GenericCategory(mName.getText().toString(), fields, this);
+				cat.setColor(color);
+				cat.save();
 			} catch(IllegalArgumentException e) {
 				//Toast
 				

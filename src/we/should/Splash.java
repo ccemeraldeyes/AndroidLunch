@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import we.should.communication.BackupService;
 import we.should.communication.GetReferralsService;
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -14,7 +13,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ArrayAdapter;
