@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Criteria;
@@ -222,8 +223,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	String tabId = mTabHost.getCurrentTabTag();
 
 		mTabHost.clearAllTabs();
+		Drawable allItems = getResources().getDrawable(R.drawable.white);
         TabHost.TabSpec spec = mTabHost.newTabSpec(ALL_ITEMS_TAG)
-        		.setIndicator("  " + ALL_ITEMS_NAME + "  ");
+        		.setIndicator("  " + ALL_ITEMS_NAME + "  ", allItems);
     	switch (mSortType) {
     	case Category:
     		updateTabsCategory(spec);
@@ -257,8 +259,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         CategoryPopulator tp = new CategoryPopulator();
         spec = spec.setContent(tp);
         mTabHost.addTab(spec);
+        Resources res = getResources();
         for (String name : mCategories.keySet()) {
-	        spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ")
+        	Category cat = mCategories.get(name);
+	        spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ",
+	        		res.getDrawable(cat.getColor().getDrawable()))
 	        		.setContent(tp);
 	        mTabHost.addTab(spec);
         }
@@ -277,8 +282,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		TagPopulator tp = new TagPopulator();
         spec = spec.setContent(tp);
         mTabHost.addTab(spec);
+        Resources res = getResources();
 		for (String name : mTags.keySet()) {
-			spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ")
+			Tag t = mTags.get(name);
+			spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ",
+					res.getDrawable(t.getColor().getDrawable()))
 					.setContent(tp);
 			mTabHost.addTab(spec);
 		}
@@ -702,20 +710,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			throw new IllegalArgumentException("color is null or " +
 					"color string is suppose to be six characters");
 		}
-		switch(color){
-		case Yellow:
-			return getResources().getDrawable(R.drawable.yellow);
-		case Green:
-			return getResources().getDrawable(R.drawable.green);
-		case Blue:
-			return getResources().getDrawable(R.drawable.blue);
-		case Purple:
-			return getResources().getDrawable(R.drawable.purple);
-		case Red:
-			return getResources().getDrawable(R.drawable.red);
-		default:
-			return getResources().getDrawable(R.drawable.red);
-		}
+		return getResources().getDrawable(color.getDrawable());
 	}
 	
 }
