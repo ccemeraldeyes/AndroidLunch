@@ -115,11 +115,12 @@ public class GenericItem extends Item {
 				WSdb db = new WSdb(ctx);
 				db.open();
 				db.deleteItem(this.id);
-				Set<Tag> tags = getTags();	
-				//TODO:  database deletes all item-tags on item delete.  Should I change? -- Troy
+				//Set<Tag> tags = getTags();	
+				/* database does this
 				for(Tag t: tags){
 					db.deleteItemTagRel(this.id, t.getId());
 				}
+				*/
 				db.close();
 			} else {
 				Log.w("Item.delete()", "This item has no context. Item cannot be deleted from database.");
@@ -266,7 +267,7 @@ public class GenericItem extends Item {
 		for(Tag t : thisTags) {
 			int tagID;
 			if (!dbTags.contains(t)) {
-				tagID = (int) db.insertTag(t.toString(), t.getColor().toString());//TODO: Davis tags include colors				
+				tagID = (int) db.insertTag(t.toString(), t.getColor().toString());				
 			} else {
 				tagID = dbTags.get(dbTags.indexOf(t)).getId(); //If this tag already exists, it is linked to the db row
 			}

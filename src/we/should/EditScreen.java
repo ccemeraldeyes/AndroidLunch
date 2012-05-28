@@ -400,36 +400,6 @@ public class EditScreen extends Activity {
 			return;
 		}
 
-		
-//		// Create a new HttpClient and Post Header
-//		HttpClient httpclient = new DefaultHttpClient();
-//		
-//		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
-//		
-//
-//	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-//	    nameValuePairs.add(new BasicNameValuePair("user_email", settings.getString(WeShouldActivity.ACCOUNT_NAME, "")));	    
-//	    nameValuePairs.add(new BasicNameValuePair("item", mItem.dataToDB().toString()));
-//		
-//		String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
-//
-//		
-//		HttpGet httpget = new HttpGet("http://23.23.237.174/save-item?"+paramString);
-//
-//		try {
-//			
-//
-//			
-//			httpclient.execute(httpget);
-//		    Log.v("GETREFERRALSSERVICE", "backing up items");
-//
-//		} catch (ClientProtocolException e) {
-//		    // TODO Auto-generated catch block
-//			Log.v("GETREFERRALSSERVICE", e.getMessage());
-//		} catch (IOException e) {
-//		    // TODO Auto-generated catch block
-//			Log.v("GETREFERRALSSERVICE", e.getMessage());
-//		}
 		finish();
 	}
 	private void delete() {
