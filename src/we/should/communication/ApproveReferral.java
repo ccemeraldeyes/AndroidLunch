@@ -51,7 +51,7 @@ public class ApproveReferral extends Activity {
 		final List<Referral> list = new ArrayList<Referral>();
 		Intent intent = this.getIntent();
 		Bundle bundle = intent.getExtras();
-		String dataAsString = bundle.getString("data");
+		String dataAsString = bundle.getString("we.should.communication.data");
 		
 		Log.v("DATA EXTRA", dataAsString);
 		

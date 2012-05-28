@@ -109,14 +109,19 @@ public class GetReferralsService extends IntentService {
 			CharSequence contentText = "You have "+data.length()+" new referrals awaiting your approval.";
 			Intent notificationIntent = new Intent(this, ApproveReferral.class);
 			
-			notificationIntent.putExtra("data", data.toString());
+			notificationIntent.putExtra("we.should.communication.data", data.toString());
 	
-			Log.v("AFTER EXTRAS INSERT", notificationIntent.getStringExtra("data"));
+			//Log.v("AFTER EXTRAS INSERT", notificationIntent.getStringExtra("data"));
 			
-			PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+			PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 	
+			
+			
+			
 			notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
 			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
+			
+			
 			nm.notify(ActivityKey.NEW_REFERRAL.ordinal(), notification);
 		} 
 	}
