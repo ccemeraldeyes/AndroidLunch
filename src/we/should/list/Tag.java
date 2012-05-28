@@ -115,6 +115,8 @@ public class Tag implements Serializable {
 	     return builder.toString();
 	}
 	
+	
+	//TODO: hex values not used
 	/**
 	 * Returns a map that maps each possible color's human readable name to its
 	 * value.
