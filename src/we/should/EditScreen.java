@@ -377,8 +377,12 @@ public class EditScreen extends Activity {
 		}
 		Map<Field, String> fieldMap = detailPlace.asFieldMap();
 		for (Field f : fieldMap.keySet()) {
-			if (fieldMap.get(f) != null) {
-				mData.put(f, fieldMap.get(f));
+			if (mData.containsKey(f)) {
+				if (fieldMap.get(f) != null) {
+					mData.put(f, fieldMap.get(f));
+				} else {
+					mData.put(f, "");
+				}
 			}
 		}
 
