@@ -46,6 +46,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
@@ -133,7 +134,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
 			public void onTabChanged(String tabId) {
 				updateView(tabId.trim());
-				setupDelete(tabId.trim());
+				setupTab(tabId.trim());
 			}
 		});
         
@@ -161,14 +162,16 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     }
     
     /**
-     * Set up the delete button, if necessary.
+     * Set up the delete button and tab color, if necessary.
      * 
      * @param tabid the selected category or tag
      */
-    private void setupDelete(String tabid) {
+    private void setupTab(String tabid) {
     	Button delete = (Button) findViewById(R.id.delete);
+    	
     	if (mSortType.equals(SortType.Category)) {
     		final Category cat = mCategories.get(tabid);
+    		
     		delete.setVisibility((cat == null || cat.getItems().size() > 0) ?
     				View.GONE : View.VISIBLE);
     		delete.setOnClickListener(new View.OnClickListener() {
@@ -179,7 +182,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 				}
 			});
     	} else {
-    		final Tag tag = mTags.get(tabid);
+    		final Tag tag = mTags.get(tabid);    		
     		delete.setVisibility((tag == null)
     				|| Item.getItemsOfTag(tag, this).size() > 0 ? View.GONE
     						: View.VISIBLE);
@@ -275,6 +278,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		updateTabsTag(spec);
     		break;
     	}
+    	mTabHost.getTabWidget().setStripEnabled(true);
     	mTabHost.setCurrentTabByTag(tabId);
     }
 
