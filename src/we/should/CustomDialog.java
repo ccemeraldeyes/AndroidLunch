@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import we.should.list.Field;
 import we.should.list.Item;
-
+//TODO: Comment this file
 public class CustomDialog extends Dialog {
 	private Item item;
 	private double distance;
