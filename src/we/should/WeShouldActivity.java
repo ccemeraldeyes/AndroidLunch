@@ -77,7 +77,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/** for Map **/
 	public static double DISTANCETOMILES =  0.000621371192;
 	private static final List<CustomPinPoint> lstPinPoints = new ArrayList<CustomPinPoint>();
-	
+	private static final int highlightPin = R.drawable.yellow;
 	/** The TabHost that cycles between tabs. **/
 	private TabHost mTabHost;
 	
@@ -703,6 +703,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @throws IllegalArgumentException on null input.
 	 */
 	private void addPin(GeoPoint point, Color color, Item item, boolean isSelected) {
+		
 		if(point == null || color == null || item == null) {
 			throw new IllegalArgumentException("input to addPin is null");
 		}
@@ -710,7 +711,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		double distance = distanceBetween(getDeviceLocation(), point);
 		Drawable drawable;
 		if(isSelected) {
-			drawable = getDrawable(Color.Yellow);
+			drawable = getResources().getDrawable(highlightPin);
 		} else {
 			drawable = getDrawable(color);
 		}

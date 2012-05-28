@@ -92,8 +92,8 @@ public class Tag implements Serializable {
 			int id = tags.getInt(0);
 			out.add(new Tag(id, tag, color));
 		}
-		tags.close(); //TS
-		db.close(); //TS
+		tags.close();
+		db.close();
 		return out;	
 	}
 	
