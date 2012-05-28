@@ -54,7 +54,7 @@ public class FieldAdapter extends ArrayAdapter<FieldAdapter.ProtoField> {
 			row = inflater.inflate(R.layout.new_row, parent, false);
 			
 			protoRow = new ProtoFieldView();
-			protoRow.name = (EditText) row.findViewById(R.id.name);
+			protoRow.name = (FixedEditText) row.findViewById(R.id.name);
 			protoRow.type = (Spinner) row.findViewById(R.id.type);
 			protoRow.removeField = (Button) row.findViewById(R.id.removeField);
 			ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext, android.R.layout.simple_spinner_item, FieldType.getTypes());
@@ -69,6 +69,7 @@ public class FieldAdapter extends ArrayAdapter<FieldAdapter.ProtoField> {
 		protoRow.name.setText(pf.name);
 		protoRow.type.setSelection(pf.type);
 		
+		protoRow.name.removeAllListeners();
 		protoRow.name.addTextChangedListener(new TextWatcher() {
 
 			public void afterTextChanged(Editable s) {
@@ -111,7 +112,7 @@ public class FieldAdapter extends ArrayAdapter<FieldAdapter.ProtoField> {
 	}
 
 	private static class ProtoFieldView {
-		public EditText name;
+		public FixedEditText name;
 		public Spinner type;
 		public Button removeField;
 	}

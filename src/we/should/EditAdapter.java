@@ -94,8 +94,9 @@ public class EditAdapter extends ArrayAdapter<Field> {
 		case TextField:
 		case MultilineTextField:
 		case PhoneNumber:
-			TextView tv = (TextView) view;
+			FixedEditText tv = (FixedEditText) view;
 			tv.setText(mData.get(field));
+			tv.removeAllListeners();
 			tv.addTextChangedListener(new TextWatcher() {
 
 				public void afterTextChanged(Editable s) {
