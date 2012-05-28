@@ -45,7 +45,7 @@ public class FieldAdapter extends ArrayAdapter<FieldAdapter.ProtoField> {
 
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(final int position, View convertView, ViewGroup parent) {
 		View row = convertView;
 		ProtoFieldView protoRow = null;
 		
@@ -64,13 +64,17 @@ public class FieldAdapter extends ArrayAdapter<FieldAdapter.ProtoField> {
 		} else {
 			protoRow = (ProtoFieldView) row.getTag();
 		}
+		protoRow.name.removeAllListeners();
 		
 		final ProtoField pf = getItem(position);
 		protoRow.name.setText(pf.name);
 		protoRow.type.setSelection(pf.type);
 		
-		protoRow.name.removeAllListeners();
 		protoRow.name.addTextChangedListener(new TextWatcher() {
+			
+			public String toString() {
+				return pf.name + ", pos: " + position;
+			}
 
 			public void afterTextChanged(Editable s) {
 				pf.name = s.toString();
