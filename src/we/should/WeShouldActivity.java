@@ -41,8 +41,10 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
 import android.widget.Toast;
@@ -128,10 +130,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         this.zoomButton = (ImageButton) findViewById(R.id.my_location_button);
         mSortType = SortType.Category;
         mTabHost.setup();
-        updateTabs();        
+        updateTabs();
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
 			public void onTabChanged(String tabId) {
 				updateView(tabId.trim());
+				setupDelete(tabId.trim());
 			}
 		});
         
@@ -152,6 +155,39 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         	zoomLocation(location);
         }
         map.postInvalidate();    
+    }
+    
+    /**
+     * Set up the delete button, if necessary.
+     * 
+     * @param tabid the selected category or tag
+     */
+    private void setupDelete(String tabid) {
+    	Button delete = (Button) findViewById(R.id.delete);
+    	if (mSortType.equals(SortType.Category)) {
+    		final Category cat = mCategories.get(tabid);
+    		delete.setVisibility((cat == null || cat.getItems().size() > 0) ?
+    				View.GONE : View.VISIBLE);
+    		delete.setOnClickListener(new View.OnClickListener() {
+				
+				public void onClick(View v) {
+					// This is where we would be deleting the category if we had
+					// a way to
+				}
+			});
+    	} else {
+    		final Tag tag = mTags.get(tabid);
+    		delete.setVisibility((tag == null)
+    				|| Item.getItemsOfTag(tag, this).size() > 0 ? View.GONE
+    						: View.VISIBLE);
+    		delete.setOnClickListener(new View.OnClickListener() {
+				
+				public void onClick(View v) {
+					// This is where we would be deleting the tag if we had
+					// a way to
+				}
+			});
+    	}
     }
     
     /**
@@ -475,6 +511,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			} else {
 				itemsList.addAll(cat.getItems());
 			}
+			
 			mAdapter = new ItemAdapter(WeShouldActivity.this, itemsList);
 			lv.setAdapter(mAdapter);
 			registerForContextMenu(lv);
