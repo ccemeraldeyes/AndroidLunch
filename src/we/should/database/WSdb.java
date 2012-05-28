@@ -25,12 +25,14 @@ public class WSdb {
 	private SQLiteDatabase db; 
 	private final Context context;
 	private DBHelper dbhelper;
-	final String F_SEP = "|"; //field separator
 	
-	//escaped separator expressions for String.split
-	final String F_SEP_SPLIT_EXP = "\\|";
-	final String R_SEP_SPLIT_EXP = "\\|\\|"; // row separator ||
-	final String T_SEP_SPLIT_EXP = "\\|\\|\\|"; // table separator |||
+	// separators for backup & restore
+	final char SEP = '#';
+	final String F_SEP = "@#";	 // field separator
+	final String R_SEP = "@##";  // row separator
+	final String T_SEP = "@###"; // table separator
+	
+	// number of fields for each table
 	final int catFields = 4;
 	final int itemFields = 4;
 	final int tagFields=3;
@@ -740,59 +742,62 @@ public class WSdb {
 		// parse category
 		c = getAllCategories();
 		// first value is count - needed for empty table case
-		data+= c.getCount()+F_SEP+F_SEP;
+		data+= c.getCount()+F_SEP+SEP;
 		
 		while (c.moveToNext()){
 			//id,name,color,schema
 			for(int i=0;i<catFields;i++)
 				data+=c.getString(i) + F_SEP;
-			
-			data += F_SEP;
+			// adds to field separator to become row separator
+			data += SEP;
 		}
-		data += F_SEP;
+		// adds to row separator to become table separator
+		data += SEP; 
 		
 		
 		// parse item
 		c = getAllItems();
 		// first value is count - needed for empty table case
-		data+= c.getCount()+F_SEP+F_SEP;
+		data+= c.getCount()+F_SEP+SEP;
 		
 		while (c.moveToNext()){
 			//id,name,catId, data
 			for(int i=0;i<itemFields;i++)
 				data+=c.getString(i) + F_SEP;
-			
-			data += F_SEP;
+			// adds to field separator to become row separator
+			data += SEP;
 		}
-		data += F_SEP;
+		// adds to row separator to become table separator
+		data += SEP;
 		
 		
 		// parse tag
 		c = getAllTags();
 		// first value is count - needed for empty table case
-		data+= c.getCount()+F_SEP+F_SEP;
+		data+= c.getCount()+F_SEP+SEP;
 		
 		while (c.moveToNext()){
 			//id,name,catId, data
 			for(int i=0;i<tagFields;i++)
 				data+=c.getString(i) + F_SEP;	
-			
-			data += F_SEP;
+			// adds to field separator to become row separator
+			data += SEP;
 		}
-		data += F_SEP;
+		// adds to row separator to become table separator
+		data += SEP;
 		
 		
 		//parse item_tag
 		c = getAllItem_Tags();
 		// first value is count - needed for empty table case
-		data+= c.getCount()+F_SEP+F_SEP;
+		data+= c.getCount()+F_SEP+SEP;
 		
 		while (c.moveToNext()){
 			//id,name,catId, data
 			for(int i=0;i<item_tagFields;i++)
 				data+=c.getString(i) + F_SEP;
-			
-			data += F_SEP;
+			// adds to field separator to become row separator
+			data += SEP;
 		}
 		c.close();
 		return data;
@@ -820,7 +825,7 @@ public class WSdb {
 		rebuildTables();
 		
 		// split string by tables
-		String[] tables = data.split(T_SEP_SPLIT_EXP);
+		String[] tables = data.split(T_SEP);
 	
 		//used to split table strings into rows and fields
 		String[] catRows,itemRows,tagRows,item_tagRows, fields;
@@ -837,15 +842,15 @@ public class WSdb {
 		//parse, refactor ids & insert categories
 		if (tables[0] != null){
 			Log.v("db.Restore","ParseCatetories- " + tables[0]);
-			catRows=tables[0].split(R_SEP_SPLIT_EXP);
+			catRows=tables[0].split(R_SEP);
 			
 			if (Integer.valueOf(catRows[0])!=0){ // empty table
 				for(int count=1;count < catRows.length; count++,newId++){
 					Log.v("db.Restore","CatRow- " + catRows[count]);
 
 					// split row into fields
-					fields = catRows[count].split(F_SEP_SPLIT_EXP);
-					Log.v("db.Restore","Catfields- " + fields[0] + " | " + fields[1] + " | " + fields[2] + " | " + fields[3]);
+					fields = catRows[count].split(F_SEP);
+					Log.v("db.Restore","Catfields- " + fields[0] + " @# " + fields[1] + " @# " + fields[2] + " @# " + fields[3]);
 				
 					// refactor id
 					oldId=Integer.valueOf(fields[0]);
@@ -861,14 +866,14 @@ public class WSdb {
 		//parse, refactor ids & insert items
 		if (tables[1] != null){
 			Log.v("db.Restore","ParseItems- " + tables[1]);
-			itemRows=tables[1].split(R_SEP_SPLIT_EXP);
-			
+			itemRows=tables[1].split(R_SEP);
+			Log.v("db.restore", "number of items="+itemRows[0]);
 			if (Integer.valueOf(itemRows[0])!=0){ // empty table
 				oldId=0;  newId=1;
 				int newCatId;
 				for(int count=1;count < itemRows.length; count++,newId++){
 					// split row into fields
-					fields = itemRows[count].split(F_SEP_SPLIT_EXP);
+					fields = itemRows[count].split(F_SEP);
 					
 					// refactor id
 					oldId=Integer.valueOf(fields[0]);
@@ -889,13 +894,13 @@ public class WSdb {
 		//parse, refactor ids & insert Tags
 		if (tables[2] != null){
 			Log.v("db.Restore","ParseTags- " + tables[2]);
-			tagRows=tables[2].split(R_SEP_SPLIT_EXP);
+			tagRows=tables[2].split(R_SEP);
 		
 			if (Integer.valueOf(tagRows[0])!=0){ // empty table
 				oldId=0;  newId=1;
 				for(int count=1; count < tagRows.length; count++,newId++){
 					// split row into fields
-					fields = tagRows[count].split(F_SEP_SPLIT_EXP);
+					fields = tagRows[count].split(F_SEP);
 					
 					// refactor id
 					oldId=Integer.valueOf(fields[0]);
@@ -912,13 +917,13 @@ public class WSdb {
 		//parse, refactor ids & insert Item_Tags	
 		if (tables[3] != null){
 			Log.v("db.Restore","ParseItem_Tags- " + tables[3]);
-			item_tagRows=tables[3].split(R_SEP_SPLIT_EXP);
+			item_tagRows=tables[3].split(R_SEP);
 			
 			if (Integer.valueOf(item_tagRows[0])!=0){ // empty table
 				int newItemId,newTagId;
 				for(int count=1;count < item_tagRows.length; count++,newId++){
 					// split row into fields
-					fields = item_tagRows[count].split(F_SEP_SPLIT_EXP);
+					fields = item_tagRows[count].split(F_SEP);
 					
 					//get refactored itemId and tagId
 					newItemId = itemIdMap.get(Integer.valueOf(fields[0]));

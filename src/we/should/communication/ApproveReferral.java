@@ -18,9 +18,6 @@ import org.json.JSONObject;
 
 import we.should.R;
 import we.should.WeShouldActivity;
-import we.should.database.WSdb;
-import we.should.list.Category;
-import we.should.list.Item;
 import we.should.list.ReferralItem;
 import we.should.list.Referrals;
 import android.app.Activity;
@@ -64,7 +61,6 @@ public class ApproveReferral extends Activity {
 		try {
 			data = new JSONArray(dataAsString);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -78,7 +74,6 @@ public class ApproveReferral extends Activity {
 				
 				list.add(new Referral(o.getString("item_name"), o.getString("referred_by"), false, d));
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				Log.v("REFERRAL OBJECT DATA", e.getMessage());
 			}
@@ -95,8 +90,7 @@ public class ApproveReferral extends Activity {
 				
 				List<Referral> approvedList = mAdapter.getApprovedList();
 				
-				//TODO: send approved/rejected to remote db and delete
-				
+
 				Referrals refs = Referrals.getReferralCategory(c);
 				
 				for(Referral r: approvedList){
@@ -108,7 +102,6 @@ public class ApproveReferral extends Activity {
 						Toast.makeText(c, e.getMessage(), Toast.LENGTH_SHORT).show();
 						return;
 					}
-					
 
 				}
 				
@@ -137,13 +130,11 @@ public class ApproveReferral extends Activity {
 	    	try {
 				o.put("name", r.getName());
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	    	try {
 				o.put("referred_by", r.getSender());
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	    	listArray.put(o);
@@ -158,10 +149,8 @@ public class ApproveReferral extends Activity {
 		try {
 			HttpResponse response = httpclient.execute(httpget);
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
