@@ -278,6 +278,13 @@ public class EditScreen extends Activity {
 		builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				String nameStr = name.getText().toString();
+				if (nameStr.equals("")) {
+					Toast.makeText(EditScreen.this,
+							"Please enter a name for this tag",
+							Toast.LENGTH_LONG).show();
+					addTag();
+					return;
+				}
 				if (tagNames.contains(nameStr)) {
 					Toast.makeText(EditScreen.this,
 							"A tag with this name already exists",
