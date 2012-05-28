@@ -3,8 +3,7 @@ package we.should;
 import android.util.Log;
 
 public enum Color{
-	Yellow, Green, Blue, Purple, Red;
-	
+	Yellow, Green, Blue, Purple, Red, White, Pink, Orange, Brown;
 	public static final Color DEFAULT = Red;
 	public static Color get(String color) {
 		try{

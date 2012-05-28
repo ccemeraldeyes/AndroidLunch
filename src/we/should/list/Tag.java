@@ -122,13 +122,16 @@ public class Tag implements Serializable {
 	 * @return see above
 	 */
 	public static Map<String, String> getAllTagColors() {
+		
 		Map<String, String> colorMap = new HashMap<String, String>();
 		colorMap.put("Red", "#FF0000");
 		colorMap.put("Green", "#00FF00");
 		colorMap.put("Blue", "#0000FF");
-		colorMap.put("Yellow", "#FFFF00");
+		colorMap.put("Brown", "#AAAAAA");
 		colorMap.put("Purple", "#FF00FF");
-		colorMap.put("Cyan", "#00FFFF");
+		colorMap.put("Orange", "#AAAAAA");
+		colorMap.put("White", "#FFFFFF");
+		colorMap.put("Pink", "#AAAAAA");
 		return colorMap;
 	}
 	/**

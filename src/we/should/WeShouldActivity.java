@@ -713,6 +713,14 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			return getResources().getDrawable(R.drawable.purple);
 		case Red:
 			return getResources().getDrawable(R.drawable.red);
+		case White:
+			return getResources().getDrawable(R.drawable.white);
+		case Orange:
+			return getResources().getDrawable(R.drawable.orange);
+		case Pink:
+			return getResources().getDrawable(R.drawable.pink);
+		case Brown:
+			return getResources().getDrawable(R.drawable.brown);
 		default:
 			return getResources().getDrawable(R.drawable.red);
 		}
