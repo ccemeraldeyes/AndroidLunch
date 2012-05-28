@@ -107,14 +107,9 @@ public class Splash extends Activity {
 
 	protected void afterLogin(){
 		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
-//		Intent service = new Intent(this, GetReferralsService.class);
-//		service.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
-//		startService(service);
-		
-		Intent backupservice = new Intent(this, BackupService.class);
-		backupservice.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
-		startService(backupservice);	
-		Log.v("SPLASH", "started backup service");
+		Intent service = new Intent(this, GetReferralsService.class);
+		service.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
+		startService(service);
 		
 		Intent openStartingPoint = new Intent("we.should.MAIN");
 		startActivity(openStartingPoint);

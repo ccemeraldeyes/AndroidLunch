@@ -108,6 +108,11 @@ public class RestoreService extends IntentService{
 		db.Restore(dbstring);
 		db.close();
 		//do db restore from string
+		
+		Intent weshouldactivity = new Intent();
+		weshouldactivity.setClass(getApplicationContext(), WeShouldActivity.class);
+		weshouldactivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		this.startActivity(weshouldactivity);
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import we.should.communication.BackupService;
 import we.should.communication.RestoreService;
 import we.should.list.Category;
 import we.should.list.Field;
@@ -318,9 +319,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
 		switch (item.getItemId()) {
 		case R.id.restore:
-			SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
+
 			Intent service = new Intent(this, RestoreService.class);
 			service.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
 			startService(service);
@@ -329,6 +331,12 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			Intent intent = new Intent(this, HelpScreen.class);
 			intent.putExtra(HELP_TEXT, R.string.help_home);
 			startActivity(intent);
+			break;
+		case R.id.backup:
+			Intent backupservice = new Intent(this, BackupService.class);
+			backupservice.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
+			startService(backupservice);	
+			Log.v("BACKUP", "started backup service");
 			break;
 		case R.id.add_cat:
 			intent = new Intent(this, NewCategory.class);

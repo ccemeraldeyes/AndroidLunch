@@ -13,4 +13,6 @@
     </item>
     <item android:id="@+id/restore"
           android:title="Restore" />
+        <item android:id="@+id/backup"
+          android:title="Backup" />
 </menu>
