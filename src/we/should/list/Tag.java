@@ -47,8 +47,8 @@ public class Tag implements Serializable {
 	protected Tag(JSONObject o){
 		try {
 			this.id = o.getInt(idKey);
-			this.color = Color.get(o.getString(colorKey));
 			this.tag = o.getString(tagKey);
+			this.color = Color.get(o.getString(colorKey));
 		} catch (JSONException e) {
 			throw new IllegalArgumentException("JSON object parameter improperlly formed!");
 		}
@@ -117,25 +117,6 @@ public class Tag implements Serializable {
 	
 	
 	//TODO: hex values not used
-	/**
-	 * Returns a map that maps each possible color's human readable name to its
-	 * value.
-	 * 
-	 * @return see above
-	 */
-	public static Map<String, String> getAllTagColors() {
-		
-		Map<String, String> colorMap = new HashMap<String, String>();
-		colorMap.put("Red", "#FF0000");
-		colorMap.put("Green", "#00FF00");
-		colorMap.put("Blue", "#0000FF");
-		colorMap.put("Brown", "#AAAAAA");
-		colorMap.put("Purple", "#FF00FF");
-		colorMap.put("Orange", "#AAAAAA");
-		colorMap.put("White", "#FFFFFF");
-		colorMap.put("Pink", "#AAAAAA");
-		return colorMap;
-	}
 	/**
 	 * returns true if the names of this and o are the same.
 	 */

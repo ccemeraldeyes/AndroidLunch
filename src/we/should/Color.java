@@ -1,5 +1,8 @@
 package we.should;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.util.Log;
 
 public enum Color{
@@ -30,5 +33,16 @@ public enum Color{
 			Log.i("GetColor", "Returning Default");
 			return DEFAULT;
 		}
+	}
+	/**
+	 * Returns a the list of names of the declared colors as seen at
+	 * the top of this file.
+	 * @return a list of color names
+	 */
+	public static List<String> getColors(){
+		Color[] colors = Color.values();
+		List<String> out = new ArrayList<String>();
+		for(Color c : colors) out.add(c.name());
+		return out;
 	}
 }
