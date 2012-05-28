@@ -142,6 +142,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			public void onClick(View arg0) {
 				GeoPoint loc = getDeviceLocation();
 				if(loc != null) {
+		        	CustomPinPoint yellowPin = getYellowPin();
+		        	if(yellowPin != null) {
+		        		replacePin(yellowPin, false);
+		        	}
 					zoomLocation(loc);
 				}
 			}
@@ -531,13 +535,17 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
 		        			GeoPoint myLoc = getDeviceLocation();
 		        			//Loop through the pins, remove the normal pin and add yellow pin.
-		        			//and replace any yellow pin back to normal pin.      			
-		        			if(myLoc == null) {
+		        			//and replace any yellow pin back to normal pin.
+		        			//get the current existing pin, if it is already on there.
+		        			CustomPinPoint pin = findPin(placeLocation);
+		        			if(myLoc == null || (pin != null && pin.isSelected())) {
 		        				zoomLocation(placeLocation);
 		        			} else {
 		        				zoomToTwoPoint(placeLocation, myLoc);
-		        			}	        			
-		        			updateYellowPin(placeLocation);
+		        			}
+		        			if(pin == null || !pin.isSelected()) {
+		        				updateYellowPin(placeLocation);
+		        			}
 		        		    break;
 			    		}
 				    }
@@ -547,6 +555,36 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		}
 	}
 	
+	/**
+	 * Looking through the map and see if there is any customPinPoint at that placeLocation.
+	 * 
+	 * @param placeLocation - the location of the current item address
+	 * @return - a customPinPoint if they find a pin on that location on the map.
+	 * 		   - null if not found.
+	 */
+	private CustomPinPoint findPin(GeoPoint placeLocation) {
+		for(CustomPinPoint customPin : lstPinPoints) {
+			if(customPin.contains(placeLocation)) {
+				return customPin;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Search for a yellowPin on the map.
+	 * 
+	 * @return a customPinPoint if there is a yellow pin on the map
+	 * 			null when not found.
+	 */
+	private CustomPinPoint getYellowPin() {
+		for(CustomPinPoint customPin : lstPinPoints) {
+			if(customPin.isSelected()) {
+				return customPin;
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * updating the yellowPin when item is clicked.
@@ -568,20 +606,28 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		}
 		
 		if(replaceToColorPin != null) {
-			overlayList.remove(replaceToColorPin);
-			lstPinPoints.remove(replaceToColorPin);
-			addPin(replaceToColorPin.getPoint(), 
-					replaceToColorPin.getColor(), 
-					replaceToColorPin.getItem(), false);
+			replacePin(replaceToColorPin, false);
 		}
 		
 		if(replaceToYellowPin != null) {
-			overlayList.remove(replaceToYellowPin);
-			lstPinPoints.remove(replaceToYellowPin);
-			addPin(replaceToYellowPin.getPoint(),
-					replaceToYellowPin.getColor(),
-					replaceToYellowPin.getItem(), true);
+			replacePin(replaceToYellowPin, true);
 		}
+	}
+	
+	/**
+	 * This method replace the Pin with a new Pin.
+	 * The new pin is exactly the same as the old one, pin maybe 
+	 * selected (yellow pin) or not selected (the color associate with the pin).
+	 * 
+	 * @param Pin - the pin to be replace 
+	 * @param isSelected - whether or not it is selected - yellow pin
+	 */
+	private void replacePin(CustomPinPoint replaceToColorPin, boolean isSelected) {
+		overlayList.remove(replaceToColorPin);
+		lstPinPoints.remove(replaceToColorPin);
+		addPin(replaceToColorPin.getPoint(), 
+				replaceToColorPin.getColor(), 
+				replaceToColorPin.getItem(), isSelected);
 	}
 	
 	/**
@@ -622,12 +668,16 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		    				int locY = (int) (addr.getLongitude() * 1E6);
 		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
 		        			GeoPoint myLoc = getDeviceLocation();
-		        			if(myLoc == null) {
+		        			CustomPinPoint pin = findPin(placeLocation);
+
+		        			if(myLoc == null || (pin != null && pin.isSelected())) {
 		        				zoomLocation(placeLocation);
 		        			} else {
 		        				zoomToTwoPoint(placeLocation, myLoc);
 		        			}
-		        			updateYellowPin(placeLocation);
+		        			if(pin == null || !pin.isSelected()) {
+		        				updateYellowPin(placeLocation);
+		        			}
 		        		    break;
 			    		}
 				    }
