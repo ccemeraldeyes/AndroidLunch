@@ -115,6 +115,8 @@ public class Tag implements Serializable {
 	     return builder.toString();
 	}
 	
+	
+	//TODO: hex values not used
 	/**
 	 * returns true if the names of this and o are the same.
 	 */
