@@ -69,6 +69,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private final Category RESTAURANTS = new GenericCategory(Category.Special.Restaurants.toString(), Field.getDefaultFields(), this);
 	private final Category MOVIES = new Movies(this);
 	private final Category REFERRALS = new Referrals(this);
+	private static final String ALL_ITEMS_TAG = "";
+	private static final String ALL_ITEMS_NAME = "All items";
 
 	/** for Map **/
 	public static double DISTANCETOMILES =  0.000621371192;
@@ -124,6 +126,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         this.zoomButton = (ImageButton) findViewById(R.id.my_location_button);
         mSortType = SortType.Category;
+        mTabHost.setup();
         updateTabs();        
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
 			public void onTabChanged(String tabId) {
@@ -160,15 +163,22 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	
     	Color color = Color.Red;
 		
-    	switch (mSortType) {
-    	case Category:
-    		items = mCategories.get(name).getItems();
-    		color = mCategories.get(name).getColor();
-    		break;
-    	case Tag:
-    		items = new ArrayList<Item>(Item.getItemsOfTag(mTags.get(name), this));
-    		color = mTags.get(name).getColor();
-    		break;
+    	if (name.equals(ALL_ITEMS_TAG)) {
+    		items = new ArrayList<Item>();
+    		for (Category cat : Category.getCategories(this)) {
+    			items.addAll(cat.getItems());
+    		}
+    	} else {
+	    	switch (mSortType) {
+	    	case Category:
+	    		items = mCategories.get(name).getItems();
+	    		color = mCategories.get(name).getColor();
+	    		break;
+	    	case Tag:
+	    		items = new ArrayList<Item>(Item.getItemsOfTag(mTags.get(name), this));
+	    		color = mTags.get(name).getColor();
+	    		break;
+	    	}
     	}
     	mAdapter = new ItemAdapter(WeShouldActivity.this, items);
     	mAdapter.notifyDataSetChanged();
@@ -210,12 +220,16 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
      */
     private void updateTabs() {
     	String tabId = mTabHost.getCurrentTabTag();
+
+		mTabHost.clearAllTabs();
+        TabHost.TabSpec spec = mTabHost.newTabSpec(ALL_ITEMS_TAG)
+        		.setIndicator("  " + ALL_ITEMS_NAME + "  ");
     	switch (mSortType) {
     	case Category:
-    		updateTabsCategory();
+    		updateTabsCategory(spec);
     		break;
     	case Tag:
-    		updateTabsTag();
+    		updateTabsTag(spec);
     		break;
     	}
     	mTabHost.setCurrentTabByTag(tabId);
@@ -224,7 +238,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/**
      * Updates the tabs on startup or when categories change.
      */
-	private void updateTabsCategory() {
+	private void updateTabsCategory(TabHost.TabSpec spec) {
 		mCategories = new HashMap<String, Category>();
 		Set<Category> categories = Category.getCategories(this);
 		for (Category cat : categories) {
@@ -239,11 +253,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			RESTAURANTS.save();
 			REFERRALS.save();
 		}
-
-        mTabHost.setup();
-		mTabHost.clearAllTabs();
-		TabHost.TabSpec spec;
+		
         CategoryPopulator tp = new CategoryPopulator();
+        spec = spec.setContent(tp);
+        mTabHost.addTab(spec);
         for (String name : mCategories.keySet()) {
 	        spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ")
 	        		.setContent(tp);
@@ -254,16 +267,16 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/**
 	 * Updates the tabs when tags change.
 	 */
-	private void updateTabsTag() {
+	private void updateTabsTag(TabHost.TabSpec spec) {
 		mTags = new HashMap<String, Tag>();
 		List<Tag> tags = Tag.getTags(this);
 		for (Tag tag : tags) {
 			mTags.put(tag.toString(), tag);
 		}
-		mTabHost.setup();
-		mTabHost.clearAllTabs();
-		TabHost.TabSpec spec;
+
 		TagPopulator tp = new TagPopulator();
+        spec = spec.setContent(tp);
+        mTabHost.addTab(spec);
 		for (String name : mTags.keySet()) {
 			spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ")
 					.setContent(tp);
@@ -444,14 +457,16 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 
 		public View createTabContent(String tag) {
 			ListView lv = new ListView(getApplicationContext());
+			final List<Item> itemsList = new ArrayList<Item>();
 			
-			String cleanedTag = tag.trim(); // because we use spaces for formatting
-			Category cat = mCategories.get(cleanedTag);
+			Category cat = mCategories.get(tag);
 			if (cat == null) {
-				throw new IllegalStateException("Category not found!?");
+				for (Category c : Category.getCategories(WeShouldActivity.this)) {
+					itemsList.addAll(c.getItems());
+				}
+			} else {
+				itemsList.addAll(cat.getItems());
 			}
-			
-			final List<Item> itemsList = cat.getItems();
 			mAdapter = new ItemAdapter(WeShouldActivity.this, itemsList);
 			lv.setAdapter(mAdapter);
 			registerForContextMenu(lv);
@@ -533,13 +548,15 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			Context ctx = getApplicationContext();
 			ListView lv = new ListView(ctx);
 			
-			String cleanedTag = name.trim(); // because we use spaces for formatting
-			Tag tag = Tag.get(ctx, cleanedTag);
+			Tag tag = Tag.get(ctx, name);
+			final List<Item> itemsList = new ArrayList<Item>();
 			if (tag == null) {
-				throw new IllegalStateException("Tag not found!?");
+				for (Category c : Category.getCategories(WeShouldActivity.this)) {
+					itemsList.addAll(c.getItems());
+				}
+			} else {
+				itemsList.addAll(Item.getItemsOfTag(tag, ctx));
 			}
-			
-			final List<Item> itemsList = new ArrayList<Item>(Item.getItemsOfTag(tag, ctx));
 			mAdapter = new ItemAdapter(WeShouldActivity.this, itemsList);
 			lv.setAdapter(mAdapter);
 			registerForContextMenu(lv);
@@ -699,18 +716,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		default:
 			return getResources().getDrawable(R.drawable.red);
 		}
-			
-//		if(color.equals("FFFF00")) {//TODO: suppose to be hex , just for the special case of highlighting.
-//			return getResources().getDrawable(R.drawable.yellow);
-//		} else if(color.equals("00FF00")) {
-//			return getResources().getDrawable(R.drawable.green);
-//		} else if(color.equals("0000FF")) {
-//			return getResources().getDrawable(R.drawable.blue);
-//		} else if(color.equals("FF00FF")) {
-//			return getResources().getDrawable(R.drawable.purple);
-//		} else {
-//			return getResources().getDrawable(R.drawable.red);
-//		}
 	}
 	
 }
