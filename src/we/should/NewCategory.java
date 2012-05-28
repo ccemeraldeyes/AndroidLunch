@@ -54,7 +54,7 @@ public class NewCategory extends Activity {
         mColor = (Spinner) findViewById(R.id.color);
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
 				android.R.layout.simple_spinner_item,
-				new ArrayList<String>(Tag.getAllTagColors().keySet()));
+				new ArrayList<String>(Color.getColors()));
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mColor.setAdapter(adapter);
         
