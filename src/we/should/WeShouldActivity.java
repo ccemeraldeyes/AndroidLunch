@@ -234,6 +234,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	for(CustomPinPoint pin : lstPinPoints) {
     		overlayList.remove(pin);
     	}
+    	lstPinPoints.clear();
+    	
     	if(color == null || items == null) {
     		throw new RuntimeException("fail to get item from category or tags");
     	}
