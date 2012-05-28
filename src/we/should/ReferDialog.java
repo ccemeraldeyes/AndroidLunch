@@ -119,9 +119,9 @@ public class ReferDialog extends Activity {
 		    System.out.println(response.toString());
 
 		} catch (ClientProtocolException e) {
-		    // TODO Auto-generated catch block
+			Log.e("ReferDialog",e.getMessage());
 		} catch (IOException e) {
-		    // TODO Auto-generated catch block
+			Log.e("ReferDialog",e.getMessage());
 		}
 	}
 	

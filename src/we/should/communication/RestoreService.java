@@ -33,7 +33,6 @@ public class RestoreService extends IntentService{
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		// TODO Auto-generated method stub
 		Bundle extras = intent.getExtras();
 		String username = extras.getString(WeShouldActivity.ACCOUNT_NAME);
 		
@@ -86,13 +85,10 @@ public class RestoreService extends IntentService{
 			   		    
 	
 			} catch (ClientProtocolException e) {
-			    // TODO Auto-generated catch block
-				Log.v("RESTORE SERVICE", e.getMessage());
+				Log.e("RESTORE SERVICE", e.getMessage());
 			} catch (IOException e) {
-			    // TODO Auto-generated catch block
-				Log.v("RESTORE SERVICE", e.getMessage());
+				Log.e("RESTORE SERVICE", e.getMessage());
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
 			index++;

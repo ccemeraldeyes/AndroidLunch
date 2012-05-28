@@ -10,9 +10,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -80,21 +78,17 @@ public class GetReferralsService extends IntentService {
 			resp = new JSONObject(new String(buf));
 
 			data = resp.getJSONArray("referrals"); 
-			
 		    
 		    Log.v("GETREFERRALSSERVICE", "Checking for new referrals");
 		    
 
 		} catch (ClientProtocolException e) {
-		    // TODO Auto-generated catch block
-			Log.v("GETREFERRALSSERVICE", e.getMessage());
+			Log.e("GETREFERRALSSERVICE", e.getMessage());
 		} catch (IOException e) {
-		    // TODO Auto-generated catch block
-			Log.v("GETREFERRALSSERVICE", e.getMessage());
+			Log.e("GETREFERRALSSERVICE", e.getMessage());
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-			Log.v("GET REFFERAL SERVICE", "JSON EXCEPTION "+e.getMessage());
+			Log.e("GET REFFERAL SERVICE", "JSON EXCEPTION "+e.getMessage());
 		}
 
 		

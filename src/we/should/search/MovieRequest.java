@@ -1,13 +1,10 @@
 package we.should.search;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -20,6 +17,7 @@ public class MovieRequest extends Search {
 	private IMDBRecord cache = null;
 	
 	public MovieRequest() {}
+	
 	
 	public List<Place> search(String query){
 		List<Place> out = new ArrayList<Place>();
@@ -44,13 +42,17 @@ public class MovieRequest extends Search {
 			Place m = new IMDBRecord(response);
 			out.add(m);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return out;
 		
-		
 	}
+	
+	/**
+	 * 
+	 * @param reference
+	 * @return
+	 */
 	public DetailPlace searchDetail(String reference) {
 		List<Place> out = search(reference);
 		DetailPlace ret = null;
