@@ -95,10 +95,15 @@ public class NewCategory extends Activity {
 				saveable = false;
 				Toast.makeText(this, "Duplicate name: " + pf.name, duration).show();
 			}
+			if (pf.name.equals("")) {
+				saveable = false;
+				Toast.makeText(this, "All fields must be named.", duration).show();
+			}
 			if (Field.getReservedNames().contains(pf.name.toLowerCase())) {
 				saveable = false;
 				Toast.makeText(this, "Field name " + pf.name + " is reserved.", duration).show();
 			}
+			names.add(pf.name);
 		}
 		
 		if (Category.getCategory(mName.getText().toString(), this) != null) {

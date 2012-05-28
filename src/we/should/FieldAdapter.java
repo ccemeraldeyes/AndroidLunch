@@ -111,7 +111,7 @@ public class FieldAdapter extends ArrayAdapter<FieldAdapter.ProtoField> {
 	}
 	
 	public static class ProtoField {
-		public String name;
+		public String name = "";
 		public int type;
 	}
 
