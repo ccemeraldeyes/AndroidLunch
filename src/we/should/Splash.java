@@ -14,6 +14,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Patterns;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -30,9 +33,8 @@ public class Splash extends Activity {
 	/** The log in button. **/
 	private Button mLogin;
 	
-
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.splash);
 		
@@ -49,6 +51,25 @@ public class Splash extends Activity {
 			}
 			
 		});
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.splash_menu, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.help:
+			Intent intent = new Intent(this, HelpScreen.class);
+			intent.putExtra(WeShouldActivity.HELP_TEXT, R.string.help_splash);
+			startActivity(intent);
+			break;
+		}
+		return true;
 	}
 	
 	/**
@@ -96,12 +117,6 @@ public class Splash extends Activity {
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mAccountsSpinner.setAdapter(adapter);
 	}
-	
-	@Override
-	protected void onPause() {
-		super.onPause();
-		finish();
-	}
 
 	protected void afterLogin(){
 		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
@@ -111,6 +126,7 @@ public class Splash extends Activity {
 		
 		Intent openStartingPoint = new Intent("we.should.MAIN");
 		startActivity(openStartingPoint);
+		finish();
 	}
 
 	

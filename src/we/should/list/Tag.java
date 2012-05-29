@@ -3,10 +3,8 @@ package we.should.list;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONException;
@@ -128,8 +126,8 @@ public class Tag implements Serializable {
 			int id = tags.getInt(0);
 			out.add(new Tag(id, tag, color, ctx));
 		}
-		tags.close(); //TS
-		db.close(); //TS
+		tags.close();
+		db.close();
 		return out;	
 	}
 	
@@ -148,6 +146,7 @@ public class Tag implements Serializable {
 	     }
 	     return builder.toString();
 	}
+	
 	
 	/**
 	 * returns true if the names of this and o are the same.

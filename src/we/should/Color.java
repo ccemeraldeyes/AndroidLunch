@@ -6,11 +6,14 @@ import java.util.List;
 import android.util.Log;
 
 public enum Color{
-	Yellow(R.drawable.yellow),
+	//Yellow(R.drawable.yellow),
 	Green(R.drawable.green),
 	Blue(R.drawable.blue),
 	Purple(R.drawable.purple),
-	Red(R.drawable.red);
+	Red(R.drawable.red),
+	White(R.drawable.white),
+	Pink(R.drawable.pink),
+	Brown(R.drawable.brown);
 	
 	private int mDrawable;
 	

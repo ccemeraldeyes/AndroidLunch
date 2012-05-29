@@ -104,6 +104,7 @@ public class GenericItem extends Item {
 	public String getComment() {
 		return values.get(Field.COMMENT); 
 	}
+
 	@Override
 	public String get(Field key) throws IllegalArgumentException{
 		if(key.equals(Field.TAGS)){
@@ -154,6 +155,24 @@ public class GenericItem extends Item {
 		}
 		checkRep();
 	}
+
+	@Override
+	public Set<Tag> getTags(){
+		String tags = this.values.get(Field.TAGS);
+		if(tags == null) tags = "";
+		Set<Tag> result = new HashSet<Tag>();
+		try {
+			JSONArray out = new JSONArray(tags);
+			for(int i = 0; i < out.length(); i++){
+				JSONObject tagString = out.getJSONObject(i);
+				result.add(new Tag(tagString));
+			}
+		} catch (JSONException e) {
+			Log.e("GenericItem.getTags", "Tags string improperly formatted, returning empty set!");
+		}
+		return result;
+	}
+
 	private JSONObject addressToJSON(Address a, String addressString){
 		JSONObject out = new JSONObject();
 		try{

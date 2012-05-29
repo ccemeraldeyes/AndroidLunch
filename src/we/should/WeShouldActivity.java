@@ -44,9 +44,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
@@ -78,7 +78,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/** for Map **/
 	public static double DISTANCETOMILES =  0.000621371192;
 	private static final List<CustomPinPoint> lstPinPoints = new ArrayList<CustomPinPoint>();
-	
+	private static final int highlightPin = R.drawable.yellow;
 	/** The TabHost that cycles between tabs. **/
 	private TabHost mTabHost;
 	
@@ -134,7 +134,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
 			public void onTabChanged(String tabId) {
 				updateView(tabId.trim());
-				setupDelete(tabId.trim());
+				setupTab(tabId.trim());
 			}
 		});
         
@@ -142,6 +142,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			public void onClick(View arg0) {
 				GeoPoint loc = getDeviceLocation();
 				if(loc != null) {
+		        	CustomPinPoint yellowPin = getYellowPin();
+		        	if(yellowPin != null) {
+		        		replacePin(yellowPin, false);
+		        	}
 					zoomLocation(loc);
 				}
 			}
@@ -158,14 +162,16 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     }
     
     /**
-     * Set up the delete button, if necessary.
+     * Set up the delete button and tab color, if necessary.
      * 
      * @param tabid the selected category or tag
      */
-    private void setupDelete(String tabid) {
+    private void setupTab(String tabid) {
     	Button delete = (Button) findViewById(R.id.delete);
+    	
     	if (mSortType.equals(SortType.Category)) {
     		final Category cat = mCategories.get(tabid);
+    		
     		delete.setVisibility((cat == null || cat.getItems().size() > 0) ?
     				View.GONE : View.VISIBLE);
     		delete.setOnClickListener(new View.OnClickListener() {
@@ -176,7 +182,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 				}
 			});
     	} else {
-    		final Tag tag = mTags.get(tabid);
+    		final Tag tag = mTags.get(tabid);    		
     		delete.setVisibility((tag == null)
     				|| Item.getItemsOfTag(tag, this).size() > 0 ? View.GONE
     						: View.VISIBLE);
@@ -272,6 +278,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		updateTabsTag(spec);
     		break;
     	}
+    	mTabHost.getTabWidget().setStripEnabled(true);
     	mTabHost.setCurrentTabByTag(tabId);
     }
 
@@ -529,13 +536,17 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
 		        			GeoPoint myLoc = getDeviceLocation();
 		        			//Loop through the pins, remove the normal pin and add yellow pin.
-		        			//and replace any yellow pin back to normal pin.      			
-		        			if(myLoc == null) {
+		        			//and replace any yellow pin back to normal pin.
+		        			//get the current existing pin, if it is already on there.
+		        			CustomPinPoint pin = findPin(placeLocation);
+		        			if(myLoc == null || (pin != null && pin.isSelected())) {
 		        				zoomLocation(placeLocation);
 		        			} else {
 		        				zoomToTwoPoint(placeLocation, myLoc);
-		        			}	        			
-		        			updateYellowPin(placeLocation);
+		        			}
+		        			if(pin == null || !pin.isSelected()) {
+		        				updateYellowPin(placeLocation);
+		        			}
 		        		    break;
 			    		}
 				    }
@@ -545,40 +556,84 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		}
 	}
 	
+	/**
+	 * Looking through the map and see if there is any customPinPoint at that placeLocation.
+	 * 
+	 * @param placeLocation - the location of the current item address
+	 * @return - a customPinPoint if they find a pin on that location on the map.
+	 * 		   - null if not found.
+	 */
+	private CustomPinPoint findPin(GeoPoint placeLocation) {
+		if(placeLocation != null) {
+			for(CustomPinPoint customPin : lstPinPoints) {
+				if(customPin.contains(placeLocation)) {
+					return customPin;
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Search for a yellowPin on the map.
+	 * 
+	 * @return a customPinPoint if there is a yellow pin on the map
+	 * 			null when not found.
+	 */
+	private CustomPinPoint getYellowPin() {
+		for(CustomPinPoint customPin : lstPinPoints) {
+			if(customPin.isSelected()) {
+				return customPin;
+			}
+		}
+		return null;
+	}
 	
 	/**
 	 * updating the yellowPin when item is clicked.
 	 * @param placeLocation
 	 */
 	private void updateYellowPin(GeoPoint placeLocation) {
-		CustomPinPoint replaceToColorPin = null;
-		CustomPinPoint replaceToYellowPin = null;
-		for(CustomPinPoint customPin : lstPinPoints) {
-			if(customPin.contains(placeLocation)) {
-				replaceToYellowPin = customPin;
+		if(placeLocation != null) {
+			CustomPinPoint replaceToColorPin = null;
+			CustomPinPoint replaceToYellowPin = null;
+			for(CustomPinPoint customPin : lstPinPoints) {
+				if(customPin.contains(placeLocation)) {
+					replaceToYellowPin = customPin;
+				}
+				if(customPin.isSelected()) {
+					replaceToColorPin = customPin;
+				}
+				if(replaceToColorPin != null && replaceToYellowPin != null) {
+					break;
+				}
 			}
-			if(customPin.isSelected()) {
-				replaceToColorPin = customPin;
+			
+			if(replaceToColorPin != null) {
+				replacePin(replaceToColorPin, false);
 			}
-			if(replaceToColorPin != null && replaceToYellowPin != null) {
-				break;
+			
+			if(replaceToYellowPin != null) {
+				replacePin(replaceToYellowPin, true);
 			}
 		}
-		
-		if(replaceToColorPin != null) {
-			overlayList.remove(replaceToColorPin);
-			lstPinPoints.remove(replaceToColorPin);
-			addPin(replaceToColorPin.getPoint(), 
-					replaceToColorPin.getColor(), 
-					replaceToColorPin.getItem(), false);
-		}
-		
-		if(replaceToYellowPin != null) {
-			overlayList.remove(replaceToYellowPin);
-			lstPinPoints.remove(replaceToYellowPin);
-			addPin(replaceToYellowPin.getPoint(),
-					replaceToYellowPin.getColor(),
-					replaceToYellowPin.getItem(), true);
+	}
+	
+	/**
+	 * This method replace the Pin with a new Pin.
+	 * The new pin is exactly the same as the old one, pin maybe 
+	 * selected (yellow pin) or not selected (the color associate with the pin).
+	 * 
+	 * @param pin - the pin to be replace 
+	 * @param isSelected - whether or not it is selected - yellow pin
+	 */
+	private void replacePin(CustomPinPoint pin, boolean isSelected) {
+		if(pin != null) {
+			overlayList.remove(pin);
+			lstPinPoints.remove(pin);
+			addPin(pin.getPoint(), 
+					pin.getColor(), 
+					pin.getItem(), isSelected);
 		}
 	}
 	
@@ -620,12 +675,16 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		    				int locY = (int) (addr.getLongitude() * 1E6);
 		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
 		        			GeoPoint myLoc = getDeviceLocation();
-		        			if(myLoc == null) {
+		        			CustomPinPoint pin = findPin(placeLocation);
+
+		        			if(myLoc == null || (pin != null && pin.isSelected())) {
 		        				zoomLocation(placeLocation);
 		        			} else {
 		        				zoomToTwoPoint(placeLocation, myLoc);
 		        			}
-		        			updateYellowPin(placeLocation);
+		        			if(pin == null || !pin.isSelected()) {
+		        				updateYellowPin(placeLocation);
+		        			}
 		        		    break;
 			    		}
 				    }
@@ -646,6 +705,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @throws IllegalArgumentException on null input.
 	 */
 	private void addPin(GeoPoint point, Color color, Item item, boolean isSelected) {
+		
 		if(point == null || color == null || item == null) {
 			throw new IllegalArgumentException("input to addPin is null");
 		}
@@ -653,7 +713,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		double distance = distanceBetween(getDeviceLocation(), point);
 		Drawable drawable;
 		if(isSelected) {
-			drawable = getDrawable(Color.Yellow);
+			drawable = getResources().getDrawable(highlightPin);
 		} else {
 			drawable = getDrawable(color);
 		}

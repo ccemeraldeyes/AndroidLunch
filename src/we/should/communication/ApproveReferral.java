@@ -18,9 +18,6 @@ import org.json.JSONObject;
 
 import we.should.R;
 import we.should.WeShouldActivity;
-import we.should.database.WSdb;
-import we.should.list.Category;
-import we.should.list.Item;
 import we.should.list.ReferralItem;
 import we.should.list.Referrals;
 import android.app.Activity;
@@ -34,6 +31,15 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+
+/**
+ * Activity that displays unread referrals to the user for approval or rejection
+ * It is assumed that if a referral is viewed but not approved, it is rejected-- i.e. that if a user
+ * presses "save", any referrals that are unchecked are rejected
+ * 
+ * @author colleen
+ *
+ */
 public class ApproveReferral extends Activity {
 	
 	/** The button to save approved referrals. **/
@@ -42,10 +48,16 @@ public class ApproveReferral extends Activity {
 	/** The adapter that handles our referrals. **/
 	private ReferralAdapter mAdapter;
 	
+	/**
+	 * Sets up the approve view for referrals and saves all approved referrals to the database with category
+	 * "referral"
+	 * 
+	 * @param savedInstanceState
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		
-		final Context c = this.getApplicationContext(); //I don't know if this is the right way to do this!
+		final Context c = this.getApplicationContext(); 
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.approve_referral);
@@ -54,7 +66,7 @@ public class ApproveReferral extends Activity {
 		final List<Referral> list = new ArrayList<Referral>();
 		Intent intent = this.getIntent();
 		Bundle bundle = intent.getExtras();
-		String dataAsString = bundle.getString("data");
+		String dataAsString = bundle.getString("we.should.communication.data");
 		
 		Log.v("DATA EXTRA", dataAsString);
 		
@@ -64,7 +76,6 @@ public class ApproveReferral extends Activity {
 		try {
 			data = new JSONArray(dataAsString);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -78,7 +89,6 @@ public class ApproveReferral extends Activity {
 				
 				list.add(new Referral(o.getString("item_name"), o.getString("referred_by"), false, d));
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				Log.v("REFERRAL OBJECT DATA", e.getMessage());
 			}
@@ -95,8 +105,7 @@ public class ApproveReferral extends Activity {
 				
 				List<Referral> approvedList = mAdapter.getApprovedList();
 				
-				//TODO: send approved/rejected to remote db and delete
-				
+
 				Referrals refs = Referrals.getReferralCategory(c);
 				
 				for(Referral r: approvedList){
@@ -108,7 +117,6 @@ public class ApproveReferral extends Activity {
 						Toast.makeText(c, e.getMessage(), Toast.LENGTH_SHORT).show();
 						return;
 					}
-					
 
 				}
 				
@@ -120,6 +128,11 @@ public class ApproveReferral extends Activity {
 		});
 	}
 	
+	/**
+	 * Communicates with the remote database to clear read referrals
+	 * 
+	 * @param referrals the list of Referral objects to be deleted from the remote database
+	 */
 	public void deleteRefs(List<Referral> referrals){
 		
 		Log.v("DELETE REFERRALS", "deleting");
@@ -137,13 +150,11 @@ public class ApproveReferral extends Activity {
 	    	try {
 				o.put("name", r.getName());
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	    	try {
 				o.put("referred_by", r.getSender());
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	    	listArray.put(o);
@@ -158,10 +169,8 @@ public class ApproveReferral extends Activity {
 		try {
 			HttpResponse response = httpclient.execute(httpget);
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
