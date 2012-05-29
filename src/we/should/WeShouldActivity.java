@@ -177,8 +177,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		delete.setOnClickListener(new View.OnClickListener() {
 				
 				public void onClick(View v) {
-					// This is where we would be deleting the category if we had
-					// a way to
+					if (cat != null) {
+						cat.delete();
+					}
 				}
 			});
     	} else {
@@ -189,8 +190,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		delete.setOnClickListener(new View.OnClickListener() {
 				
 				public void onClick(View v) {
-					// This is where we would be deleting the tag if we had
-					// a way to
+					if (tag != null) {
+						tag.delete();
+					}
 				}
 			});
     	}
