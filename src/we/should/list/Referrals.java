@@ -17,7 +17,7 @@ public class Referrals extends GenericCategory {
 	
 	@Override
 	public Item newItem(){
-		ReferralItem out = newItem(new JSONObject());
+		ReferralItem out = this.newItem(new JSONObject());
 		return out;
 	}
 	public static Referrals getReferralCategory(Context ctx){
