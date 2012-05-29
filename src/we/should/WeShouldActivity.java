@@ -234,7 +234,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
      * This method remove all the pin in current map 
      * and create a list of pins base on the item it is given.
      * 
-     * @param color - a color string, 6 character long represent r, g, b
+     * @param color - Enum constant
      * @param items - the items that needed to create the pin for.
      */
     private void updatePins(PinColor color, List<Item> items){
@@ -247,18 +247,40 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	if(color == null || items == null) {
     		throw new RuntimeException("fail to get item from category or tags");
     	}
-    	
+    	int minLat = Integer.MAX_VALUE;
+		int minLong = minLat;
+		int maxLat = Integer.MIN_VALUE;
+		int maxLong = maxLat;
+		boolean zoom = false;
     	for (Item item : items) {
     		Set<Address> addrs = item.getAddresses();
     		for(Address addr : addrs) {
 				if(addr.hasLatitude() && addr.hasLongitude()) {
+					zoom = true;
     				int locX = (int) (addr.getLatitude() * 1E6);
     				int locY = (int) (addr.getLongitude() * 1E6);
+    				/**Finds the min and max lat and long**/
+    				minLat = Math.min(minLat, locX);
+    				minLong = Math.min(minLong, locY);
+    				maxLat = Math.max(maxLat, locX);
+    				maxLong = Math.max(maxLong, locY);
         			GeoPoint placeLocation = new GeoPoint(locX, locY);
         			addPin(placeLocation, color, item, false);
 				}
     		}
     	}
+    	if (zoom) {
+			/**Zoom to contain all of the pins and current location**/
+			GeoPoint p = getDeviceLocation();
+			int locX = p.getLatitudeE6();
+			int locY = p.getLongitudeE6();
+			minLat = Math.min(minLat, locX);
+			minLong = Math.min(minLong, locY);
+			maxLat = Math.max(maxLat, locX);
+			maxLong = Math.max(maxLong, locY);
+			zoomToTwoPoint(new GeoPoint(minLat, minLong), new GeoPoint(maxLat,
+					maxLong));
+		}
     	
     }
     
@@ -528,6 +550,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			
 			// click to view item & current location in map
 			lv.setOnItemClickListener(new OnItemClickListener() {
+				boolean closeZoom = false;
 				public void onItemClick(AdapterView<?> parent,
 						View view, int position, long id) {				
 			    	Item item = itemsList.get(position);
@@ -542,9 +565,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		        			//and replace any yellow pin back to normal pin.
 		        			//get the current existing pin, if it is already on there.
 		        			CustomPinPoint pin = findPin(placeLocation);
-		        			if(myLoc == null || (pin != null && pin.isSelected())) {
+		        			if(myLoc == null || ((pin != null && pin.isSelected()) && !closeZoom)) {
+		        				closeZoom = true;
 		        				zoomLocation(placeLocation);
 		        			} else {
+		        				closeZoom = false;
 		        				zoomToTwoPoint(placeLocation, myLoc);
 		        			}
 		        			if(pin == null || !pin.isSelected()) {
