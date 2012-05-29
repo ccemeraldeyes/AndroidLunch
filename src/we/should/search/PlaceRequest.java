@@ -46,7 +46,7 @@ public class PlaceRequest extends Search{
 	 */
 	//Possible feature:
 	//Note that Location can be get by getting the Device Location, on when user click on the map, we can get the location.
-	public List<Place> search(String searchname) throws Exception{
+	public List<SearchResult> search(String searchname){
 		if(l == null || searchname == null) {
 			throw new IllegalArgumentException("input is null");
 		}
@@ -59,11 +59,11 @@ public class PlaceRequest extends Search{
 			//make sure status is okay before we get the results
 			if(obj.getString("status").equals("OK")) {			
 				JSONArray jsonPlaces = obj.getJSONArray("results");
-				List<Place> places = new ArrayList<Place>();
+				List<SearchResult> places = new ArrayList<SearchResult>();
 				//Loop throught the results and create Place
 				for(int i = 0; i < jsonPlaces.length(); i++) {
 					JSONObject place = (JSONObject) jsonPlaces.get(i);
-					places.add(new Place(place));
+					places.add(new SearchResult(place));
 				}
 				return places;
 			} else if(obj.getString("status").equals("ZERO_RESULTS")){
@@ -88,7 +88,7 @@ public class PlaceRequest extends Search{
 	 * @param reference - the reference String return from querying searchByLocation.
 	 * @return DetailPlace if success, null if fail
 	 */
-	public DetailPlace searchDetail(String reference) {
+	public DetailSearchResult searchDetail(String reference) {
 		if(reference == null) {
 			throw new IllegalArgumentException("reference string is null");
 		}
@@ -99,7 +99,7 @@ public class PlaceRequest extends Search{
 			if(obj.getString("status").equals("OK")) {	
 				//making a new DetailPlace
 				JSONObject data = obj.getJSONObject("result");
-				return new DetailPlace(data);
+				return new DetailSearchResult(data);
 			} else {
 				Log.v(LOG_KEY, "query status fail");
 			}

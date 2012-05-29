@@ -3,7 +3,7 @@ package we.should;
 import java.util.ArrayList;
 import java.util.List;
 
-import we.should.search.Place;
+import we.should.search.SearchResult;
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -13,7 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.TextView;
 
-public class PlaceAdapter extends ArrayAdapter<Place> {
+public class PlaceAdapter extends ArrayAdapter<SearchResult> {
 	
 	/** The context. **/
 	private Context mContext;
@@ -22,14 +22,14 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 	private static final int sLayoutResourceId = R.layout.place_row;
 	
 	/** The places. **/
-	private List<Place> mPlaces;
+	private List<SearchResult> mPlaces;
 
-	public PlaceAdapter(Context context, List<Place> places) {
-		super(context, sLayoutResourceId, new ArrayList<Place>(places));
+	public PlaceAdapter(Context context, List<SearchResult> places) {
+		super(context, sLayoutResourceId, new ArrayList<SearchResult>(places));
 		mContext = context;
 		mPlaces = places;
 	}
-	public Place getItem(int position){
+	public SearchResult getItem(int position){
 		return mPlaces.get(position);
 	}
 	
@@ -55,7 +55,7 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 			placeRow = (PlaceRow) row.getTag();
 		}
 		
-		Place place = mPlaces.get(position);
+		SearchResult place = mPlaces.get(position);
 		placeRow.name.setText(place.getName());
 		placeRow.detail.setText(place.getDetail());
 		return row;
@@ -71,14 +71,14 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint) {
 			FilterResults filterResults = new FilterResults();
-			List<Place> list = new ArrayList<Place>();
+			List<SearchResult> list = new ArrayList<SearchResult>();
 			if (constraint == null) {
 				filterResults.values = mPlaces;
 				filterResults.count = mPlaces.size();
 				return filterResults;
 			}
 			//String query = constraint.toString().toLowerCase().substring(0, constraint.length() - 2);//Looser filtering
-			for (Place p : mPlaces) {
+			for (SearchResult p : mPlaces) {
 				//String name = p.getName().toLowerCase();
 				list.add(p);
 			}
@@ -100,9 +100,9 @@ public class PlaceAdapter extends ArrayAdapter<Place> {
 				FilterResults results) {
 			clear();
 			@SuppressWarnings("unchecked")
-			List<Place> list = (List<Place>) results.values;
+			List<SearchResult> list = (List<SearchResult>) results.values;
 			if(list == null) return;
-			for (Place p : list) {
+			for (SearchResult p : list) {
 				add(p);
 			}
 			notifyDataSetChanged();

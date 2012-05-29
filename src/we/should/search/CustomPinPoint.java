@@ -2,7 +2,7 @@ package we.should.search;
 import java.util.ArrayList;
 import java.util.List;
 
-import we.should.Color;
+import we.should.PinColor;
 import we.should.CustomDialog;
 import we.should.list.Item;
 import android.app.Dialog;
@@ -22,11 +22,11 @@ public class CustomPinPoint extends ItemizedOverlay<OverlayItem> {
 	private List<OverlayItem> mapOverlays;
 	private double distance;
 	private boolean isSelected;
-	private Color color;
+	private PinColor color;
 	
 	//Here if the color indicate the color of the pin, but if select is true, the pin is yellow color.
 	//It is useful when we need to revert back to the original color.
-	public CustomPinPoint(Drawable pin, Context context, Item item, double distance, boolean isSelected, Color color) {
+	public CustomPinPoint(Drawable pin, Context context, Item item, double distance, boolean isSelected, PinColor color) {
 		super(boundCenterBottom(pin));
 		this.context = context;
 		this.item = item;
@@ -104,7 +104,7 @@ public class CustomPinPoint extends ItemizedOverlay<OverlayItem> {
 	 * @return String - the original color of the pin, yellow pin may return red,
 	 *  because yellow is the special pin, allow us to make a pin with the original color.
 	 */
-	public Color getColor() {
+	public PinColor getColor() {
 		return color;
 	}
 	

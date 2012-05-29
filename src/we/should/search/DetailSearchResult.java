@@ -9,11 +9,11 @@ import we.should.list.Field;
 
 
 /**
- * DetailPlace is immutable.
+ * DetailSearchResult is immutable.
  * 
- * Detail place is an extension to place.  It has more information 
- * about a place including phoneNumber, website, url, address, 
- * international_phoneNumber.
+ * DetailSearchResult is an extension to SearchResult.  It has more information 
+ * about a result *potentially* including phoneNumber, website, url, address, 
+ * international_phoneNumber. They contain and empty string otherwise
  * 
  * Before using the DetailPlace, be sure to check whether or not the
  * DetailPlace is valid. When there is error in parsing the JSONObject, 
@@ -21,7 +21,7 @@ import we.should.list.Field;
  * 
  * @author Lawrence
  */
-public class DetailPlace extends Place{
+public class DetailSearchResult extends SearchResult{
 	protected String phoneNumber, website, url, address, 
 	               international_phoneNumber;
 	
@@ -31,13 +31,13 @@ public class DetailPlace extends Place{
 	 * @param obj JSONObject from a DetailPlaceQuery on Google API.
 	 * @thorws JSONException - if obj fails.
 	 */
-	public DetailPlace(JSONObject obj) throws JSONException {
+	public DetailSearchResult(JSONObject obj) throws JSONException {
 		super(obj);
-		phoneNumber = obj.optString("formatted_phone_number", null);
-		website = obj.optString("website", null);
-		url = obj.optString("url", null);
-		address = obj.optString("formatted_address", null);
-		international_phoneNumber = obj.optString("international_phone_number", null);
+		phoneNumber = obj.optString("formatted_phone_number", "");
+		website = obj.optString("website", "");
+		url = obj.optString("url", "");
+		address = obj.optString("formatted_address", "");
+		international_phoneNumber = obj.optString("international_phone_number", "");
 	}
 	
 	/**
@@ -92,7 +92,7 @@ public class DetailPlace extends Place{
 	@Override
 	public boolean equals(Object o) {
 		if(o != null && getClass() == o.getClass()) {
-			DetailPlace p = (DetailPlace) o;
+			DetailSearchResult p = (DetailSearchResult) o;
 			return super.equals(p) && p.phoneNumber.equals(this.phoneNumber)
 				&& p.website.equals(this.website)
 				&& p.url.equals(this.url)

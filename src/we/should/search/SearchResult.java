@@ -16,10 +16,10 @@ import org.json.JSONObject;
  * @throws JSONException - if the JSONObject pass through the constructor fail.
  * @author Lawrence
  */
-public class Place {
+public class SearchResult {
 	private double latitude, longitude, rating;
 	protected String icon, id, name, vicinity, reference;
-	public Place(JSONObject obj) throws JSONException {
+	public SearchResult(JSONObject obj) throws JSONException {
 		//getLocation(obj);
 		icon = obj.optString("icon", null);
 		id = obj.optString("id", null);
@@ -28,17 +28,17 @@ public class Place {
 		reference = obj.optString("reference", null);
 	}
 	
-	/**
-	 * Getting the location off the JSONObject
-	 * @param obj
-	 * @throws JSONException
-	 */
-	private void getLocation(JSONObject obj) throws JSONException {
-		JSONObject geo = obj.getJSONObject("geometry");
-		JSONObject loc = geo.getJSONObject("location");
-		latitude = Double.parseDouble(loc.getString("lat"));
-		longitude = Double.parseDouble(loc.getString("lng"));
-	}
+//	/**
+//	 * Getting the location off the JSONObject
+//	 * @param obj
+//	 * @throws JSONException
+//	 */
+//	private void getLocation(JSONObject obj) throws JSONException {
+//		JSONObject geo = obj.getJSONObject("geometry");
+//		JSONObject loc = geo.getJSONObject("location");
+//		latitude = Double.parseDouble(loc.getString("lat"));
+//		longitude = Double.parseDouble(loc.getString("lng"));
+//	}
 	
 	/**
 	 * @return Google place reference, can be useful for other detail search
@@ -98,6 +98,10 @@ public class Place {
 	}
 	/**
 	 * Returns a qualifying detail string description of this.
+	 * This will be displayed as a subtitle in the suggestion list.
+	 * 
+	 * Override this method in subclasses to change how what 
+	 * details are displayed next to results.
 	 * @return
 	 */
 	public String getDetail() {
@@ -118,7 +122,7 @@ public class Place {
 	@Override
 	public boolean equals(Object o) {
 		if(o != null && getClass() == o.getClass()) {
-			Place p = (Place) o;
+			SearchResult p = (SearchResult) o;
 			return p != null && p.reference.equals(this.reference);
 		} else {
 			return false;

@@ -33,6 +33,13 @@ public class ReferralAdapter extends ArrayAdapter<Referral> {
 		mContext = context;
 	}
 
+	/**
+	 * Returns a view for a single referral item
+	 * 
+	 * @param position
+	 * @param convertView
+	 * @param parent the parent ViewGroup
+	 */
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		View row = convertView;

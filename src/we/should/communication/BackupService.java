@@ -60,32 +60,23 @@ public class BackupService extends IntentService {
 		
 		Log.d("BACKUP LEN", ""+data.length()+"");
 		
+		sendToDb(data, email);
+		
+	}
+
+	public void sendToDb(String data, String email){
 		//The data is split into sections of 4096 bytes to fit within HttpRequest character limits
 		for(int i=0; i<=data.length()/4096; i++){
 			
 			String splitData = data.substring(i*4096, Math.min(i*4096+4096, data.length()));
 			HttpClient httpclient = new DefaultHttpClient();
-			
 	
-		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-		    nameValuePairs.add(new BasicNameValuePair("user_email", email));	    
-		    nameValuePairs.add(new BasicNameValuePair("data", splitData));
-		    
-		    if(i==0){
-		    	nameValuePairs.add(new BasicNameValuePair("append", "false"));
-		    } else {
-		    	nameValuePairs.add(new BasicNameValuePair("append", "true"));
-		    }
-			
-			String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
-	
+			String paramString = buildQueryString(i, email, splitData);
 			
 			HttpGet httpget = new HttpGet("http://23.23.237.174/backup?"+paramString);
 	
 			try {
-				
-	
-				
+
 				httpclient.execute(httpget);
 			    Log.d("SAVE TO REMOTE", "backing up");
 	
@@ -94,10 +85,27 @@ public class BackupService extends IntentService {
 			} catch (IOException e) {
 				Log.e("SAVE TO REMOTE", e.getMessage());
 			}
-			}
+		}
+	}
+	
+	
+	public String buildQueryString(int i, String email, String splitData){
+	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+	    nameValuePairs.add(new BasicNameValuePair("user_email", email));	    
+	    nameValuePairs.add(new BasicNameValuePair("data", splitData));
+	    
+	    if(i==0){
+	    	nameValuePairs.add(new BasicNameValuePair("append", "false"));
+	    } else {
+	    	nameValuePairs.add(new BasicNameValuePair("append", "true"));
+	    }
 		
+		String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
+		
+		return paramString;
 	}
 
-
-
+	public static String getUrl(){
+		return "backup";
+	}
 }

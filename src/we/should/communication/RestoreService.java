@@ -50,6 +50,30 @@ public class RestoreService extends IntentService{
 		Bundle extras = intent.getExtras();
 		String username = extras.getString(WeShouldActivity.ACCOUNT_NAME);
 		
+		String dbstring = buildDbString(username);
+		
+		WSdb db = new WSdb(this);
+		db.open();
+		db.Restore(dbstring);
+		db.close();
+		
+		Intent weshouldactivity = new Intent();
+		weshouldactivity.setClass(getApplicationContext(), WeShouldActivity.class);
+		weshouldactivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		this.startActivity(weshouldactivity);
+	}
+
+	
+	public String buildQueryString(int index, String username){
+	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+	    nameValuePairs.add(new BasicNameValuePair("user_email", username));
+	    nameValuePairs.add(new BasicNameValuePair("index", ""+index+""));
+		
+		String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
+		return paramString;
+	}
+	
+	public String buildDbString(String username){
 		boolean done = false;
 		String dbstring = "";
 		int index = 0;
@@ -60,11 +84,7 @@ public class RestoreService extends IntentService{
 		
 			HttpClient httpclient = new DefaultHttpClient();
 	
-		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-		    nameValuePairs.add(new BasicNameValuePair("user_email", username));
-		    nameValuePairs.add(new BasicNameValuePair("index", ""+index+""));
-			
-			String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
+			String paramString = buildQueryString(index, username);
 			
 			HttpGet httpget = new HttpGet("http://23.23.237.174/restore?"+paramString);
 						
@@ -109,16 +129,10 @@ public class RestoreService extends IntentService{
 			
 		}
 		
-		
-		WSdb db = new WSdb(this);
-		db.open();
-		db.Restore(dbstring);
-		db.close();
-		
-		Intent weshouldactivity = new Intent();
-		weshouldactivity.setClass(getApplicationContext(), WeShouldActivity.class);
-		weshouldactivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		this.startActivity(weshouldactivity);
+		return dbstring;
 	}
-
+	
+	public static String getUrl(){
+		return "restore";
+	}
 }

@@ -60,12 +60,51 @@ public class GetReferralsService extends IntentService {
 		Bundle extras = intent.getExtras();
 		String username = extras.getString(WeShouldActivity.ACCOUNT_NAME);
 		
-		HttpClient httpclient = new DefaultHttpClient();
+		
+		JSONArray data = getFromDb(username);
+		
+		String ns = Context.NOTIFICATION_SERVICE;
+		NotificationManager nm = (NotificationManager) getSystemService(ns);
+		
+		int icon = R.drawable.restaurant;
+		String tickerText = "New referrals!";
+		long when = System.currentTimeMillis();
+		Notification notification = new Notification(icon, tickerText, when);
+		
+		Context context = getApplicationContext();
+		CharSequence contentTitle = "New referrals!";
+		
+		Log.v("REFERRAL DATA", data.toString());
+		
+		if(data.length() >0){
+			CharSequence contentText = "You have "+data.length()+" new referrals awaiting your approval.";
+			Intent notificationIntent = new Intent(this, ApproveReferral.class);
+			
+			notificationIntent.putExtra("we.should.communication.data", data.toString());
+				
+			PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+			notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
+			
+			
+			nm.notify(ActivityKey.NEW_REFERRAL.ordinal(), notification);
+		} 
+	}
+	
+	public String buildQueryString(String username){
 	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 	    nameValuePairs.add(new BasicNameValuePair("user_email", username));
 		
 		String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
+		return paramString;
+	}
+
+	
+	public JSONArray getFromDb(String username){
+		HttpClient httpclient = new DefaultHttpClient();
+
+		String paramString = buildQueryString(username);
 		
 		HttpGet httpget = new HttpGet("http://23.23.237.174/check-referrals?"+paramString);
 		
@@ -106,35 +145,12 @@ public class GetReferralsService extends IntentService {
 			e.printStackTrace();
 			Log.e("GET REFFERAL SERVICE", "JSON EXCEPTION "+e.getMessage());
 		}
-
 		
-		String ns = Context.NOTIFICATION_SERVICE;
-		NotificationManager nm = (NotificationManager) getSystemService(ns);
-		
-		int icon = R.drawable.restaurant;
-		String tickerText = "New referrals!";
-		long when = System.currentTimeMillis();
-		Notification notification = new Notification(icon, tickerText, when);
-		
-		Context context = getApplicationContext();
-		CharSequence contentTitle = "New referrals!";
-		
-		Log.v("REFERRAL DATA", data.toString());
-		
-		if(data.length() >0){
-			CharSequence contentText = "You have "+data.length()+" new referrals awaiting your approval.";
-			Intent notificationIntent = new Intent(this, ApproveReferral.class);
-			
-			notificationIntent.putExtra("we.should.communication.data", data.toString());
-				
-			PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-			notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
-			
-			
-			nm.notify(ActivityKey.NEW_REFERRAL.ordinal(), notification);
-		} 
+		return data;
 	}
-
+	
+	public static String getUrl(){
+		return "check-referrals";
+	}
+	
 }

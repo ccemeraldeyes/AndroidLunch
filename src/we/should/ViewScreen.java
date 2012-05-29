@@ -118,7 +118,7 @@ public class ViewScreen extends Activity {
 		mFieldListView = (ListView) findViewById(R.id.fieldList);
 		List<Field> fields = new ArrayList<Field>(mItem.getFields());
 		fields.remove(Field.NAME);
-		mFieldListView.setAdapter(new ViewAdapter(this, fields, mData));
+		mFieldListView.setAdapter(new ViewAdapter(this, fields, mData, mItem));
 		
 		mTags = (TextView) findViewById(R.id.tags);
 		mTags.setText(Tag.getFormatted(mItem.getTags()));

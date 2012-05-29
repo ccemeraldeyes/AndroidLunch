@@ -5,7 +5,7 @@ import java.util.List;
 
 import android.util.Log;
 
-public enum Color{
+public enum PinColor{
 	//Yellow(R.drawable.yellow),
 	Green(R.drawable.green),
 	Blue(R.drawable.blue),
@@ -24,12 +24,17 @@ public enum Color{
 		return mDrawable;
 	}
 	
-	private Color(int drawable) {
+	private PinColor(int drawable) {
 		mDrawable = drawable;
 	}
 	
-	public static final Color DEFAULT = Red;
-	public static Color get(String color) {
+	public static final PinColor DEFAULT = Red;
+	/**
+	 * Returns the color enum constant associated with the color string
+	 * @param color
+	 * @return the Color enum associated with color or Color.DEFAULT if it doesn't exist.
+	 */
+	public static PinColor get(String color) {
 		try{
 			return valueOf(color);
 		} catch (IllegalArgumentException e){
@@ -43,9 +48,9 @@ public enum Color{
 	 * @return a list of color names
 	 */
 	public static List<String> getColors(){
-		Color[] colors = Color.values();
+		PinColor[] colors = PinColor.values();
 		List<String> out = new ArrayList<String>();
-		for(Color c : colors) out.add(c.name());
+		for(PinColor c : colors) out.add(c.name());
 		return out;
 	}
 }
