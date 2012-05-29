@@ -31,6 +31,15 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+
+/**
+ * Activity that displays unread referrals to the user for approval or rejection
+ * It is assumed that if a referral is viewed but not approved, it is rejected-- i.e. that if a user
+ * presses "save", any referrals that are unchecked are rejected
+ * 
+ * @author colleen
+ *
+ */
 public class ApproveReferral extends Activity {
 	
 	/** The button to save approved referrals. **/
@@ -39,10 +48,16 @@ public class ApproveReferral extends Activity {
 	/** The adapter that handles our referrals. **/
 	private ReferralAdapter mAdapter;
 	
+	/**
+	 * Sets up the approve view for referrals and saves all approved referrals to the database with category
+	 * "referral"
+	 * 
+	 * @param savedInstanceState
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		
-		final Context c = this.getApplicationContext(); //I don't know if this is the right way to do this!
+		final Context c = this.getApplicationContext(); 
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.approve_referral);
@@ -113,6 +128,11 @@ public class ApproveReferral extends Activity {
 		});
 	}
 	
+	/**
+	 * Communicates with the remote database to clear read referrals
+	 * 
+	 * @param referrals the list of Referral objects to be deleted from the remote database
+	 */
 	public void deleteRefs(List<Referral> referrals){
 		
 		Log.v("DELETE REFERRALS", "deleting");

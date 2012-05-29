@@ -30,12 +30,31 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+/**
+ * GetReferralsService is a background service that queries the remote database checking for referrals
+ * and notifies the user if there are any unread referrals.
+ * 
+ * For our purposes, "unread" means that they have not clicked save on the approve screen
+ * 
+ * @author colleen
+ *
+ */
+
 public class GetReferralsService extends IntentService {
 
+	/**
+	 * GetReferralsService constructor
+	 */
 	public GetReferralsService() {
 		super("we.should.communication.GetReferralsService");
 	}
 
+	/**
+	 * Queries the remote database to check for unread referrals. If any are returned, creates a notification
+	 * that, once clicked on, will open the approval page.
+	 * 
+	 * @param intent
+	 */
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		Bundle extras = intent.getExtras();
@@ -66,12 +85,9 @@ public class GetReferralsService extends IntentService {
 			while(i != -1){
 				i = is.read();
 				baos.write(i);
-			}
-			
-			
+			}			
 			
 			byte[] buf = baos.toByteArray(); 
-			//is.read(buf);
 			
 			Log.v("REFERRAL RESPONSE", new String(buf));
 
@@ -110,14 +126,9 @@ public class GetReferralsService extends IntentService {
 			Intent notificationIntent = new Intent(this, ApproveReferral.class);
 			
 			notificationIntent.putExtra("we.should.communication.data", data.toString());
-	
-			//Log.v("AFTER EXTRAS INSERT", notificationIntent.getStringExtra("data"));
-			
+				
 			PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-	
-			
-			
-			
+
 			notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
 			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
 			
