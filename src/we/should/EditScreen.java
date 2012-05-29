@@ -30,6 +30,7 @@ import android.os.AsyncTask.Status;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -85,6 +86,11 @@ public class EditScreen extends Activity {
 	
 	/** Search Object **/
 	private Search mSearch;
+	
+	/** True when an item has been selected from
+	 *  the auto suggest list mName
+	 */
+	private boolean autoFill = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -123,8 +129,8 @@ public class EditScreen extends Activity {
 
 			public void onTextChanged(CharSequence s, int start, int before,
 					int count) {
-				//int orig = s.length() - count + before;
-				if ((s.length() >= mName.getThreshold())){ //&& orig < mName.getThreshold()) {
+				if(count > 1) return; //Autofill will replace all text
+				if (mName.enoughToFilter()){ //&& orig < mName.getThreshold()) {
 					setupList(s.toString());
 				}
 			}
@@ -280,8 +286,8 @@ public class EditScreen extends Activity {
 					return;
 				}
 				Color colorStr = Color.get((String) color.getSelectedItem());
-				mAllTags.add(0, new Tag(0, nameStr, colorStr));
-				mTags.add(new Tag(0, name.getText().toString(), colorStr));
+				mAllTags.add(0, new Tag(nameStr, colorStr));
+				mTags.add(new Tag(name.getText().toString(), colorStr));
 				mTagsView.setText(Tag.getFormatted(mTags));
 			}
 		});
@@ -342,12 +348,7 @@ public class EditScreen extends Activity {
 		if (!mItem.getFields().contains(Field.ADDRESS) && !(mCat instanceof Movies)) {
 			return;
 		}
-		if(mLookup != null) {
-			if(!mLookup.getStatus().equals(Status.FINISHED)) {
-				mLookup.cancel(true);
-			}
-		} 
-		mLookup = new DoSuggestionLookup(this, mCat);
+		mLookup = new DoSuggestionLookup(this);
 		mLookup.execute(constraint);
 
 	}
@@ -389,47 +390,13 @@ public class EditScreen extends Activity {
 			Toast.makeText(this, "Please enter a name.", Toast.LENGTH_SHORT).show();
 			return;
 		}
-		
-		for (Tag t : mTags) {
-			mItem.addTag(t.toString(), t.getColor());
-		}
 		try {
+			mItem.setTags(mTags);
 			mItem.save();
 		} catch (Exception e) {
 			Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
 			return;
 		}
-
-		
-//		// Create a new HttpClient and Post Header
-//		HttpClient httpclient = new DefaultHttpClient();
-//		
-//		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
-//		
-//
-//	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-//	    nameValuePairs.add(new BasicNameValuePair("user_email", settings.getString(WeShouldActivity.ACCOUNT_NAME, "")));	    
-//	    nameValuePairs.add(new BasicNameValuePair("item", mItem.dataToDB().toString()));
-//		
-//		String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
-//
-//		
-//		HttpGet httpget = new HttpGet("http://23.23.237.174/save-item?"+paramString);
-//
-//		try {
-//			
-//
-//			
-//			httpclient.execute(httpget);
-//		    Log.v("GETREFERRALSSERVICE", "backing up items");
-//
-//		} catch (ClientProtocolException e) {
-//		    // TODO Auto-generated catch block
-//			Log.v("GETREFERRALSSERVICE", e.getMessage());
-//		} catch (IOException e) {
-//		    // TODO Auto-generated catch block
-//			Log.v("GETREFERRALSSERVICE", e.getMessage());
-//		}
 		finish();
 	}
 	private void delete() {
@@ -453,11 +420,9 @@ public class EditScreen extends Activity {
 	private class DoSuggestionLookup extends AsyncTask<String, Void, List<Place>> {
 
 		Context ctx;
-		Category c;
 		
-		public DoSuggestionLookup(Context ctx, Category c){
+		public DoSuggestionLookup(Context ctx){
 			this.ctx = ctx;
-			this.c = c;
 		}
 		
 		protected List<Place> doInBackground(String... params) {
@@ -473,7 +438,13 @@ public class EditScreen extends Activity {
 			return places;
 		}
 		protected void onPostExecute(List<Place> result){
-			if(result != null && !isCancelled()) mName.setAdapter(new PlaceAdapter(ctx, result));
+			if(result != null) {
+				Log.i("AsyncSuggestionLookup", "Updated adapter");
+				PlaceAdapter pa = new PlaceAdapter(ctx, result);
+				mName.setAdapter(pa);
+				pa = (PlaceAdapter) mName.getAdapter();
+				pa.notifyDataSetChanged();
+			}
 		}
 		
 	}
