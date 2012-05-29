@@ -106,7 +106,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		public int compare(String lhs, String rhs) {
 			int out = mTabContents.get(rhs).size() - mTabContents.get(lhs).size();
 			if(out == 0){
-				return lhs.compareTo(rhs);
+				return lhs.compareTo(rhs); //If tabs are the same size, compare their names. No names should be equal.
 			}
 			return out;
 		}

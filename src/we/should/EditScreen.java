@@ -370,6 +370,7 @@ public class EditScreen extends Activity {
 			detailPlace = (new PlaceRequest(null)).searchDetail(place.getReference());
 		}
 		Map<Field, String> fieldMap = detailPlace.asFieldMap();
+		if(fieldMap == null) return;
 		for (Field f : fieldMap.keySet()) {
 			if (mData.containsKey(f)) {
 				if (fieldMap.get(f) != null) {

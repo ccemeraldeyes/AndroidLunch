@@ -118,6 +118,7 @@ public class GenericItem extends Item {
 				return values.get(key);
 			}
 		} else {
+			Log.v("GenericItem.get", this.getName() + " - fields: " + getFields());
 			throw new IllegalArgumentException(key.toString() + " is not a field of the " + c.getName() + " category.");
 		}
 	}
