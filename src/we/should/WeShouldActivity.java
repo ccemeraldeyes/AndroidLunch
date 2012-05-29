@@ -2,6 +2,7 @@ package we.should;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,6 +97,16 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/** A map that maps the name of each tag to its values. **/
 	private Map<String, Tag> mTags;
 	
+	/** Maps each tab name to the items displayed in it. **/
+	private Map<String, List<Item>> mTabContents;
+	
+	/** A comparator to use for tab sorting. **/
+	private Comparator<String> mSorter = new Comparator<String>() {
+		public int compare(String lhs, String rhs) {
+			return mTabContents.get(rhs).size() - mTabContents.get(lhs).size();
+		}
+	};
+	
 	/** A global reference to the selected Item **/
 	private Item mItem;
 	
@@ -131,6 +142,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         this.mTabHost = (TabHost) findViewById(android.R.id.tabhost);
         this.zoomButton = (ImageButton) findViewById(R.id.my_location_button);
         mSortType = SortType.Category;
+        mTabContents = new HashMap<String, List<Item>>();
         mTabHost.setup();
         updateTabs();
         this.mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
@@ -295,17 +307,31 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	String tabId = mTabHost.getCurrentTabTag();
 
 		mTabHost.clearAllTabs();
-		Drawable allItems = getResources().getDrawable(R.drawable.white);
-        TabHost.TabSpec spec = mTabHost.newTabSpec(ALL_ITEMS_TAG)
-        		.setIndicator("  " + ALL_ITEMS_NAME + "  ", allItems);
+		mTabContents.clear();
+		Map<String, List<Item>> sortedMap = null;
     	switch (mSortType) {
     	case Category:
-    		updateTabsCategory(spec);
+    		sortedMap = updateTabsCategory();
     		break;
     	case Tag:
-    		updateTabsTag(spec);
+    		sortedMap = updateTabsTag();
     		break;
     	}
+        TabHost.TabSpec spec;
+        TabHost.TabContentFactory tp = new TabPopulator();
+        List<Item> allItems = new ArrayList<Item>(Item.getAllItems(this));
+        mTabContents.put(ALL_ITEMS_TAG, allItems);
+        sortedMap.put(ALL_ITEMS_TAG, allItems);
+        for (String name : sortedMap.keySet()) {
+    		spec = mTabHost.newTabSpec(name);
+        	if (name.equals(ALL_ITEMS_TAG)) {
+        		spec = spec.setIndicator("  " + ALL_ITEMS_NAME + "  ");
+        	} else {
+        		spec = spec.setIndicator("  " + name + "  ");
+        	}
+	        spec = spec.setContent(tp);
+	        mTabHost.addTab(spec);
+        }
     	mTabHost.getTabWidget().setStripEnabled(true);
     	mTabHost.setCurrentTabByTag(tabId);
     }
@@ -313,7 +339,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/**
      * Updates the tabs on startup or when categories change.
      */
-	private void updateTabsCategory(TabHost.TabSpec spec) {
+	private Map<String, List<Item>> updateTabsCategory() {
 		mCategories = new HashMap<String, Category>();
 		Set<Category> categories = Category.getCategories(this);
 		for (Category cat : categories) {
@@ -328,41 +354,39 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			RESTAURANTS.save();
 			REFERRALS.save();
 		}
-		
-        CategoryPopulator tp = new CategoryPopulator();
-        spec = spec.setContent(tp);
-        mTabHost.addTab(spec);
-        Resources res = getResources();
+
+		// We must use a secondary map in order to avoid a stack overflow error
+		// when sorting
+        Map<String, List<Item>> sortedMap = new TreeMap<String, List<Item>>(mSorter);
+        List<List<Item>> itemLists = new ArrayList<List<Item>>();
         for (String name : mCategories.keySet()) {
         	Category cat = mCategories.get(name);
-	        spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ",
-	        		res.getDrawable(cat.getColor().getDrawable()))
-	        		.setContent(tp);
-	        mTabHost.addTab(spec);
+        	List<Item> items = new ArrayList<Item>(cat.getItems());
+        	itemLists.add(items);
+        	mTabContents.put(name, items);
+        	sortedMap.put(name, items);
         }
+        return sortedMap;
 	}
 	
 	/**
 	 * Updates the tabs when tags change.
 	 */
-	private void updateTabsTag(TabHost.TabSpec spec) {
+	private Map<String, List<Item>> updateTabsTag() {
 		mTags = new HashMap<String, Tag>();
-		List<Tag> tags = Tag.getTags(this);
-		for (Tag tag : tags) {
+		for (Tag tag : Tag.getTags(this)) {
 			mTags.put(tag.toString(), tag);
 		}
-
-		TagPopulator tp = new TagPopulator();
-        spec = spec.setContent(tp);
-        mTabHost.addTab(spec);
-        Resources res = getResources();
-		for (String name : mTags.keySet()) {
-			Tag t = mTags.get(name);
-			spec = mTabHost.newTabSpec(name).setIndicator("  " + name + "  ",
-					res.getDrawable(t.getColor().getDrawable()))
-					.setContent(tp);
-			mTabHost.addTab(spec);
-		}
+		Map<String, List<Item>> sortedMap = new TreeMap<String, List<Item>>(mSorter);
+        List<List<Item>> itemLists = new ArrayList<List<Item>>();
+        for (String name : mTags.keySet()) {
+        	Tag tag = mTags.get(name);
+        	List<Item> items = new ArrayList<Item>(Item.getItemsOfTag(tag, this));
+        	itemLists.add(items);
+        	mTabContents.put(name, items);
+        	sortedMap.put(name, items);
+        }
+        return sortedMap;
 	}
 
 	@Override
@@ -530,26 +554,20 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	}
 	
 	/**
-	 * This class populates each tab with items from that tab's category.
+	 * This class populates each tab.
 	 * 
 	 * @author Will
 	 */
-	private class CategoryPopulator implements TabContentFactory {
+	private class TabPopulator implements TabContentFactory {
 
 		public View createTabContent(String tag) {
 			ListView lv = new ListView(getApplicationContext());
 			final List<Item> itemsList;
-			List<Item> items = new ArrayList<Item>();
-			Category cat = mCategories.get(tag);
-			if (cat == null) {
-				items.addAll(Item.getAllItems(getApplicationContext()));
-			} else {
-				items.addAll(cat.getItems());
-			}
+			List<Item> items = new ArrayList<Item>(mTabContents.get(tag));
 			itemsList = sortByDistance(items);
 			mAdapter = new ItemAdapter(WeShouldActivity.this, itemsList);
 			lv.setAdapter(mAdapter);
-			mAdapter.notifyDataSetChanged();
+			mAdapter.notifyDataSetChanged(); // why is this line here?
 			registerForContextMenu(lv);
 			
 			// click to view item & current location in map
@@ -669,64 +687,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		}
 	}
 	
-	/**
-	 * This class populates each tab with items from that tab's tag.
-	 * 
-	 * @author Will
-	 */
-	private class TagPopulator implements TabContentFactory {
-		
-		public View createTabContent(String name) {
-			Context ctx = getApplicationContext();
-			ListView lv = new ListView(ctx);
-			
-			Tag tag = Tag.get(ctx, name);
-			final List<Item> itemsList;
-			List<Item> items = new ArrayList<Item>();
-			if (tag == null) {
-				items.addAll(Item.getAllItems(ctx));
-			} else {
-				items.addAll(Item.getItemsOfTag(tag, ctx));
-			}
-			itemsList = sortByDistance(items);
-			mAdapter = new ItemAdapter(WeShouldActivity.this, itemsList);
-			lv.setAdapter(mAdapter);
-			mAdapter.notifyDataSetChanged();
-			registerForContextMenu(lv);
-			
-			// click to view item & current location in map
-			lv.setOnItemClickListener(new OnItemClickListener() {
-				public void onItemClick(AdapterView<?> parent,
-						View view, int position, long id) {
-					
-			    	Item item = itemsList.get(position);
-			    	Set<Address> addrs = item.getAddresses();
-			    
-			    	for(Address addr : addrs) {
-			    		if(addr.hasLatitude() && addr.hasLongitude()) {
-					    	int locX = (int) (addr.getLatitude() * 1E6);
-		    				int locY = (int) (addr.getLongitude() * 1E6);
-		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
-		        			GeoPoint myLoc = getDeviceLocation();
-		        			CustomPinPoint pin = findPin(placeLocation);
-
-		        			if(myLoc == null || (pin != null && pin.isSelected())) {
-		        				zoomLocation(placeLocation);
-		        			} else {
-		        				zoomToTwoPoint(placeLocation, myLoc);
-		        			}
-		        			if(pin == null || !pin.isSelected()) {
-		        				updateYellowPin(placeLocation);
-		        			}
-		        		    break;
-			    		}
-				    }
-			    }
-			});
-			
-			return lv;
-		}
-	}
 	/**
 	 * Takes a list of items and returns a list, sorted by item distance from
 	 * the current device location. Items with no valid location are sorted to the bottom 
