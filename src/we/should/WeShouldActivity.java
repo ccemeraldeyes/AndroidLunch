@@ -170,7 +170,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
      */
     private void setupTab(String tabid) {
     	Button delete = (Button) findViewById(R.id.delete);
-    	
     	if (mSortType.equals(SortType.Category)) {
     		final Category cat = mCategories.get(tabid);
     		
@@ -179,20 +178,21 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		delete.setOnClickListener(new View.OnClickListener() {
 				
 				public void onClick(View v) {
-					// This is where we would be deleting the category if we had
-					// a way to
+					cat.delete();
+					updateTabs();
+					
 				}
 			});
     	} else {
-    		final Tag tag = mTags.get(tabid);    		
+    		final Tag tag = mTags.get(tabid); 
     		delete.setVisibility((tag == null)
     				|| Item.getItemsOfTag(tag, this).size() > 0 ? View.GONE
     						: View.VISIBLE);
     		delete.setOnClickListener(new View.OnClickListener() {
 				
 				public void onClick(View v) {
-					// This is where we would be deleting the tag if we had
-					// a way to
+					tag.delete();
+					updateTabs();
 				}
 			});
     	}
@@ -274,12 +274,14 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	if (zoom) {
 			/**Zoom to contain all of the pins and current location**/
 			GeoPoint p = getDeviceLocation();
-			int locX = p.getLatitudeE6();
-			int locY = p.getLongitudeE6();
-			minLat = Math.min(minLat, locX);
-			minLong = Math.min(minLong, locY);
-			maxLat = Math.max(maxLat, locX);
-			maxLong = Math.max(maxLong, locY);
+			if(p != null) {
+				int locX = p.getLatitudeE6();
+				int locY = p.getLongitudeE6();
+				minLat = Math.min(minLat, locX);
+				minLong = Math.min(minLong, locY);
+				maxLat = Math.max(maxLat, locX);
+				maxLong = Math.max(maxLong, locY);
+			}
 			zoomToTwoPoint(new GeoPoint(minLat, minLong), new GeoPoint(maxLat,
 					maxLong));
 		}
@@ -305,7 +307,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     		break;
     	}
     	mTabHost.getTabWidget().setStripEnabled(true);
-    	mTabHost.setCurrentTabByTag(tabId);
+    	mTabHost.setCurrentTabByTag(tabId); //If tab is deleted this will ...
     }
 
 	/**
@@ -745,7 +747,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					int locY = (int) (addr.getLongitude() * 1E6);
 	    			placeLocation = new GeoPoint(locX, locY);
 				}
-				if(placeLocation != null) dist = Math.min(dist, distanceBetween(here, placeLocation));
+				if(placeLocation != null && here != null) dist = Math.min(dist, distanceBetween(here, placeLocation));
 			}
 			sortedByDistance.put(dist, i);
 		}
@@ -768,8 +770,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		if(point == null || color == null || item == null) {
 			throw new IllegalArgumentException("input to addPin is null");
 		}
-		
-		double distance = distanceBetween(getDeviceLocation(), point);
+		GeoPoint here = getDeviceLocation();
+		double distance = Double.NaN;
+		if(here != null){
+			distance = distanceBetween(getDeviceLocation(), point);
+		}
 		Drawable drawable;
 		if(isSelected) {
 			drawable = getResources().getDrawable(highlightPin);
@@ -793,8 +798,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	     towers = (lm.getBestProvider(crit, false)); //getting best provider.
 	     Location location = lm.getLastKnownLocation(towers);
 	     if(location == null) {
-	        Toast.makeText(WeShouldActivity.this, 
-	        			"Couldn't get providers", Toast.LENGTH_SHORT).show();
+	    	 Log.w("getDeviceLocation", "Couldn't get location providers for this device.");
 	    	 return null;
 	     } else {
 		     int myLocX = (int) (location.getLatitude() * 1E6);
