@@ -101,4 +101,8 @@ public class ReferDialog extends Activity {
 		}
 	}
 	
+	public static String getUrl(){
+		return "refer";
+	}
+	
 }
