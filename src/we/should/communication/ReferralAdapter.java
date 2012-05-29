@@ -22,6 +22,12 @@ public class ReferralAdapter extends ArrayAdapter<Referral> {
 	/** A context to use for inflating the layout. **/
 	private Context mContext;
 
+	/**
+	 * ReferralAdapter constructor
+	 * 
+	 * @param context the context to use for inflating the layout
+	 * @param data the list of Referral objects to be approved
+	 */
 	public ReferralAdapter(Context context, List<Referral> data) {
 		super(context, mLayoutResourceId, new ArrayList<Referral>(data));
 		mContext = context;
@@ -63,6 +69,12 @@ public class ReferralAdapter extends ArrayAdapter<Referral> {
 		return row;
 	}
 	
+	/**
+	 * Represents a row in the list of referrals to be approved
+	 * 
+	 * @author colleen
+	 *
+	 */
 	private static class ReferralRow {
 		TextView name;
 		TextView sender;
