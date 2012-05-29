@@ -8,11 +8,11 @@ import org.json.JSONObject;
 
 import we.should.list.Field;
 
-public class IMDBRecord extends DetailPlace {
+public class IMDBSearchResult extends DetailSearchResult {
 	private final String BASE_URL = "http://m.imdb.com/title/";
-	private String year, comment;
+	private String year;
 	
-	public IMDBRecord(JSONObject obj) throws JSONException {
+	public IMDBSearchResult(JSONObject obj) throws JSONException {
 		super(obj);
 		website = obj.optString("imdbID", null);
 		if(website != null){

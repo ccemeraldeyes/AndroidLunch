@@ -10,7 +10,7 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import we.should.Color;
+import we.should.PinColor;
 import we.should.database.WSdb;
 import android.content.Context;
 import android.database.Cursor;
@@ -26,7 +26,7 @@ public class Tag implements Serializable {
 	
 	private int id;
 	private String name;
-	private Color color;
+	private PinColor color;
 	private Context ctx;
 	
 	/**
@@ -35,7 +35,7 @@ public class Tag implements Serializable {
 	 * @param name
 	 * @param color
 	 */
-	public Tag(int id, String name, Color color){
+	public Tag(int id, String name, PinColor color){
 		this(id, name, color, null);
 	}
 	/**
@@ -44,10 +44,10 @@ public class Tag implements Serializable {
 	 * @param name
 	 * @param color
 	 */
-	public Tag(String name, Color color){
+	public Tag(String name, PinColor color){
 		this(0, name, color, null);
 	}
-	private Tag(int id, String name, Color color, Context ctx){
+	private Tag(int id, String name, PinColor color, Context ctx){
 		this.id = id;
 		this.name = name;
 		this.color = color;
@@ -61,7 +61,7 @@ public class Tag implements Serializable {
 		try {
 			this.id = o.getInt(idKey);
 			this.name = o.getString(tagKey);
-			this.color = Color.get(o.getString(colorKey));
+			this.color = PinColor.get(o.getString(colorKey));
 		} catch (JSONException e) {
 			throw new IllegalArgumentException("JSON object parameter improperlly formed!");
 		}
@@ -121,7 +121,7 @@ public class Tag implements Serializable {
 		db.open();
 		Cursor tags = db.getAllTags();
 		while(tags.moveToNext()){
-			Color color = Color.get(tags.getString(2));
+			PinColor color = PinColor.get(tags.getString(2));
 			String tag = tags.getString(1);
 			int id = tags.getInt(0);
 			out.add(new Tag(id, tag, color, ctx));
@@ -168,7 +168,7 @@ public class Tag implements Serializable {
 		tagString.put(Tag.colorKey, this.getColor().toString());
 		return tagString;
 	}
-	public Color getColor() {
+	public PinColor getColor() {
 		return this.color;
 	}
 	

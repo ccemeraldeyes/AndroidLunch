@@ -34,7 +34,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import we.should.Color;
+import we.should.PinColor;
 import we.should.database.WSdb;
 import android.content.Context;
 import android.database.Cursor;
@@ -354,7 +354,7 @@ public abstract class Item {
 					}
 				}
 				cat.id = catId;
-				cat.color = Color.get(color);
+				cat.color = PinColor.get(color);
 				cats.put(catId, cat);
 				c.close();
 			} else {

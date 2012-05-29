@@ -5,10 +5,12 @@ import java.util.Map;
 
 import we.should.list.Field;
 import we.should.list.FieldType;
+import we.should.list.Item;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Address;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,13 +40,17 @@ public class ViewAdapter extends ArrayAdapter<Field> {
 	
 	/** The raw data of the item. **/
 	private Map<Field, String> mData;
+	
+	/** Item reference to get more data if necessary **/
+	private Item mItem;
 
-	public ViewAdapter(Context context, List<Field> fields, Map<Field, String> data) {
+	public ViewAdapter(Context context, List<Field> fields, Map<Field, String> data, Item it) {
 		super(context, R.layout.edit_row_textline);
 		mContext = context;
 		mInflater = ((Activity) context).getLayoutInflater();
 		mFields = fields;
 		mData = data;
+		mItem = it;
 	}
 	
 	@Override
@@ -135,6 +141,21 @@ public class ViewAdapter extends ArrayAdapter<Field> {
 					mContext.startActivity(intent);
 				}
 			});
+		} else if (field.equals(Field.ADDRESS)) {
+			final Address add = mItem.getAddresses().iterator().next(); //Doesn't handle multiple addresses yet.
+			/** Map to the address location if clicked **/
+			if(add.hasLatitude() && add.hasLongitude()) {
+				((TextView) finalHolder.value).setTextColor(Color.BLUE);
+				convertView.setOnClickListener(new View.OnClickListener() {
+					/** Go to google maps. **/
+					public void onClick(View v) {
+						Intent intent = new Intent(android.content.Intent.ACTION_VIEW, 
+						Uri.parse("http://maps.google.com/maps?daddr=" + add.getLatitude() + "," + add.getLongitude()));
+						mContext.startActivity(intent);
+						
+					}
+				});
+			}
 		}
 		return convertView;
 	}

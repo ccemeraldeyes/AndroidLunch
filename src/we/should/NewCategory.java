@@ -53,7 +53,7 @@ public class NewCategory extends Activity {
         mColor = (Spinner) findViewById(R.id.color);
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
 				android.R.layout.simple_spinner_item,
-				new ArrayList<String>(Color.getColors()));
+				new ArrayList<String>(PinColor.getColors()));
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mColor.setAdapter(adapter);
         
@@ -144,7 +144,7 @@ public class NewCategory extends Activity {
 			fields.add(Field.COMMENT);
 			//fields.add(Field.TAGS);
 			try{
-				Color color = Color.get((String) mColor.getSelectedItem());
+				PinColor color = PinColor.get((String) mColor.getSelectedItem());
 				Category cat = new GenericCategory(mName.getText().toString(), fields, this);
 				cat.setColor(color);
 				cat.save();
