@@ -123,7 +123,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private String towers;
 	private MyLocationOverlay myLocationOverlay;
 	private List<Overlay> overlayList;
-	private ImageButton zoomButton;
+	private ImageButton zoomButton;    
+
 	
 	//protected WSdb db;
 	protected String DBFILE;
@@ -178,6 +179,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         	zoomLocation(location);
         }
         map.postInvalidate();    
+    	
     }
     
     /**
@@ -447,7 +449,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
 		switch (item.getItemId()) {
 		case R.id.restore:
-
 			Intent service = new Intent(this, RestoreService.class);
 			service.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
 			startService(service);
