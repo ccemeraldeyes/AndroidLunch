@@ -11,10 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import we.should.Color;
-import we.should.database.WSdb;
 import android.content.Context;
-import android.database.sqlite.SQLiteConstraintException;
 import android.location.Address;
 import android.location.Geocoder;
 import android.util.Log;

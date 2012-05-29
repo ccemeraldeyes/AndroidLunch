@@ -14,7 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import we.should.Color;
+import we.should.PinColor;
 import we.should.database.WSdb;
 import android.content.Context;
 import android.database.Cursor;
@@ -33,11 +33,11 @@ import android.util.Log;
  *  
  */
 public abstract class Category {
-	public static final Color DEFAULT_COLOR = Color.Red;
+	public static final PinColor DEFAULT_COLOR = PinColor.Red;
 	protected final String name;	
 	protected Context ctx = null;
 	protected int id;
-	protected Color color = DEFAULT_COLOR; //test value
+	protected PinColor color = DEFAULT_COLOR; //test value
 	protected List<Field> fields;
 	protected List<Item> items; 
 	protected boolean sync = false;
@@ -69,7 +69,6 @@ public abstract class Category {
 		this.color = Category.DEFAULT_COLOR;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected Category(String name, JSONArray a, Context ctx){
 		this(name, ctx);
 		try {
@@ -85,7 +84,7 @@ public abstract class Category {
 	 * Sets the color representation of this category
 	 * @param color is a hexadecimal representation of the color to set
 	 */
-	public void setColor(Color color) {
+	public void setColor(PinColor color) {
 		if(color != null) this.color = color;
 		else throw new IllegalArgumentException("Color is null!");
 	}
@@ -93,7 +92,7 @@ public abstract class Category {
 	 * Returns the hexidecimal representation of this color
 	 * @return the color of this
 	 */
-	public Color getColor(){
+	public PinColor getColor(){
 		return this.color;
 	}
 	/**
@@ -231,7 +230,7 @@ public abstract class Category {
 				}
 			 }
 			 cat.id = id;
-			 cat.color = Color.get(color);
+			 cat.color = PinColor.get(color);
 			 out.add(cat);
 		}
 		c.close(); // added by Troy

@@ -1,10 +1,13 @@
 package we.should;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import we.should.communication.BackupService;
 import we.should.communication.RestoreService;
@@ -46,7 +49,6 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabContentFactory;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
@@ -204,7 +206,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	
     	List<Item> items = null;
     	
-    	Color color = Color.Red;
+    	PinColor color = PinColor.Red;
 		
     	if (name.equals(ALL_ITEMS_TAG)) {
     		items = new ArrayList<Item>();
@@ -223,7 +225,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	    		break;
 	    	}
     	}
-    	mAdapter = new ItemAdapter(WeShouldActivity.this, items);
+    	mAdapter = new ItemAdapter(WeShouldActivity.this, sortByDistance(items));
     	mAdapter.notifyDataSetChanged();
     	updatePins(color, items);
 	}
@@ -235,7 +237,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
      * @param color - a color string, 6 character long represent r, g, b
      * @param items - the items that needed to create the pin for.
      */
-    private void updatePins(Color color, List<Item> items){
+    private void updatePins(PinColor color, List<Item> items){
     	//clear the pin everytime we load a new tab.
     	for(CustomPinPoint pin : lstPinPoints) {
     		overlayList.remove(pin);
@@ -510,17 +512,18 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 
 		public View createTabContent(String tag) {
 			ListView lv = new ListView(getApplicationContext());
-			final List<Item> itemsList = new ArrayList<Item>();
-			
+			final List<Item> itemsList;
+			List<Item> items = new ArrayList<Item>();
 			Category cat = mCategories.get(tag);
 			if (cat == null) {
-				itemsList.addAll(Item.getAllItems(getApplicationContext()));
+				items.addAll(Item.getAllItems(getApplicationContext()));
 			} else {
-				itemsList.addAll(cat.getItems());
+				items.addAll(cat.getItems());
 			}
-			
+			itemsList = sortByDistance(items);
 			mAdapter = new ItemAdapter(WeShouldActivity.this, itemsList);
 			lv.setAdapter(mAdapter);
+			mAdapter.notifyDataSetChanged();
 			registerForContextMenu(lv);
 			
 			// click to view item & current location in map
@@ -649,16 +652,17 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			ListView lv = new ListView(ctx);
 			
 			Tag tag = Tag.get(ctx, name);
-			final List<Item> itemsList = new ArrayList<Item>();
+			final List<Item> itemsList;
+			List<Item> items = new ArrayList<Item>();
 			if (tag == null) {
-				for (Category c : Category.getCategories(WeShouldActivity.this)) {
-					itemsList.addAll(c.getItems());
-				}
+				items.addAll(Item.getAllItems(ctx));
 			} else {
-				itemsList.addAll(Item.getItemsOfTag(tag, ctx));
+				items.addAll(Item.getItemsOfTag(tag, ctx));
 			}
+			itemsList = sortByDistance(items);
 			mAdapter = new ItemAdapter(WeShouldActivity.this, itemsList);
 			lv.setAdapter(mAdapter);
+			mAdapter.notifyDataSetChanged();
 			registerForContextMenu(lv);
 			
 			// click to view item & current location in map
@@ -694,7 +698,35 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			return lv;
 		}
 	}
-	
+	/**
+	 * Takes a list of items and returns a list, sorted by item distance from
+	 * the current device location. Items with no valid location are sorted to the bottom 
+	 * of the list.
+	 * @param items
+	 * @return a list of items sorted by distance
+	 */
+	private List<Item> sortByDistance(List<Item> items){
+		SortedMap<Double, Item> sortedByDistance = new TreeMap<Double, Item>();
+		GeoPoint here = getDeviceLocation();
+		for(Item i : items){
+			Set<Address> addresses = i.getAddresses();
+			double dist = Integer.MAX_VALUE;
+			for(Address addr: addresses){
+				GeoPoint placeLocation = null;
+				if(addr.hasLatitude() && addr.hasLongitude()) {
+					int locX = (int) (addr.getLatitude() * 1E6);
+					int locY = (int) (addr.getLongitude() * 1E6);
+	    			placeLocation = new GeoPoint(locX, locY);
+				}
+				if(placeLocation != null) dist = Math.min(dist, distanceBetween(here, placeLocation));
+			}
+			sortedByDistance.put(dist, i);
+		}
+		Collection<Item> sortedItems = sortedByDistance.values();
+		List<Item> out = new ArrayList<Item>();
+		for(Item i : sortedItems) out.add(i);
+		return out;
+	}
 	/**
 	 * helper method to add a pin to the map.
 	 * @param point - the point that you want to add the pin
@@ -704,7 +736,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * 			- false otherwise.
 	 * @throws IllegalArgumentException on null input.
 	 */
-	private void addPin(GeoPoint point, Color color, Item item, boolean isSelected) {
+	private void addPin(GeoPoint point, PinColor color, Item item, boolean isSelected) {
 		
 		if(point == null || color == null || item == null) {
 			throw new IllegalArgumentException("input to addPin is null");
@@ -728,7 +760,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/**
 	 * @return the location of the device
 	 */
-	private GeoPoint getDeviceLocation() {
+	protected GeoPoint getDeviceLocation() {
 		 lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE); // it is a string
 	     Criteria crit = new Criteria();
 	     towers = (lm.getBestProvider(crit, false)); //getting best provider.
@@ -802,7 +834,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @param color - string with six characters format, represent r, g, b
 	 * @return Drawable the pin represent for that color.
 	 */
-	private Drawable getDrawable(Color color) {
+	private Drawable getDrawable(PinColor color) {
 		if(color == null) { // || color.length() != 6) {
 			throw new IllegalArgumentException("color is null or " +
 					"color string is suppose to be six characters");

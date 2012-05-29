@@ -18,6 +18,7 @@ import we.should.search.MovieRequest;
 import we.should.search.Place;
 import we.should.search.PlaceRequest;
 import we.should.search.Search;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -26,7 +27,6 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.AsyncTask.Status;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -86,11 +86,6 @@ public class EditScreen extends Activity {
 	
 	/** Search Object **/
 	private Search mSearch;
-	
-	/** True when an item has been selected from
-	 *  the auto suggest list mName
-	 */
-	private boolean autoFill = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -261,7 +256,7 @@ public class EditScreen extends Activity {
 		final Spinner color = (Spinner) layout.findViewById(R.id.color);
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
 				android.R.layout.simple_spinner_item,
-				new ArrayList<String>(Color.getColors()));
+				new ArrayList<String>(PinColor.getColors()));
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		color.setAdapter(adapter);
 
@@ -285,7 +280,7 @@ public class EditScreen extends Activity {
 					addTag();
 					return;
 				}
-				Color colorStr = Color.get((String) color.getSelectedItem());
+				PinColor colorStr = PinColor.get((String) color.getSelectedItem());
 				mAllTags.add(0, new Tag(nameStr, colorStr));
 				mTags.add(new Tag(name.getText().toString(), colorStr));
 				mTagsView.setText(Tag.getFormatted(mTags));
