@@ -63,7 +63,7 @@ public class WSdb {
 		try {
 			db = dbhelper.getWritableDatabase();
 		} catch(SQLiteException ex) {
-			Log.v("Open database exception caught", ex.getMessage());
+			Log.e("Open database exception caught", ex.getMessage());
 			db = dbhelper.getReadableDatabase();
 			return false;
 		}
@@ -590,7 +590,8 @@ public class WSdb {
 	 */
 	public boolean deleteTag(int tagId)
 			throws SQLiteConstraintException{
-
+		Log.v("DeleteTag", "tagId="+tagId);
+		
 		// delete the item-tag associations		
 		int affected = db.delete(Item_TagConst.TBL_NAME,
 				Item_TagConst.TAG_ID + "=" + tagId, null);		
@@ -754,7 +755,7 @@ public class WSdb {
 		// adds to row separator to become table separator
 		data += SEP; 
 		
-		
+		c.close();
 		// parse item
 		c = getAllItems();
 		// first value is count - needed for empty table case
@@ -770,7 +771,7 @@ public class WSdb {
 		// adds to row separator to become table separator
 		data += SEP;
 		
-		
+		c.close();
 		// parse tag
 		c = getAllTags();
 		// first value is count - needed for empty table case
@@ -786,7 +787,7 @@ public class WSdb {
 		// adds to row separator to become table separator
 		data += SEP;
 		
-		
+		c.close();
 		//parse item_tag
 		c = getAllItem_Tags();
 		// first value is count - needed for empty table case
@@ -799,6 +800,7 @@ public class WSdb {
 			// adds to field separator to become row separator
 			data += SEP;
 		}
+		
 		c.close();
 		return data;
 	}
