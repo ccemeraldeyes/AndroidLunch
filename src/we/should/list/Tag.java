@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,19 +25,33 @@ public class Tag implements Serializable {
 	protected static String colorKey = "color";
 	
 	private int id;
-	private String tag;
+	private String name;
 	private Color color;
+	private Context ctx;
 	
 	/**
 	 * Creates a new tag object with the given name and DB id
 	 * @param id
-	 * @param tag
+	 * @param name
 	 * @param color
 	 */
-	public Tag(int id, String tag, Color color){
+	public Tag(int id, String name, Color color){
+		this(id, name, color, null);
+	}
+	/**
+	 * Creates a new tag object that will be given an id once
+	 * saved to the DB in an item.
+	 * @param name
+	 * @param color
+	 */
+	public Tag(String name, Color color){
+		this(0, name, color, null);
+	}
+	private Tag(int id, String name, Color color, Context ctx){
 		this.id = id;
-		this.tag = tag.substring(0,Math.min(tag.length(), 32)).trim();
+		this.name = name;
 		this.color = color;
+		this.ctx = ctx;
 	}
 	/**
 	 * 
@@ -45,7 +60,7 @@ public class Tag implements Serializable {
 	protected Tag(JSONObject o){
 		try {
 			this.id = o.getInt(idKey);
-			this.tag = o.getString(tagKey);
+			this.name = o.getString(tagKey);
 			this.color = Color.get(o.getString(colorKey));
 		} catch (JSONException e) {
 			throw new IllegalArgumentException("JSON object parameter improperlly formed!");
@@ -56,7 +71,7 @@ public class Tag implements Serializable {
 	 * Returns the name of this tag
 	 */
 	public String toString(){
-		return tag;
+		return name;
 	}
 	/**
 	 * Returns the DB row entry of this tag. 0 if it is
@@ -72,6 +87,25 @@ public class Tag implements Serializable {
 	 */
 	public void setId(int i){
 		this.id = i;
+	}
+	/**
+	 * Deletes this tag, and all of the item relations to it.
+	 */
+	public void delete(){
+		if(this.ctx != null && this.id != 0){
+			WSdb db = new WSdb(this.ctx);
+			Set<Item> items = Item.getItemsOfTag(this, this.ctx);
+			Set<Tag> itemTags;
+			for(Item i : items){
+				itemTags = i.getTags();
+				if(itemTags.remove(this)){
+					i.setTags(itemTags);
+					i.save();
+				}
+			}
+			db.deleteTag(this.id);
+		}
+		
 	}
 	/**
 	 * Returns a list of all of the tags added to the DB
@@ -90,7 +124,7 @@ public class Tag implements Serializable {
 			Color color = Color.get(tags.getString(2));
 			String tag = tags.getString(1);
 			int id = tags.getInt(0);
-			out.add(new Tag(id, tag, color));
+			out.add(new Tag(id, tag, color, ctx));
 		}
 		tags.close();
 		db.close();
@@ -121,11 +155,11 @@ public class Tag implements Serializable {
 		if(o == this) return true;
 		if(o == null || !(o instanceof Tag)) return false;
 		Tag cp= Tag.class.cast(o);
-		return this.tag.equals(cp.tag);
+		return this.name.equals(cp.name);
 	}
 	
 	public int hashCode(){
-		return this.tag.hashCode();
+		return this.name.hashCode();
 	}
 	public JSONObject toJSON() throws JSONException {
 		JSONObject tagString = new JSONObject();

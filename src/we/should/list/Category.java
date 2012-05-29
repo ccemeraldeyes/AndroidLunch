@@ -188,6 +188,11 @@ public abstract class Category {
 	public abstract void save();
 	
 	/**
+	 * Deletes this category from the DB
+	 */
+	public abstract void delete();
+	
+	/**
 	 * Returns the name of this Category
 	 * @return name of this category
 	 */
@@ -264,6 +269,14 @@ public abstract class Category {
 			}
 		}
 		return cat;
+	}
+	public static boolean isSpecial(Category c) {
+		for(Special s : Special.values()){
+			if(s.toString().equals(c.getName())){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public enum Special {

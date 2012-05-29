@@ -137,11 +137,22 @@ public class GenericCategory extends Category {
 				}
 			} else {
 				db.updateCategory(this.id, this.name, this.color.toString(), fieldsToDB().toString());
-				//TODO:Manage color ids
 			}
 			db.close();
 		} else {
 			Log.w("GenericCategory.save()", "Category not saved to database because context is null");
+		}
+	}
+	@Override
+	public void delete(){
+		if(ctx != null && this.id != 0) {
+			WSdb db = new WSdb(ctx);
+			db.open();
+			for(Item i : this.items){
+				i.delete();
+			}
+			db.deleteCategory(this.id);
+			db.close();
 		}
 	}
 	/**

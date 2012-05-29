@@ -38,6 +38,7 @@ import we.should.Color;
 import we.should.database.WSdb;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.util.Log;
 
 public abstract class Item {
@@ -46,12 +47,18 @@ public abstract class Item {
 	Context ctx;
 	Map<Field, String> values;
 	boolean added = false;
+	private Set<Tag> deleteCache;
+	private Category c;
+
 
 	
-	protected Item(Context ctx){
+	protected Item(Category c, Context ctx){
 		this.ctx = ctx;
 		this.id = 0;
 		this.values = new TreeMap<Field, String>();
+		this.c = c;
+		this.deleteCache = new HashSet<Tag>();
+
 	}
 	/**
 	 * @return a set of Address objects corresponding to the location(s) of this.
@@ -70,13 +77,35 @@ public abstract class Item {
 	 * Removes this from the Category object that this was constructed with.
 	 * @modifies this.C
 	 */
-	public abstract void delete();
+	public void delete() {
+		c.removeItem(this);
+		if(this.id != 0){
+			if(this.ctx != null){
+				WSdb db = new WSdb(ctx);
+				db.open();
+				db.deleteItem(this.id);
+				Set<Tag> tags = getTags();	
+				//TODO:  database deletes all item-tags on item delete.  Should I change? -- Troy
+				for(Tag t: tags){
+					db.deleteItemTagRel(this.id, t.getId());
+				}
+				db.close();
+			} else {
+				Log.w("Item.delete()", "This item has no context. Item cannot be deleted from database.");
+			}
+		} else {
+			Log.w("Item.delete()", "This item has not been saved. Item cannot be deleted from database.");
+		}
+	}
+
 	
 	/**
 	 * Returns the category of this item
 	 * @return the category object associated with this item.
 	 */	
-	public abstract Category getCategory();
+	public Category getCategory(){
+		return this.c;
+	}
 	/**
 	 * Returns the fields that this item has
 	 * @return a list of Field objects.
@@ -113,7 +142,56 @@ public abstract class Item {
 	 * @param value - the value that will be assigned to the given field.
 	 * @exception IllegalArgumentException
 	 */
-	public abstract void set(Field key, String value);
+	public void set(Field key, String value){
+		if(ctx == null) {
+			Log.w("GenericItem.save()", "Item not be saved to database because context is null");
+		} else {
+			WSdb db = new WSdb(ctx);
+			db.open();
+			saveTagsToDB(db);
+			try {
+				if (this.id != 0) {
+					db.updateItem(this.id, this.getName(), 
+						this.c.id, dataToDB().toString());
+				} else {
+						this.id = (int) db.insertItem(this.getName(), 
+							this.c.id, dataToDB().toString());
+				}
+				updateTagLinks(db);
+			} catch (SQLiteConstraintException e) {
+				throw new IllegalStateException("There is already an item of that name!");
+			} catch (IllegalArgumentException e) {
+				throw new IllegalArgumentException("Illegal field values!");
+			} finally{
+				db.close();
+			}
+		}
+	}
+	private void saveTagsToDB(WSdb db){
+		Set<Tag> thisTags = this.getTags();
+		List<Tag> dbTags = Tag.getTags(ctx);
+		for(Tag t : deleteCache){
+			db.deleteItemTagRel(id, t.getId());
+		}
+		for(Tag t : thisTags) {
+			int tagID;
+			if (!dbTags.contains(t)) {
+				tagID = (int) db.insertTag(t.toString(), t.getColor().toString());			
+			} else {
+				tagID = dbTags.get(dbTags.indexOf(t)).getId(); //If this tag already exists, it is linked to the db row
+			}
+			t.setId(tagID);
+		}
+		values.put(Field.TAGS, tagsToJSON(thisTags).toString());
+	}
+	private void updateTagLinks(WSdb db){
+		Set<Tag> thisTags = this.getTags();
+		for(Tag t : thisTags){
+			if (!db.isItemTagged(this.id, t.getId())) {
+				db.insertItem_Tag(this.id, t.getId());
+			}
+		}
+	}
 	
 	/**
 	 * Adds this item to the category factory that created it, and saves to the database. 
@@ -121,29 +199,101 @@ public abstract class Item {
 	 * @modifies this.C
 	 * @throws IllegalStateException
 	 */
-	public abstract void save() throws IllegalStateException;
+	public void save() throws IllegalStateException{
+		if(this.c == null){
+			throw new IllegalStateException("This item was not created from a category factory" +
+					"and cannot be saved.");
+		}
+		if(!added) {
+			this.c.addItem(this);
+			this.added = true;
+		}
+		if(ctx == null) {
+			Log.w("GenericItem.save()", "Item not be saved to database because context is null");
+		} else if(this.c.id == 0) {
+			Log.w("GenericItem.save()", "Item cannot be saved to Databse, because its category hasn't been saved to the database");
+		} else {
+			WSdb db = new WSdb(ctx);
+			db.open();
+			saveTagsToDB(db);
+			try {
+				if (this.id != 0) {
+					db.updateItem(this.id, this.getName(), 
+						this.c.id, dataToDB().toString());
+				} else {
+						this.id = (int) db.insertItem(this.getName(), 
+							this.c.id, dataToDB().toString());
+				}
+				updateTagLinks(db);
+			} catch (SQLiteConstraintException e) {
+				throw new IllegalStateException("There is already an item of that name!");
+			} catch (IllegalArgumentException e) {
+				throw new IllegalArgumentException("Illegal field values!");
+			} finally{
+				db.close();
+			}
+		}
+		this.deleteCache = new HashSet<Tag>();
+	}
 	
 	/**
 	 * Returns the set of tags assigned to this item
 	 * @return A Set of tag strings.
 	 */
-	public abstract Set<Tag> getTags();
-	
-	
+	public Set<Tag> getTags(){
+		String tags = this.values.get(Field.TAGS);
+		if(tags == null) tags = "";
+		Set<Tag> result = new HashSet<Tag>();
+		try {
+			JSONArray out = new JSONArray(tags);
+			for(int i = 0; i < out.length(); i++){
+				JSONObject tagString = out.getJSONObject(i);
+				result.add(new Tag(tagString));
+			}
+		} catch (JSONException e) {
+			Log.e("GenericItem.getTags", "Tags string improperly formatted, returning empty set!");
+		}
+		return result;
+	}
 	
 	/**
 	 * Sets the tags in this to match the set passed in tags
 	 * @param tags
 	 */
-	public abstract void setTags(Set<Tag> tags);
+	public void setTags(Set<Tag> tags){
+		Set<Tag> cur = getTags();
+		for(Tag t: cur){
+			if(!tags.contains(t)){
+				this.deleteCache.add(t);
+			}
+		}
+		JSONArray val = tagsToJSON(tags);
+		values.put(Field.TAGS, val.toString());
+	}
+	private JSONArray tagsToJSON(Set<Tag> tags){
+		JSONArray newTags = new JSONArray();
+		for(Tag tag : tags){
+			JSONObject tagString;
+			try {
+				tagString = tag.toJSON();
+			} catch (JSONException e) {
+				Log.e("GenericItem.addTag", "JSON exception when attempting to add tag.");
+				return new JSONArray();
+			}
+			newTags.put(tagString);
+		}
+		return newTags;
+	}
 	
 	
 	/**
 	 * Adds a tag string to this item. If s matches an
 	 * existing tag, it will not be added
 	 * @param s is the tag to be added
+	 * 
+	 * DEPRECATED
 	 */
-	public abstract void addTag(String tag, Color color);
+	//public abstract void addTag(String tag, Color color);
 	
 	/**
 	 * Returns the set of Items that have the given tag
@@ -155,11 +305,30 @@ public abstract class Item {
 		if(ctx == null){
 			throw new IllegalArgumentException("Context cannot be null!");
 		}
-		Set<Item> out = new HashSet<Item>();
-		Map<Integer, Category> cats = new HashMap<Integer, Category>();
 		WSdb db = new WSdb(ctx);
 		db.open();
 		Cursor items = db.getItemsOfTag(tag.getId());
+		return processCursor(db, items, ctx);
+		
+	}
+	/**
+	 * Returns the set of all Items saved to the database
+	 * @param ctx of the db to parse over
+	 * @return a set of Item objects that were saved to the db at the given context
+	 */
+	public static Set<Item> getAllItems(Context ctx){
+		if(ctx == null){
+			throw new IllegalArgumentException("Context cannot be null!");
+		}
+		WSdb db = new WSdb(ctx);
+		db.open();
+		Cursor items = db.getAllItems();
+		return processCursor(db, items, ctx);
+		
+	}
+	private static Set<Item> processCursor(WSdb db, Cursor items, Context ctx){
+		Map<Integer, Category> cats = new HashMap<Integer, Category>();
+		Set<Item> out = new HashSet<Item>();
 		Category cat;
 		Item i;
 		while(items.moveToNext()){
@@ -212,6 +381,7 @@ public abstract class Item {
 		db.close();
 		return out;
 	}
+	
 	/**
 	 * Sets the id of this item for DB lookup.
 	 * Should be set to the return value of a DB insert
@@ -221,23 +391,7 @@ public abstract class Item {
 	protected void setID(int i){
 		this.id = i;
 	}
-	/**
-	 * Restores the values held in this item from a JSONObject DB entry
-	 * @param d
-	 * @throws JSONException
-	 * @modifies this.values
-	 */
-
-	protected void DBtoData(JSONObject d) throws JSONException{
-		@SuppressWarnings("unchecked")
-		Iterator<String> i = d.keys();
-		while(i.hasNext()){
-			String fieldString = i.next();
-			String value = d.getString(fieldString);
-			Field f = new Field(fieldString);
-			this.values.put(f, value);
-		}
-	}
+	
 	public boolean isAdded() {
 		return added;
 	}
@@ -264,5 +418,22 @@ public abstract class Item {
 			}
 		}
 		return out;
+	}
+	/**
+	 * Restores the values held in this item from a JSONObject DB entry
+	 * @param d
+	 * @throws JSONException
+	 * @modifies this.values
+	 */
+
+	protected void DBtoData(JSONObject d) throws JSONException{
+		@SuppressWarnings("unchecked")
+		Iterator<String> i = d.keys();
+		while(i.hasNext()){
+			String fieldString = i.next();
+			String value = d.getString(fieldString);
+			Field f = new Field(fieldString);
+			this.values.put(f, value);
+		}
 	}
 }

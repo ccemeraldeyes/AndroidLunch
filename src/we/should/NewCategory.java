@@ -10,7 +10,6 @@ import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.FieldType;
 import we.should.list.GenericCategory;
-import we.should.list.Tag;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
