@@ -104,7 +104,11 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	/** A comparator to use for tab sorting. **/
 	private Comparator<String> mSorter = new Comparator<String>() {
 		public int compare(String lhs, String rhs) {
-			return mTabContents.get(rhs).size() - mTabContents.get(lhs).size();
+			int out = mTabContents.get(rhs).size() - mTabContents.get(lhs).size();
+			if(out == 0){
+				return lhs.compareTo(rhs);
+			}
+			return out;
 		}
 	};
 	
@@ -186,7 +190,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	if (mSortType.equals(SortType.Category)) {
     		final Category cat = mCategories.get(tabid);
     		
-    		delete.setVisibility((cat == null || cat.getItems().size() > 0) ?
+    		delete.setVisibility((cat == null || cat.getItems().size() > 0 || Category.isSpecial(cat)) ?
     				View.GONE : View.VISIBLE);
     		delete.setOnClickListener(new View.OnClickListener() {
 				
@@ -226,9 +230,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		
     	if (name.equals(ALL_ITEMS_TAG)) {
     		items = new ArrayList<Item>();
-    		for (Category cat : Category.getCategories(this)) {
-    			items.addAll(cat.getItems());
-    		}
+    		items.addAll(Item.getAllItems(getApplicationContext()));
     	} else {
 	    	switch (mSortType) {
 	    	case Category:
