@@ -94,6 +94,7 @@ public class Tag implements Serializable {
 	public void delete(){
 		if(this.ctx != null && this.id != 0){
 			WSdb db = new WSdb(this.ctx);
+			db.open();
 			Set<Item> items = Item.getItemsOfTag(this, this.ctx);
 			Set<Tag> itemTags;
 			for(Item i : items){
