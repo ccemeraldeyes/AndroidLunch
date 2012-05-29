@@ -10,22 +10,28 @@ import we.should.list.Field;
 
 public class IMDBSearchResult extends DetailSearchResult {
 	private final String BASE_URL = "http://m.imdb.com/title/";
-	private String year;
+	private String year, genre;
 	
 	public IMDBSearchResult(JSONObject obj) throws JSONException {
 		super(obj);
-		website = obj.optString("imdbID", null);
+		website = obj.optString("imdbID", "");
 		if(website != null){
 			website = BASE_URL + website;
 		}
 		name = obj.optString("Title", null);
 		year = obj.optString("Year");
+		genre = obj.optString("Genre");
 		
 	}
 	
 	@Override
 	public String getDetail(){
-		return this.year;
+		if (genre.length() > 0){
+			return (this.year + " - " + this.genre);
+		} else {
+			return(this.year);
+		}
+		
 	}
 	@Override
 	public Map<Field, String> asFieldMap() {
