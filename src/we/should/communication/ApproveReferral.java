@@ -176,5 +176,9 @@ public class ApproveReferral extends Activity {
 
 		
 	}
+	
+	public static String getUrl(){
+		return "delete-referrals";
+	}
 
 }

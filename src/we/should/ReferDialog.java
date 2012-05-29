@@ -56,10 +56,7 @@ public class ReferDialog extends Activity {
 		mSend = (Button) findViewById(R.id.send);
 		mSend.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-//				List<String> emails = new ArrayList<String>();
-//				for (String email : mEmails.getText().toString().split(",")) {
-//					emails.add(email.trim());
-//				}
+
 				send(mEmails.getText().toString(), mItem);
 				finish();
 			}
@@ -71,49 +68,28 @@ public class ReferDialog extends Activity {
 	 * @param item 
 	 */
 	private void send(String emails, Item item) {
-//		Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
-//		Account[] accounts = AccountManager.get(getBaseContext()).getAccounts();
-//		String email = "";
-//		for (Account account : accounts) {
-//		    if (emailPattern.matcher(account.name).matches()) {
-//		        email = account.name;
-//		        break;
-//		    }
-//		}
+
 		
 		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
 		String email = settings.getString(WeShouldActivity.ACCOUNT_NAME, "");
 		
 		Log.v("REFER EMAILS", emails);
 		
-		// Create a new HttpClient and Post Header
 		HttpClient httpclient = new DefaultHttpClient();
-		//HttpPost httppost = new HttpPost("http://23.23.237.174/refer");
 
 		try {
-		    // Add your data
 		    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 		    nameValuePairs.add(new BasicNameValuePair("user_email", email));
 		    nameValuePairs.add(new BasicNameValuePair("email_list", emails));
 		    
-//		    List<Field> fields = item.getFields();
-//		    String itemdata = "";
-//		    for(Field f: fields){
-//		    	itemdata+=f.getName()+": "+item.get(f)+",";
-//		    }
-		    	
-		    //Log.v("REFERRAL DATA", itemdata);
+
 		    nameValuePairs.add(new BasicNameValuePair("item_data", mItem.dataToDB().toString()));
 		    nameValuePairs.add(new BasicNameValuePair("item_name", mItem.getName()));
-		    //httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 		    
 		    String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
 		    
 		    HttpGet httpget = new HttpGet("http://23.23.237.174/refer?"+paramString);
 
-		    
-		    
-		    // Execute HTTP Post Request
 		    HttpResponse response = httpclient.execute(httpget);
 		    
 		    System.out.println(response.toString());
