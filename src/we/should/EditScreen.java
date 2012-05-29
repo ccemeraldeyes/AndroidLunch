@@ -13,9 +13,9 @@ import we.should.list.Field;
 import we.should.list.Item;
 import we.should.list.Movies;
 import we.should.list.Tag;
-import we.should.search.DetailPlace;
+import we.should.search.DetailSearchResult;
 import we.should.search.MovieRequest;
-import we.should.search.Place;
+import we.should.search.SearchResult;
 import we.should.search.PlaceRequest;
 import we.should.search.Search;
 
@@ -82,7 +82,7 @@ public class EditScreen extends Activity {
 	private List<Tag> mAllTags;
 	
 	/** Async location lookup **/
-	private AsyncTask<String, Void, List<Place>> mLookup;
+	private AsyncTask<String, Void, List<SearchResult>> mLookup;
 	
 	/** Search Object **/
 	private Search mSearch;
@@ -136,7 +136,7 @@ public class EditScreen extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				PlaceAdapter pa = (PlaceAdapter) mName.getAdapter();
-				fillFields((Place) pa.getItem(position));
+				fillFields((SearchResult) pa.getItem(position));
 			}
 			
 		});
@@ -351,8 +351,8 @@ public class EditScreen extends Activity {
 	/**
 	 * Fills in any fields from the selected place.
 	 */
-	private void fillFields(Place place) {
-		DetailPlace detailPlace;
+	private void fillFields(SearchResult place) {
+		DetailSearchResult detailPlace;
 		if(mCat instanceof Movies){
 			detailPlace = (new MovieRequest()).searchDetail(place.getName());
 		} else {
@@ -412,7 +412,7 @@ public class EditScreen extends Activity {
         .setNegativeButton(R.string.no, null)
         .show();
 	}
-	private class DoSuggestionLookup extends AsyncTask<String, Void, List<Place>> {
+	private class DoSuggestionLookup extends AsyncTask<String, Void, List<SearchResult>> {
 
 		Context ctx;
 		
@@ -420,8 +420,8 @@ public class EditScreen extends Activity {
 			this.ctx = ctx;
 		}
 		
-		protected List<Place> doInBackground(String... params) {
-			List<Place> places = new ArrayList<Place>();
+		protected List<SearchResult> doInBackground(String... params) {
+			List<SearchResult> places = new ArrayList<SearchResult>();
 			try {
 				if(!isCancelled()){
 					places = mSearch.search(params[0]);
@@ -432,7 +432,7 @@ public class EditScreen extends Activity {
 			}
 			return places;
 		}
-		protected void onPostExecute(List<Place> result){
+		protected void onPostExecute(List<SearchResult> result){
 			if(result != null) {
 				Log.i("AsyncSuggestionLookup", "Updated adapter");
 				PlaceAdapter pa = new PlaceAdapter(ctx, result);

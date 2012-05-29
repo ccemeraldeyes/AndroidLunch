@@ -1,5 +1,10 @@
 package we.should.search;
 
+/**
+ * This is an abstract class to be used in performing item suggestion lookups.
+ * Subclass this to create a new type of search method. 
+ *
+ */
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,12 +20,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public abstract class Search {
-
-	public abstract List<Place> search(String query) throws Exception;
 	
 	/**
+	 * Override this method to return a list of SearchResult objects produced from a string
+	 * query
+	 * @param query
+	 * @return a list of SearchResult objects that reflect the search query string
+	 * 
+	 */
+	public abstract List<SearchResult> search(String query);
+	
+	/**
+	 * Executes an HTTP get query on the given URI and returns the resulting JSON object.
+	 * 
 	 * @param url - the url to execute.
-	 * @return a JSONObject from Google Place API
+	 * @return a JSONObject of the result
 	 * @throws JSONException
 	 * @throws ClientProtocolException
 	 * @throws IOException

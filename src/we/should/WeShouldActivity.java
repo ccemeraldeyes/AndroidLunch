@@ -232,7 +232,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     
     /**
      * This method remove all the pin in current map 
-     * and create a list of pins base on the item it is given.
+     * and create a list of pins base on the item it is given, and 
+     * zooms to contain all of the addresses specified in items.
      * 
      * @param color - Enum constant
      * @param items - the items that needed to create the pin for.
@@ -251,7 +252,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		int minLong = minLat;
 		int maxLat = Integer.MIN_VALUE;
 		int maxLong = maxLat;
-		boolean zoom = false;
+		boolean zoom = false; 
     	for (Item item : items) {
     		Set<Address> addrs = item.getAddresses();
     		for(Address addr : addrs) {
@@ -269,6 +270,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 				}
     		}
     	}
+    	//If no items have valid addresses (or no items) the zoom wont be changed
     	if (zoom) {
 			/**Zoom to contain all of the pins and current location**/
 			GeoPoint p = getDeviceLocation();

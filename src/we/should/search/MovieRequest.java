@@ -14,13 +14,12 @@ public class MovieRequest extends Search {
 	private final String SCHEME = "http";
 	private final String PLACES_SEARCH_URL =  "//www.imdbapi.com/?t=";
 	public final String LOG_KEY = "WeShould.MovieRequest";
-	private IMDBRecord cache = null;
 	
 	public MovieRequest() {}
 	
 	
-	public List<Place> search(String query){
-		List<Place> out = new ArrayList<Place>();
+	public List<SearchResult> search(String query){
+		List<SearchResult> out = new ArrayList<SearchResult>();
 		String baseUrl = PLACES_SEARCH_URL;
         String url = baseUrl + query.trim();
     	Log.v(LOG_KEY, "build string url is: " + url);
@@ -39,7 +38,7 @@ public class MovieRequest extends Search {
 		}
 		Log.v(LOG_KEY, response.toString());
 		try {
-			Place m = new IMDBRecord(response);
+			SearchResult m = new IMDBSearchResult(response);
 			out.add(m);
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -53,11 +52,11 @@ public class MovieRequest extends Search {
 	 * @param reference
 	 * @return
 	 */
-	public DetailPlace searchDetail(String reference) {
-		List<Place> out = search(reference);
-		DetailPlace ret = null;
+	public DetailSearchResult searchDetail(String reference) {
+		List<SearchResult> out = search(reference);
+		DetailSearchResult ret = null;
 		if(out.size() > 0){
-			ret = (IMDBRecord) out.get(0);
+			ret = (IMDBSearchResult) out.get(0);
 		}
 		return ret;
 	}
