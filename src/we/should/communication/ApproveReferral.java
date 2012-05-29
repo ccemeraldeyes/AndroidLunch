@@ -58,6 +58,8 @@ public class ApproveReferral extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		
 		final Context c = this.getApplicationContext(); 
+		final SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
+
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.approve_referral);
@@ -120,7 +122,7 @@ public class ApproveReferral extends Activity {
 
 				}
 				
-				deleteRefs(list);
+				deleteRefs(list, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
 				
 				finish();
 			}
@@ -133,15 +135,14 @@ public class ApproveReferral extends Activity {
 	 * 
 	 * @param referrals the list of Referral objects to be deleted from the remote database
 	 */
-	public void deleteRefs(List<Referral> referrals){
+	public void deleteRefs(List<Referral> referrals, String email){
 		
 		Log.v("DELETE REFERRALS", "deleting");
-		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
 		
 		HttpClient httpclient = new DefaultHttpClient();
 		
 	    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-	    nameValuePairs.add(new BasicNameValuePair("user_email", settings.getString(WeShouldActivity.ACCOUNT_NAME, "")));
+	    nameValuePairs.add(new BasicNameValuePair("user_email", email));
 		
 	    JSONArray listArray = new JSONArray();
 	    
