@@ -214,20 +214,7 @@ public abstract class Category {
 			 String name = c.getString(1);
 			 String color = c.getString(2);
 			 String schema = c.getString(3);
-			 if (name.equals(Category.Special.Movies.toString())){
-				 cat = new Movies(ctx);
-			 } else if(name.equals(Category.Special.Referrals.toString())) {
-				 cat = new Referrals(ctx);
-			 } else {
-				JSONArray schemaList;
-				try {
-					schemaList = new JSONArray(schema);
-					cat = new GenericCategory(name, schemaList, ctx);
-				} catch (JSONException e) {
-					Log.e("Category.getCategories", "Field Schema improperly formatted!", e);
-					cat = new GenericCategory(name, new LinkedList<Field>(), ctx);
-				}
-			 }
+			 cat = categoryFromDB(name, schema, ctx);
 			 cat.id = id;
 			 cat.color = PinColor.get(color);
 			 out.add(cat);
@@ -235,6 +222,31 @@ public abstract class Category {
 		c.close(); // added by Troy
 		db.close();
 		return out;
+	}
+	/**
+	 * Returns the correct class of category given its name and data
+	 * @param name
+	 * @param schema
+	 * @param ctx
+	 * @return a category object that reflects the given special name
+	 */
+	protected static Category categoryFromDB(String name, String schema, Context ctx){
+		Category cat = null;
+		if (name.equals(Category.Special.Movies.toString())){
+			 cat = new Movies(ctx);
+		 } else if(name.equals(Category.Special.Referrals.toString())) {
+			 cat = new Referrals(ctx);
+		 } else {
+			JSONArray schemaList;
+			try {
+				schemaList = new JSONArray(schema);
+				cat = new GenericCategory(name, schemaList, ctx);
+			} catch (JSONException e) {
+				Log.e("Category.getCategories", "Field Schema improperly formatted!", e);
+				cat = new GenericCategory(name, new LinkedList<Field>(), ctx);
+			}
+		 }
+		return cat;
 	}
 	JSONArray fieldsToDB(){
 		JSONArray out = new JSONArray();

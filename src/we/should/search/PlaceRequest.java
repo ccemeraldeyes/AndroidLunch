@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import com.google.android.maps.GeoPoint;
 
-import android.location.Location;
 import android.util.Log;
 
 /**
