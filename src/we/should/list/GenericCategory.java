@@ -60,7 +60,6 @@ public class GenericCategory extends Category {
 					Log.w("GenericCategory.getItems()", "Couldn't fill data from DB " + itemData.get(i).toString());
 				}
 				nIt.id = i;
-				if(!this.items.contains(nIt)) this.items.add(nIt);
 				nIt.added = true;
 			}
 			sync = true;
@@ -103,6 +102,7 @@ public class GenericCategory extends Category {
 	@Override
 	public Item newItem() {
 		Item i = new GenericItem(this, ctx);
+		sync = false;
 		return i;
 	}
 	

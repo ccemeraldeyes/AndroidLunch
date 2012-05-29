@@ -48,7 +48,7 @@ public abstract class Item {
 	Map<Field, String> values;
 	boolean added = false;
 	private Set<Tag> deleteCache;
-	private Category c;
+	protected Category c;
 
 
 	

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.android.maps.GeoPoint;
+
 import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.Item;
@@ -173,10 +175,19 @@ public class EditScreen extends Activity {
 		mAllTags = new ArrayList<Tag>(Tag.getTags(this));
 		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		GeoPoint here = null;
+		if(location == null) {
+	    	 Log.w("getDeviceLocation", "Couldn't get location providers for this device.");
+	    	 return;
+	     } else {
+		     int myLocX = (int) (location.getLatitude() * 1E6);
+			 int myLocY = (int) (location.getLongitude() * 1E6);
+		     here = new GeoPoint(myLocX, myLocY);
+		}
 		if(mCat instanceof Movies){
 			mSearch = new MovieRequest();
 		} else {
-			mSearch = new PlaceRequest(location);
+			mSearch = new PlaceRequest(here);
 		}
 	}
 	
@@ -423,7 +434,7 @@ public class EditScreen extends Activity {
 		protected List<SearchResult> doInBackground(String... params) {
 			List<SearchResult> places = new ArrayList<SearchResult>();
 			try {
-				if(!isCancelled()){
+				if(!isCancelled() && mSearch != null){
 					places = mSearch.search(params[0]);
 				}
 			} catch (Exception e) {
@@ -433,7 +444,7 @@ public class EditScreen extends Activity {
 			return places;
 		}
 		protected void onPostExecute(List<SearchResult> result){
-			if(result != null) {
+			if(result != null && result.size() > 0) {
 				Log.i("AsyncSuggestionLookup", "Updated adapter");
 				PlaceAdapter pa = new PlaceAdapter(ctx, result);
 				mName.setAdapter(pa);

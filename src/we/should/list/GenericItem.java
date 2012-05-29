@@ -34,11 +34,9 @@ import android.util.Log;
 
 public class GenericItem extends Item {
 	public static final Locale DEFAULT_LOCALE = Locale.US; 
-	protected Category c;
 		
 	protected GenericItem(Category c, Context ctx) {
 		super(c, ctx);
-		this.c = c;
 		List<Field> fields = this.getFields();
 		for(Field i : fields){
 			if (i.getType().equals(FieldType.CheckBox)) {

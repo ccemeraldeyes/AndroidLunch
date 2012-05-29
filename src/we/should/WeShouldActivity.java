@@ -3,6 +3,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -225,7 +226,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	    		break;
 	    	}
     	}
-    	mAdapter = new ItemAdapter(WeShouldActivity.this, sortByDistance(items));
+    	List<Item> sortedItems = sortByDistance(items);
+    	mAdapter = new ItemAdapter(WeShouldActivity.this, sortedItems);
     	mAdapter.notifyDataSetChanged();
     	updatePins(color, items);
 	}
@@ -735,11 +737,14 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @return a list of items sorted by distance
 	 */
 	private List<Item> sortByDistance(List<Item> items){
+		if(items == null || items.size() == 0) return new ArrayList<Item>();
 		SortedMap<Double, Item> sortedByDistance = new TreeMap<Double, Item>();
 		GeoPoint here = getDeviceLocation();
+		Set<Item> invalidCache = new HashSet<Item>();
 		for(Item i : items){
-			Set<Address> addresses = i.getAddresses();
+			boolean valid = false;
 			double dist = Integer.MAX_VALUE;
+			Set<Address> addresses = i.getAddresses();
 			for(Address addr: addresses){
 				GeoPoint placeLocation = null;
 				if(addr.hasLatitude() && addr.hasLongitude()) {
@@ -747,9 +752,17 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					int locY = (int) (addr.getLongitude() * 1E6);
 	    			placeLocation = new GeoPoint(locX, locY);
 				}
-				if(placeLocation != null && here != null) dist = Math.min(dist, distanceBetween(here, placeLocation));
+				if(placeLocation != null && here != null){
+					dist = Math.min(dist, distanceBetween(here, placeLocation));
+					valid = true;
+				}
 			}
-			sortedByDistance.put(dist, i);
+			if(!valid) invalidCache.add(i); //This is a hack to ensure unique keys
+			else sortedByDistance.put(dist, i);
+		}
+		double dist = Integer.MAX_VALUE - items.size() + 1;
+		for(Item i : invalidCache){
+			sortedByDistance.put(dist + items.indexOf(i), i);
 		}
 		Collection<Item> sortedItems = sortedByDistance.values();
 		List<Item> out = new ArrayList<Item>();
@@ -812,7 +825,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * google support zoomToSpan, try their best to fit two points in the same view.
 	 * 
 	 * @param point - point 1 to be include in the view
-	 * @param point2 - point2 to be include in the view
+	 * @param point2 - point 2 to be include in the view
 	 * 	 
 	 * @throws IllegalArgumentException when the point is null
 	 */

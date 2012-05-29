@@ -112,9 +112,8 @@ public abstract class Category {
 					Log.w("GenericCategory.getItems()", "Couldn't fill data from DB " + itemData.get(i).toString());
 				}
 				nIt.id = i;
-				if(!this.items.contains(nIt)) this.items.add(nIt);
 				nIt.added = true;
-				
+	
 			}
 			sync = true;
 		}

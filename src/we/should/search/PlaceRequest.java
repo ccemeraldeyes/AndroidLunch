@@ -7,6 +7,8 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.google.android.maps.GeoPoint;
+
 import android.location.Location;
 import android.util.Log;
 
@@ -30,9 +32,9 @@ public class PlaceRequest extends Search{
 	private static final String PLACES_DETAIL_SEARCH = "//maps.googleapis.com/maps/api/place/details/json?";
 	public static final String LOG_KEY = "WeShould.search";
 	
-	private Location l;
+	private GeoPoint l;
 	
-	public PlaceRequest(Location l) {
+	public PlaceRequest(GeoPoint l) {
 		this.l = l;
 	}
 	
@@ -48,7 +50,7 @@ public class PlaceRequest extends Search{
 	//Note that Location can be get by getting the Device Location, on when user click on the map, we can get the location.
 	public List<SearchResult> search(String searchname){
 		if(l == null || searchname == null) {
-			throw new IllegalArgumentException("input is null");
+			throw new IllegalArgumentException("input is null, or location is null");
 		}
 		
 		Log.v(LOG_KEY, "Start SearchByLocation: " + searchname +".");
@@ -123,11 +125,11 @@ public class PlaceRequest extends Search{
 	 * @return url for the searchByLocation query
 	 * @throws URISyntaxException 
 	 */
-    private URI buildURLForGooglePlaces(Location myLocation, String searchName) 
+    private URI buildURLForGooglePlaces(GeoPoint myLocation, String searchName) 
     		throws URISyntaxException{
         String baseUrl = PLACES_SEARCH_URL;
-        String lat = String.valueOf(myLocation.getLatitude());
-        String lon = String.valueOf(myLocation.getLongitude());
+        String lat = String.valueOf(myLocation.getLatitudeE6()*1.0/1E6);
+        String lon = String.valueOf(myLocation.getLongitudeE6()*1.0/1E6);
         String url = baseUrl + "location=" + lat + "," + lon + "&" +
                      "rankby=distance" + "&" + "sensor=true" +
                      "&" + "name=" + searchName +
