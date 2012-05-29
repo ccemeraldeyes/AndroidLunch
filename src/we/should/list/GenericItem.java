@@ -38,10 +38,9 @@ import android.util.Log;
 public class GenericItem extends Item {
 	public static final Locale DEFAULT_LOCALE = Locale.US; 
 	protected Category c;
-	private Set<Tag> deleteCache;
 		
 	protected GenericItem(Category c, Context ctx) {
-		super(ctx);
+		super(c, ctx);
 		this.c = c;
 		List<Field> fields = this.getFields();
 		for(Field i : fields){
@@ -51,7 +50,6 @@ public class GenericItem extends Item {
 				values.put(i, "");
 			}
 		}
-		deleteCache = new HashSet<Tag>();
 		checkRep();
 	}
 	/**
@@ -106,29 +104,6 @@ public class GenericItem extends Item {
 	public String getComment() {
 		return values.get(Field.COMMENT); 
 	}
-
-	@Override
-	public void delete() {
-		c.removeItem(this);
-		if(this.id != 0){
-			if(this.ctx != null){
-				WSdb db = new WSdb(ctx);
-				db.open();
-				db.deleteItem(this.id);
-				Set<Tag> tags = getTags();	
-				//TODO:  database deletes all item-tags on item delete.  Should I change? -- Troy
-				for(Tag t: tags){
-					db.deleteItemTagRel(this.id, t.getId());
-				}
-				db.close();
-			} else {
-				Log.w("Item.delete()", "This item has no context. Item cannot be deleted from database.");
-			}
-		} else {
-			Log.w("Item.delete()", "This item has not been saved. Item cannot be deleted from database.");
-		}
-	}
-
 	@Override
 	public String get(Field key) throws IllegalArgumentException{
 		if(key.equals(Field.TAGS)){
@@ -179,123 +154,6 @@ public class GenericItem extends Item {
 		}
 		checkRep();
 	}
-	
-	@Override
-	public void save() {
-		checkRep();
-		if(this.c == null){
-			throw new IllegalStateException("This item was not created from a category factory" +
-					"and cannot be saved.");
-		}
-		if(!added) {
-			this.c.addItem(this);
-			this.added = true;
-		}
-		if(ctx == null) {
-			Log.w("GenericItem.save()", "Item not be saved to database because context is null");
-		} else if(this.c.id == 0) {
-			Log.w("GenericItem.save()", "Item cannot be saved to Databse, because its category hasn't been saved to the database");
-		} else {
-			WSdb db = new WSdb(ctx);
-			db.open();
-			saveTagsToDB(db);
-			try {
-				if (this.id != 0) {
-					db.updateItem(this.id, this.getName(), 
-						this.c.id, dataToDB().toString());
-				} else {
-						this.id = (int) db.insertItem(this.getName(), 
-							this.c.id, dataToDB().toString());
-				}
-				updateTagLinks(db);
-			} catch (SQLiteConstraintException e) {
-				throw new IllegalStateException("There is already an item of that name!");
-			} catch (IllegalArgumentException e) {
-				throw new IllegalArgumentException("Illegal field values!");
-			} finally{
-				db.close();
-			}
-		}
-		checkRep();
-	}
-
-	
-	@Override
-	public void addTag(String tag, Color color) {
-		Set<Tag> tags = this.getTags();
-		if (!tags.contains(new Tag(0,tag, color))){
-			tags.add(new Tag(0, tag, color));
-			JSONArray newTags = tagsToJSON(tags);
-			values.put(Field.TAGS, newTags.toString());
-		}
-	}
-	@Override
-	public Set<Tag> getTags(){
-		String tags = this.values.get(Field.TAGS);
-		if(tags == null) tags = "";
-		Set<Tag> result = new HashSet<Tag>();
-		try {
-			JSONArray out = new JSONArray(tags);
-			for(int i = 0; i < out.length(); i++){
-				JSONObject tagString = out.getJSONObject(i);
-				result.add(new Tag(tagString));
-			}
-		} catch (JSONException e) {
-			Log.e("GenericItem.getTags", "Tags string improperly formatted, returning empty set!");
-		}
-		return result;
-	}
-	@Override
-	public void setTags(Set<Tag> tags){
-		Set<Tag> cur = getTags();
-		for(Tag t: cur){
-			if(!tags.contains(t)){
-				deleteCache.add(t);
-			}
-		}
-		JSONArray val = tagsToJSON(tags);
-		values.put(Field.TAGS, val.toString());
-	}
-	
-	private void saveTagsToDB(WSdb db){
-		Set<Tag> thisTags = this.getTags();
-		List<Tag> dbTags = Tag.getTags(ctx);
-		for(Tag t : deleteCache){
-			db.deleteItemTagRel(id, t.getId());
-		}
-		for(Tag t : thisTags) {
-			int tagID;
-			if (!dbTags.contains(t)) {
-				tagID = (int) db.insertTag(t.toString(), t.getColor().toString());//TODO: Davis tags include colors				
-			} else {
-				tagID = dbTags.get(dbTags.indexOf(t)).getId(); //If this tag already exists, it is linked to the db row
-			}
-			t.setId(tagID);
-		}
-		values.put(Field.TAGS, tagsToJSON(thisTags).toString());
-	}
-	private void updateTagLinks(WSdb db){
-		Set<Tag> thisTags = this.getTags();
-		for(Tag t : thisTags){
-			if (!db.isItemTagged(this.id, t.getId())) {
-				db.insertItem_Tag(this.id, t.getId());
-			}
-		}
-	}
-	private JSONArray tagsToJSON(Set<Tag> tags){
-		JSONArray newTags = new JSONArray();
-		for(Tag tag : tags){
-			JSONObject tagString;
-			try {
-				tagString = tag.toJSON();
-			} catch (JSONException e) {
-				Log.e("GenericItem.addTag", "JSON exception when attempting to add tag.");
-				return new JSONArray();
-			}
-			newTags.put(tagString);
-		}
-		return newTags;
-	}
 	private JSONObject addressToJSON(Address a, String addressString){
 		JSONObject out = new JSONObject();
 		try{
@@ -307,7 +165,9 @@ public class GenericItem extends Item {
 				out.put("lat", false);
 				out.put("long", false);
 			}
-		} catch (JSONException je){}
+		} catch (JSONException je){
+			throw new IllegalArgumentException("Address improperly formatted: " + addressString); 
+		}
 		return out;
 	}
 	private Address JSONToAddress(String add){
