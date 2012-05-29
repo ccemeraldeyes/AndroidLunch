@@ -507,9 +507,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			
 			Category cat = mCategories.get(tag);
 			if (cat == null) {
-				for (Category c : Category.getCategories(WeShouldActivity.this)) {
-					itemsList.addAll(c.getItems());
-				}
+				itemsList.addAll(Item.getAllItems(getApplicationContext()));
 			} else {
 				itemsList.addAll(cat.getItems());
 			}
