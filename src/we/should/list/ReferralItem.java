@@ -52,16 +52,16 @@ public class ReferralItem extends GenericItem {
 
 	@SuppressWarnings("unchecked")
 	protected void DBtoData(JSONObject d) throws JSONException{
-		Log.i("Referral DBtoData", "Adding Item Specific Fields.");
 		this.fields = new LinkedList<Field>();
 		super.DBtoData(d);
+		//Log.i("Referral DBtoData", "Adding Item Specific Fields for: " + d.toString());
 		Iterator<String> keys = d.keys();
 		String k;
 		while(keys.hasNext()){
 			k = keys.next();
 			fields.add(new Field(k));
 		}
-		Log.i("Referral DBtoData", this.fields.toString());
+		//Log.i("Referral DBtoData", this.fields.toString());
 		Collections.sort(fields);
 	}
 }
