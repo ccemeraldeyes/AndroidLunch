@@ -246,7 +246,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	List<Item> sortedItems = sortByDistance(items);
     	mAdapter = new ItemAdapter(WeShouldActivity.this, sortedItems);
     	mAdapter.notifyDataSetChanged();
-    	updatePins(color, items);
+    	updatePins(items);
 	}
     
     /**
@@ -257,16 +257,13 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
      * @param color - Enum constant
      * @param items - the items that needed to create the pin for.
      */
-    private void updatePins(PinColor color, List<Item> items){
+    private void updatePins(List<Item> items){
     	//clear the pin everytime we load a new tab.
     	for(CustomPinPoint pin : lstPinPoints) {
     		overlayList.remove(pin);
     	}
     	lstPinPoints.clear();
     	
-    	if(color == null || items == null) {
-    		throw new RuntimeException("fail to get item from category or tags");
-    	}
     	int minLat = Integer.MAX_VALUE;
 		int minLong = minLat;
 		int maxLat = Integer.MIN_VALUE;
@@ -285,6 +282,10 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     				maxLat = Math.max(maxLat, locX);
     				maxLong = Math.max(maxLong, locY);
         			GeoPoint placeLocation = new GeoPoint(locX, locY);
+        			PinColor color = item.getCategory().getColor();
+        			if(color == null || items == null) {
+        	    		throw new RuntimeException("fail to get item from category or tags");
+        	    	}
         			addPin(placeLocation, color, item, false);
 				}
     		}

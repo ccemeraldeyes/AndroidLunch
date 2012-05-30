@@ -29,6 +29,8 @@ import android.widget.Toast;
 
 public class ViewAdapter extends ArrayAdapter<Field> {
 	
+	private static final int DEFAULT_COLOR = Color.GREEN;
+	
 	/** The context to use for our actionable views. **/
 	private Context mContext;
 	
@@ -116,7 +118,7 @@ public class ViewAdapter extends ArrayAdapter<Field> {
 		
 		final ViewHolder finalHolder = holder;
 		if (field.equals(Field.PHONENUMBER)) {
-			((TextView) finalHolder.value).setTextColor(Color.BLUE);
+			((TextView) finalHolder.value).setTextColor(DEFAULT_COLOR);
 			convertView.setOnClickListener(new View.OnClickListener() {
 				/** Call the phone number. **/
 				public void onClick(View arg0) {
@@ -126,7 +128,7 @@ public class ViewAdapter extends ArrayAdapter<Field> {
 				}
 			});
 		} else if (field.equals(Field.WEBSITE)) {
-			((TextView) finalHolder.value).setTextColor(Color.BLUE);
+			((TextView) finalHolder.value).setTextColor(DEFAULT_COLOR);
 			convertView.setOnClickListener(new View.OnClickListener() {
 				/** Go to the web site. **/
 				public void onClick(View v) {
@@ -145,7 +147,7 @@ public class ViewAdapter extends ArrayAdapter<Field> {
 			final Address add = mItem.getAddresses().iterator().next(); //Doesn't handle multiple addresses yet.
 			/** Map to the address location if clicked **/
 			if(add.hasLatitude() && add.hasLongitude()) {
-				((TextView) finalHolder.value).setTextColor(Color.BLUE);
+				((TextView) finalHolder.value).setTextColor(DEFAULT_COLOR);
 				convertView.setOnClickListener(new View.OnClickListener() {
 					/** Go to google maps. **/
 					public void onClick(View v) {
