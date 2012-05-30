@@ -60,6 +60,7 @@ public class RestoreService extends IntentService{
 		Intent weshouldactivity = new Intent();
 		weshouldactivity.setClass(getApplicationContext(), WeShouldActivity.class);
 		weshouldactivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		weshouldactivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		this.startActivity(weshouldactivity);
 	}
 

@@ -66,7 +66,7 @@ public class GetReferralsService extends IntentService {
 		String ns = Context.NOTIFICATION_SERVICE;
 		NotificationManager nm = (NotificationManager) getSystemService(ns);
 		
-		int icon = R.drawable.restaurant;
+		int icon = R.drawable.referrals;
 		String tickerText = "New referrals!";
 		long when = System.currentTimeMillis();
 		Notification notification = new Notification(icon, tickerText, when);
