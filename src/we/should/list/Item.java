@@ -178,7 +178,7 @@ public abstract class Item {
 			if (!dbTags.contains(t)) {
 				tagID = (int) db.insertTag(t.toString(), t.getColor().toString());			
 			} else {
-				tagID = dbTags.get(dbTags.indexOf(t)).getId(); //If this tag already exists, it is linked to the db row
+				tagID = dbTags.get(dbTags.indexOf(t)).getId(); //If this tag already exists (name comparison), it is linked to the db row
 			}
 			t.setId(tagID);
 		}
@@ -204,6 +204,7 @@ public abstract class Item {
 			throw new IllegalStateException("This item was not created from a category factory" +
 					"and cannot be saved.");
 		}
+		c.sync = false;
 		if(!added) {
 			this.c.addItem(this);
 			this.added = true;
@@ -340,19 +341,7 @@ public abstract class Item {
 				String name = c.getString(1);
 				String color = c.getString(2);
 				String schema = c.getString(3);
-				if (name.equals("Movies")) {
-					cat = new Movies(ctx);
-				} else {
-					JSONArray schemaList;
-					try {
-						schemaList = new JSONArray(schema);
-						cat = new GenericCategory(name, schemaList, ctx);
-					} catch (JSONException e) {
-						Log.e("Category.getCategories",
-								"Field Schema improperly formatted!", e);
-						return null;
-					}
-				}
+				cat = Category.categoryFromDB(name, schema, ctx);
 				cat.id = catId;
 				cat.color = PinColor.get(color);
 				cats.put(catId, cat);
@@ -360,11 +349,7 @@ public abstract class Item {
 			} else {
 				cat = cats.get(catId);
 			}
-			if (cat.getName().equals(Category.Special.Movies.toString())) {
-				i = new MovieItem(cat, ctx);
-			} else {
-				i = new GenericItem(cat, ctx);
-			}
+			i = cat.newItem();
 			i.setID(id);
 			JSONObject data;
 			try { 

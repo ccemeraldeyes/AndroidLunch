@@ -31,6 +31,13 @@ public abstract class Search {
 	public abstract List<SearchResult> search(String query);
 	
 	/**
+	 * Returns the details of a specific search item associated with the given
+	 * reference string
+	 * @param reference
+	 * @return
+	 */
+	public abstract DetailSearchResult searchDetail(String reference);
+	/**
 	 * Executes an HTTP get query on the given URI and returns the resulting JSON object.
 	 * 
 	 * @param url - the url to execute.

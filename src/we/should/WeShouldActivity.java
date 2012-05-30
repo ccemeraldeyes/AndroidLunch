@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Criteria;
@@ -123,7 +122,8 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private String towers;
 	private MyLocationOverlay myLocationOverlay;
 	private List<Overlay> overlayList;
-	private ImageButton zoomButton;
+	private ImageButton zoomButton;    
+
 	
 	//protected WSdb db;
 	protected String DBFILE;
@@ -139,7 +139,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
         map = (MapView) findViewById(R.id.mapview);       
         controller = map.getController();
         overlayList = map.getOverlays();
@@ -178,6 +177,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
         	zoomLocation(location);
         }
         map.postInvalidate();    
+    	
     }
     
     /**
@@ -447,7 +447,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		SharedPreferences settings = getSharedPreferences(WeShouldActivity.PREFS, 0);
 		switch (item.getItemId()) {
 		case R.id.restore:
-
 			Intent service = new Intent(this, RestoreService.class);
 			service.putExtra(WeShouldActivity.ACCOUNT_NAME, settings.getString(WeShouldActivity.ACCOUNT_NAME, ""));
 			startService(service);
@@ -844,7 +843,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @return Drawable the pin represent for that color.
 	 */
 	private Drawable getDrawable(PinColor color) {
-		if(color == null) { // || color.length() != 6) {
+		if(color == null) {
 			throw new IllegalArgumentException("color is null or " +
 					"color string is suppose to be six characters");
 		}

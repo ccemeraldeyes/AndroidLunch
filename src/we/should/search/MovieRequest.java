@@ -3,7 +3,9 @@ package we.should.search;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,11 +17,20 @@ public class MovieRequest extends Search {
 	private final String PLACES_SEARCH_URL =  "//www.imdbapi.com/?t=";
 	public final String LOG_KEY = "WeShould.MovieRequest";
 	
-	public MovieRequest() {}
+	private final Map<String, SearchResult> cache; //This reduces time for item filling. 
+	
+	public MovieRequest() {
+		cache = new HashMap<String, SearchResult>();
+	}
 	
 	
 	public List<SearchResult> search(String query){
 		List<SearchResult> out = new ArrayList<SearchResult>();
+		if(cache.containsKey(query)) {
+			out.add(cache.get(query));
+			return out;
+		}
+
 		String baseUrl = PLACES_SEARCH_URL;
         String url = baseUrl + query.trim();
     	Log.v(LOG_KEY, "build string url is: " + url);
@@ -43,6 +54,7 @@ public class MovieRequest extends Search {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		for(SearchResult s : out) cache.put(s.getName(), s);
 		return out;
 		
 	}

@@ -159,7 +159,10 @@ public class Tag implements Serializable {
 		Tag cp= Tag.class.cast(o);
 		return this.name.equals(cp.name);
 	}
-	
+	/**
+	 * This ensures that tags of the same name, but different color
+	 * (caused by a referral) are merged together.
+	 */
 	public int hashCode(){
 		return this.name.hashCode();
 	}

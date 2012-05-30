@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.util.Log;
 
 /**
  * This is a specific item class used for referrals from other users. Its fields
@@ -53,13 +54,14 @@ public class ReferralItem extends GenericItem {
 	protected void DBtoData(JSONObject d) throws JSONException{
 		this.fields = new LinkedList<Field>();
 		super.DBtoData(d);
+		//Log.i("Referral DBtoData", "Adding Item Specific Fields for: " + d.toString());
 		Iterator<String> keys = d.keys();
 		String k;
 		while(keys.hasNext()){
 			k = keys.next();
 			fields.add(new Field(k));
 		}
-
+		//Log.i("Referral DBtoData", this.fields.toString());
 		Collections.sort(fields);
 	}
 }
