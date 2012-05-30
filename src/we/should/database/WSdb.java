@@ -821,7 +821,7 @@ public class WSdb {
 	public boolean Restore (String data){
 		Log.v("db.Restore", "Arg data="+data);
 		
-		if (data==null)
+		if (data==null||data.length()==0)
 			return false;
 		
 		rebuildTables();
