@@ -843,7 +843,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	 * @return Drawable the pin represent for that color.
 	 */
 	private Drawable getDrawable(PinColor color) {
-		if(color == null) { // || color.length() != 6) {
+		if(color == null) {
 			throw new IllegalArgumentException("color is null or " +
 					"color string is suppose to be six characters");
 		}
