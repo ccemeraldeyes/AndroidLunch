@@ -178,7 +178,7 @@ public abstract class Item {
 			if (!dbTags.contains(t)) {
 				tagID = (int) db.insertTag(t.toString(), t.getColor().toString());			
 			} else {
-				tagID = dbTags.get(dbTags.indexOf(t)).getId(); //If this tag already exists, it is linked to the db row
+				tagID = dbTags.get(dbTags.indexOf(t)).getId(); //If this tag already exists (name comparison), it is linked to the db row
 			}
 			t.setId(tagID);
 		}
@@ -204,6 +204,7 @@ public abstract class Item {
 			throw new IllegalStateException("This item was not created from a category factory" +
 					"and cannot be saved.");
 		}
+		c.sync = false;
 		if(!added) {
 			this.c.addItem(this);
 			this.added = true;

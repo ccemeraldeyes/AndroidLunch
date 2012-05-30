@@ -365,9 +365,9 @@ public class EditScreen extends Activity {
 	private void fillFields(SearchResult place) {
 		DetailSearchResult detailPlace;
 		if(mCat instanceof Movies){
-			detailPlace = (new MovieRequest()).searchDetail(place.getName());
+			detailPlace = mSearch.searchDetail(place.getName());
 		} else {
-			detailPlace = (new PlaceRequest(null)).searchDetail(place.getReference());
+			detailPlace = mSearch.searchDetail(place.getReference());
 		}
 		Map<Field, String> fieldMap = detailPlace.asFieldMap();
 		if(fieldMap == null) return;
