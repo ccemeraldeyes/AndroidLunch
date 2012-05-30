@@ -264,12 +264,6 @@ public class EditScreen extends Activity {
 		View layout = inflater.inflate(R.layout.add_tag, null);
 
 		final EditText name = (EditText) layout.findViewById(R.id.name);
-		final Spinner color = (Spinner) layout.findViewById(R.id.color);
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
-				android.R.layout.simple_spinner_item,
-				new ArrayList<String>(PinColor.getColors()));
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		color.setAdapter(adapter);
 
 		builder = new AlertDialog.Builder(this);
 		builder.setView(layout);
@@ -291,9 +285,8 @@ public class EditScreen extends Activity {
 					addTag();
 					return;
 				}
-				PinColor colorStr = PinColor.get((String) color.getSelectedItem());
-				mAllTags.add(0, new Tag(nameStr, colorStr));
-				mTags.add(new Tag(name.getText().toString(), colorStr));
+				mAllTags.add(0, new Tag(nameStr, PinColor.Red));
+				mTags.add(new Tag(name.getText().toString(), PinColor.Red));
 				mTagsView.setText(Tag.getFormatted(mTags));
 			}
 		});
