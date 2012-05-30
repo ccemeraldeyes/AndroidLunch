@@ -110,22 +110,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 			return out;
 		}
 	};
-	private LocationListener mLocationListener = new LocationListener() {
-	    public void onLocationChanged(Location location) {
-	      // Called when a new location is found by the network location provider.
-	    	int myLocX = (int) (location.getLatitude() * 1E6);
-			int myLocY = (int) (location.getLongitude() * 1E6);
-		    here = new GeoPoint(myLocX, myLocY);
-		    Log.i("LocationListener", "Updated Location to: " + myLocX + "," + myLocY);
-	    }
-
-	    public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-	    public void onProviderEnabled(String provider) {}
-
-	    public void onProviderDisabled(String provider) {}
-	  };
-	private GeoPoint here;
 	
 	/** A global reference to the selected Item **/
 	private Item mItem;
@@ -155,8 +139,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        here = getDeviceLocation();
-        lm.requestLocationUpdates(lm.getBestProvider(new Criteria(), false), 0, 200, mLocationListener);
         map = (MapView) findViewById(R.id.mapview);       
         controller = map.getController();
         overlayList = map.getOverlays();
@@ -310,7 +292,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	//If no items have valid addresses (or no items) the zoom wont be changed
     	if (zoom) {
 			/**Zoom to contain all of the pins and current location**/
-			GeoPoint p = here;
+			GeoPoint p = getDeviceLocation();
 			if(p != null) {
 				int locX = p.getLatitudeE6();
 				int locY = p.getLongitudeE6();
@@ -606,7 +588,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 					    	int locX = (int) (addr.getLatitude() * 1E6);
 		    				int locY = (int) (addr.getLongitude() * 1E6);
 		        			GeoPoint placeLocation = new GeoPoint(locX, locY);
-		        			GeoPoint myLoc = here;
+		        			GeoPoint myLoc = getDeviceLocation();
 		        			//Loop through the pins, remove the normal pin and add yellow pin.
 		        			//and replace any yellow pin back to normal pin.
 		        			//get the current existing pin, if it is already on there.
@@ -721,7 +703,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	private List<Item> sortByDistance(List<Item> items){
 		if(items == null || items.size() == 0) return new ArrayList<Item>();
 		SortedMap<Double, Item> sortedByDistance = new TreeMap<Double, Item>();
-		//GeoPoint here = getDeviceLocation();
+		GeoPoint here = getDeviceLocation();
 		Set<Item> invalidCache = new HashSet<Item>();
 		for(Item i : items){
 			boolean valid = false;
@@ -765,7 +747,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 		if(point == null || color == null || item == null) {
 			throw new IllegalArgumentException("input to addPin is null");
 		}
-		//GeoPoint here = getDeviceLocation();
+		GeoPoint here = getDeviceLocation();
 		double distance = Double.NaN;
 		if(here != null){
 			distance = distanceBetween(getDeviceLocation(), point);
