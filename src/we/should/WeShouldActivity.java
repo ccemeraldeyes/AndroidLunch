@@ -226,7 +226,6 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	
     	List<Item> items = null;
     	
-    	PinColor color = PinColor.Red;
 		
     	if (name.equals(ALL_ITEMS_TAG)) {
     		items = new ArrayList<Item>();
@@ -235,11 +234,9 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
 	    	switch (mSortType) {
 	    	case Category:
 	    		items = mCategories.get(name).getItems();
-	    		color = mCategories.get(name).getColor();
 	    		break;
 	    	case Tag:
 	    		items = new ArrayList<Item>(Item.getItemsOfTag(mTags.get(name), this));
-	    		color = mTags.get(name).getColor();
 	    		break;
 	    	}
     	}
