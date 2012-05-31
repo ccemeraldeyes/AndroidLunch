@@ -31,11 +31,11 @@ public class GenericCategory extends Category {
 	
 	public GenericCategory(String name, List<Field> fields, Context ctx) {
 		super(name, fields, ctx);
-		checkRep();
+		//checkRep();
 	}
 	protected GenericCategory(String name, JSONArray a, Context ctx) throws JSONException{
 		super(name, a, ctx);
-		checkRep();
+		//checkRep();
 	}
 	/**
 	 * Checks the representation invariant.
@@ -64,6 +64,7 @@ public class GenericCategory extends Category {
 			}
 			sync = true;
 		}
+		checkRep();
 		return this.items;
 	}
 	@Override

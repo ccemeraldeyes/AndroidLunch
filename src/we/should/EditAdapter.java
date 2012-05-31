@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,23 +60,9 @@ public class EditAdapter extends ArrayAdapter<Field> {
 		
 		if (convertView == null) {
 			holder = new ViewHolder();
-			switch (enumType) {
-			case TextField:
-				convertView = mInflater.inflate(R.layout.edit_row_textline, null);
-				break;
-			case MultilineTextField:
-				convertView = mInflater.inflate(R.layout.edit_row_multiline, null);
-				break;
-			case Rating:
-				convertView = mInflater.inflate(R.layout.edit_row_rating, null);
-				break;
-			case PhoneNumber:
-				convertView = mInflater.inflate(R.layout.edit_row_phone, null);
-				break;
-			case CheckBox:
-				convertView = mInflater.inflate(R.layout.edit_row_checkbox, null);
-				break;
-			default:
+			try{
+				convertView = mInflater.inflate(enumType.drawable, null);
+			} catch(InflateException ie) {
 				throw new IllegalStateException("Do not know how to handle enum" + enumType);
 			}
 			holder.name = (TextView) convertView.findViewById(R.id.name);

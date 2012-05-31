@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.android.maps.GeoPoint;
-
 import we.should.list.Category;
 import we.should.list.Field;
 import we.should.list.Item;
@@ -17,10 +15,9 @@ import we.should.list.Movies;
 import we.should.list.Tag;
 import we.should.search.DetailSearchResult;
 import we.should.search.MovieRequest;
-import we.should.search.SearchResult;
 import we.should.search.PlaceRequest;
 import we.should.search.Search;
-
+import we.should.search.SearchResult;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -39,14 +36,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.maps.GeoPoint;
 
 public class EditScreen extends Activity {
 	/** Result code for item deletion **/
@@ -285,8 +282,9 @@ public class EditScreen extends Activity {
 					addTag();
 					return;
 				}
-				mAllTags.add(0, new Tag(nameStr, PinColor.Red));
-				mTags.add(new Tag(name.getText().toString(), PinColor.Red));
+				Tag nTag = new Tag(nameStr, PinColor.DEFAULT);
+				mAllTags.add(0, nTag);
+				mTags.add(nTag);
 				mTagsView.setText(Tag.getFormatted(mTags));
 			}
 		});

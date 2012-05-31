@@ -21,6 +21,7 @@
 package we.should.list;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,6 +42,17 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.util.Log;
 
+/**
+ * This is the abstract Item class that all Item classes subclass.
+ * It contains the value map for an item as well as all of its database
+ * manipulation methods.
+ * 
+ * Rep Invariant:
+ * 	this.id >= 0
+ * 	added ---> this.id > 0
+ * @author Davis
+ *
+ */
 public abstract class Item {
 		
 	int id;
@@ -302,14 +314,14 @@ public abstract class Item {
 	 * @param ctx of the database
 	 * @return a set of all Items I s.t for all i in I, i.getTags().contains(tag). 
 	 */
-	public static Set<Item> getItemsOfTag(Tag tag, Context ctx){
+	public static List<Item> getItemsOfTag(Tag tag, Context ctx){
 		if(ctx == null){
 			throw new IllegalArgumentException("Context cannot be null!");
 		}
 		WSdb db = new WSdb(ctx);
 		db.open();
 		Cursor items = db.getItemsOfTag(tag.getId());
-		return processCursor(db, items, ctx);
+		return new ArrayList<Item>(processCursor(db, items, ctx));
 		
 	}
 	/**

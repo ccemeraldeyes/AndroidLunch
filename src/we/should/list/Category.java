@@ -27,6 +27,9 @@ import android.util.Log;
  *  fall under this category.  It provides a factory method for adding items as well
  *  as returning items that have already been made. 
  *  
+ *  Rep Invariant:
+ *  	for(Item i : this.items)
+ *  		i.c == this
  * 
  *  
  *  

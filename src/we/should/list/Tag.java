@@ -54,7 +54,7 @@ public class Tag implements Serializable {
 		this.ctx = ctx;
 	}
 	/**
-	 * 
+	 * Creates a new tag from a db JSONObject
 	 * @param o
 	 */
 	protected Tag(JSONObject o){
@@ -95,7 +95,7 @@ public class Tag implements Serializable {
 		if(this.ctx != null && this.id != 0){
 			WSdb db = new WSdb(this.ctx);
 			db.open();
-			Set<Item> items = Item.getItemsOfTag(this, this.ctx);
+			List<Item> items = Item.getItemsOfTag(this, this.ctx);
 			Set<Tag> itemTags;
 			for(Item i : items){
 				itemTags = i.getTags();
@@ -107,7 +107,6 @@ public class Tag implements Serializable {
 			db.deleteTag(this.id);
 			db.close();
 		}
-		
 	}
 	/**
 	 * Returns a list of all of the tags added to the DB
@@ -166,6 +165,11 @@ public class Tag implements Serializable {
 	public int hashCode(){
 		return this.name.hashCode();
 	}
+	/**
+	 * Returns a JSON representation of this
+	 * @return JSONObject rep of this
+	 * @throws JSONException
+	 */
 	public JSONObject toJSON() throws JSONException {
 		JSONObject tagString = new JSONObject();
 		tagString.put(Tag.idKey, this.getId());
@@ -173,6 +177,10 @@ public class Tag implements Serializable {
 		tagString.put(Tag.colorKey, this.getColor().toString());
 		return tagString;
 	}
+	/**
+	 * Returns the color of this tag
+	 * @return PinColor of this
+	 */
 	public PinColor getColor() {
 		return this.color;
 	}
