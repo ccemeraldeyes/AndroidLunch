@@ -14,5 +14,5 @@
     <string name="delete_item_confirm">Are you sure you wish to delete this item?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="help_splash">Splash help text!</string>
+    <string name="help_splash">We have a list of accounts that are found under the devices.  You can choose which account you want to login as.  This account will be useful for getting referrals from others users of the applications.  Once login, we will remembers you when you login next time</string>
 </resources>
