@@ -17,9 +17,35 @@ import android.util.Log;
  * 
  * @author  Troy Schuring
  * 			UW CSE403 SP12
+ * 
+ * The representation invariant for the database is enforced by the
+ * SQLite database constraints set on creation of the tables.
+ * 
+ * 
+ * Representation Invariant:
+ * 		Category Table
+ * 			ID     - integer, unique, not null, ID>0
+ *   		NAME   - text, unique, not null
+ *   		COLOR  - text, not null
+ *   		SCHEMA - text, not null
+ *   	
+ *   	Item Table
+ *   		ID     - integer, unique, not null, ID>0
+ *   		NAME   - text, unique, not null
+ *   		CAT_ID - integer, exists in ID field of Category table
+ *   		DATA   - text, not null
+ *   
+ *   	Item-Tag Table
+ *   		NAME   - text, unique, not null
+ *   		ITEM_ID- integer, exists in ID field of Item table
+ *   		TAG_ID - integer, exists in ID field of Tag table
+ *   
+ *   	Tag Table
+ *   		ID     - integer, unique, not null, ID>0
+ * 			NAME   - text, unique, not null
+ * 			COLOR  - text, not null
  */
 
-//TODO: rep invariant
 
 public class WSdb {
 	private SQLiteDatabase db; 
@@ -27,17 +53,19 @@ public class WSdb {
 	private DBHelper dbhelper;
 	
 	// separators for backup & restore
-	final char SEP = '#';
+	final char SEP = '#';		 // separator char
 	final String F_SEP = "@#";	 // field separator
 	final String R_SEP = "@##";  // row separator
 	final String T_SEP = "@###"; // table separator
 	
-	// number of fields for each table
+	// # of fields for each table used in restore parsing
 	final int catFields = 4;
 	final int itemFields = 4;
 	final int tagFields=3;
 	final int item_tagFields=2;
 	
+	// turn logging on and off
+	public static boolean LOG_ON = false;
 
 	/**
 	 * WeShould Database Constructor
@@ -45,7 +73,7 @@ public class WSdb {
 	 * @param c context to use to create the database helper
 	 */
 	public WSdb(Context c){
-		Log.v("WSDB constructor", "entering constructor");
+		if (LOG_ON)Log.v("WSDB constructor", "entering constructor");
 		context=c;
 		dbhelper = new DBHelper(context, ItemConst.DATABASE_NAME, null, 
 									 ItemConst.DATABASE_VERSION);
@@ -63,10 +91,12 @@ public class WSdb {
 		try {
 			db = dbhelper.getWritableDatabase();
 		} catch(SQLiteException ex) {
-			Log.e("Open database exception caught", ex.getMessage());
+			if (LOG_ON)Log.e("Open database exception caught", ex.getMessage());
 			db = dbhelper.getReadableDatabase();
 			return false;
 		}
+		
+		// enforce referential integrity
 		db.execSQL("PRAGMA foreign_keys=ON;");
 		return true;
 	}
@@ -108,11 +138,11 @@ public class WSdb {
 	public long insertItem(String name, int categoryId, String data)
 			throws IllegalArgumentException, SQLiteConstraintException{
 		
-		Log.v("db.insertItem",name + " " + categoryId + " " + data);
+		if (LOG_ON)Log.v("db.insertItem",name + " " + categoryId + " " + data);
 		
 		// check arguments for valid format
 		if (hasNoChars(name) || hasNoChars(data) || categoryId<1){
-			Log.e("db.insertItem","invalid argument - " + name + 
+			if (LOG_ON)Log.e("db.insertItem","invalid argument - " + name + 
 					" or " + data + " or " + categoryId);
 			throw new IllegalArgumentException();
 		}
@@ -137,11 +167,11 @@ public class WSdb {
 	public long insertCategory(String name, String color, String schema)
 			throws IllegalArgumentException, SQLiteConstraintException{
 		
-		Log.v("InsertCategory", "arguments-- " + name + ", " + color + ", " + schema);
+		if (LOG_ON)Log.v("InsertCategory", "arguments-- " + name + ", " + color + ", " + schema);
 		
 		//check arguments for null and empty strings
 		if (hasNoChars(name) || hasNoChars(color) || hasNoChars(schema)){
-			Log.e("db.insertCategory","argument format error");
+			if (LOG_ON)Log.e("db.insertCategory","argument format error");
 			throw new IllegalArgumentException ();
 		}
 		ContentValues newTaskValue = new ContentValues();
@@ -165,11 +195,11 @@ public class WSdb {
 	public long insertTag(String name, String color)
 			throws IllegalArgumentException, SQLiteConstraintException{
 		
-		Log.v("WSdb.insertTag","inserting tag " + name + ", ");
+		if (LOG_ON)Log.v("WSdb.insertTag","inserting tag " + name + ", ");
 		
 		// check argument for null or empty string
 		if(hasNoChars(name) || hasNoChars(color)){
-			Log.e("db.insertTag","argument (name) is empty");
+			if (LOG_ON)Log.e("db.insertTag","argument (name) is empty");
 			throw new IllegalArgumentException();
 		}
 		ContentValues newTaskValue = new ContentValues();
@@ -191,10 +221,10 @@ public class WSdb {
 	 */
 	public long insertItem_Tag(int itemID, int tagID)
 			throws IllegalArgumentException, SQLiteConstraintException{
-		Log.v("WSdb.insertItem_Tag","inserting (item,tag)=(" + itemID + "," + tagID + ")");
+		if (LOG_ON)Log.v("WSdb.insertItem_Tag","inserting (item,tag)=(" + itemID + "," + tagID + ")");
 		
 		if (itemID < 1 || tagID < 1){
-			Log.e("db.insertItem_Tag","invalid id argument");
+			if (LOG_ON)Log.e("db.insertItem_Tag","invalid id argument");
 			throw new IllegalArgumentException();
 		}
 		
@@ -415,12 +445,12 @@ public class WSdb {
 	public boolean updateCategory(int catID, String name, String color, String schema) 
 					throws IllegalArgumentException, SQLiteConstraintException{
 
-		Log.v("DB.updateCategory","update category categoryID=" + 
+		if (LOG_ON)Log.v("DB.updateCategory","update category categoryID=" + 
 		          catID);
 
 		// check arguments for valid format
 		if (hasNoChars(name) || hasNoChars(color) || hasNoChars(schema)){
-			Log.e("db.updateCategory","Invalid Argument format");
+			if (LOG_ON)Log.e("db.updateCategory","Invalid Argument format");
 			throw new IllegalArgumentException();
 		}	
 		
@@ -440,7 +470,7 @@ public class WSdb {
 			db.endTransaction();
 			return true;
 		}else{
-    		Log.e("db.updateCategory", "update failed & rolled back, " +
+			if (LOG_ON)Log.e("db.updateCategory", "update failed & rolled back, " +
     				"check constraint exception");
 			db.endTransaction();
 			return false;
@@ -460,10 +490,10 @@ public class WSdb {
 	public boolean updateTag(int tagID, String newName, String color)
 			throws IllegalArgumentException, SQLiteConstraintException{
 
-		Log.v("DB.updateTag","update tagId=" + tagID);
+		if (LOG_ON)Log.v("DB.updateTag","update tagId=" + tagID);
 		
 		if (hasNoChars(newName) || hasNoChars(color) || tagID<1){
-			Log.e("db.updateTag","Invalid argument");
+			if (LOG_ON)Log.e("db.updateTag","Invalid argument");
 			throw new IllegalArgumentException();
 		}
 		int affected=0;
@@ -496,10 +526,10 @@ public class WSdb {
 	public boolean updateItem(int itemID, String name, int catId, String data)
 			throws IllegalArgumentException, SQLiteConstraintException{
 
-		Log.v("DB.updateItem","updating item itemId=" + itemID);
+		if (LOG_ON)Log.v("DB.updateItem","updating item itemId=" + itemID);
 		
 		if (hasNoChars(name) || itemID<1){
-			Log.e("db.updateItem","Invalid argument");
+			if (LOG_ON)Log.e("db.updateItem","Invalid argument");
 			throw new IllegalArgumentException();
 		}
 		int affected=0;
@@ -536,14 +566,14 @@ public class WSdb {
 		// delete the item-tag associations
 		affected=db.delete(Item_TagConst.TBL_NAME, 
 				 Item_TagConst.ITEM_ID + "=" + itemId, null);         
-		Log.v("WSdb.deleteItem",
+		if (LOG_ON)Log.v("WSdb.deleteItem",
 				  "deleted " + affected + " item tag associations");
 		//delete the item
 		affected=db.delete(ItemConst.TBL_NAME, ItemConst.ID + "=" + itemId, 
 				null);
 	
 		if (affected>0){
-			Log.v("WSdb.deleteItem", "deleted " + affected + " item");		
+			if (LOG_ON)Log.v("WSdb.deleteItem", "deleted " + affected + " item");		
 			return true;
 		}
 		return false;	
@@ -564,7 +594,7 @@ public class WSdb {
 		// do not delete category if there are items associated with it		
 		Cursor c = getItemsOfCategory(catId);
 		if (c.getCount()>0){
-			Log.e("db.deleteCategory", 
+			if (LOG_ON)Log.e("db.deleteCategory", 
 			"cannot delete category if items of this category exist");
 			c.close();
 			return false;
@@ -575,7 +605,8 @@ public class WSdb {
 				       CategoryConst.ID + "=" + catId, null);		
 		
 		if (affected>0){
-			Log.v("WSdb.deleteCategory","deleted " + affected + " category");		
+			if (LOG_ON)Log.v("WSdb.deleteCategory",
+					"deleted " + affected + " category");		
 			return true;
 		}else
 			return false;	
@@ -590,17 +621,17 @@ public class WSdb {
 	 */
 	public boolean deleteTag(int tagId)
 			throws SQLiteConstraintException{
-		Log.v("DeleteTag", "tagId="+tagId);
+		if (LOG_ON)Log.v("DeleteTag", "tagId="+tagId);
 		
 		// delete the item-tag associations		
 		int affected = db.delete(Item_TagConst.TBL_NAME,
 				Item_TagConst.TAG_ID + "=" + tagId, null);		
-		Log.v("WSdb.deleteTag",
+		if (LOG_ON)Log.v("WSdb.deleteTag",
 			  "deleted " + affected + " item tag associations");		
 		//delete the Tag		
 		affected=db.delete(TagConst.TBL_NAME, 
 				TagConst.ID + "=" + tagId, null);		
-		Log.v("WSdb.deleteTag","deleted " + affected + " tags");
+		if (LOG_ON)Log.v("WSdb.deleteTag","deleted " + affected + " tags");
 		if (affected > 0)			
 			return true;		
 		else			
@@ -657,7 +688,7 @@ public class WSdb {
 	 */
 	public void fillTables(){
 		try {
-			Log.v("WSdb.fillTables","enter test data");
+			if (LOG_ON)Log.v("WSdb.fillTables","enter test data");
 	        insertCategory("Cat 1", "abc123", "schema for cat 1");
 	        insertCategory("cat 2", "abc123", "schema for cat 2");
 		    insertItem("Itemname1", 2, "DATA here");
@@ -667,7 +698,7 @@ public class WSdb {
 	        insertItem_Tag(1,2);
 	        insertItem_Tag(1,1);
 		} catch (Exception e) {
-			Log.v("NotesDB.fillTables exception: ", e.getMessage());
+			if (LOG_ON)Log.v("NotesDB.fillTables exception: ", e.getMessage());
 		}
 	}	
 	
@@ -739,65 +770,58 @@ public class WSdb {
 		String data="";
 		Cursor c;
 		
-		
-		// parse category
+		// read category table
 		c = getAllCategories();
+		
 		// first value is count - needed for empty table case
 		data+= c.getCount()+F_SEP+SEP;
 		
 		while (c.moveToNext()){
-			//id,name,color,schema
+			
 			for(int i=0;i<catFields;i++)
 				data+=c.getString(i) + F_SEP;
+			
 			// adds to field separator to become row separator
 			data += SEP;
 		}
 		// adds to row separator to become table separator
 		data += SEP; 
 		
-		c.close();
-		// parse item
+		
+		// read item table
 		c = getAllItems();
-		// first value is count - needed for empty table case
 		data+= c.getCount()+F_SEP+SEP;
 		
 		while (c.moveToNext()){
-			//id,name,catId, data
+
 			for(int i=0;i<itemFields;i++)
 				data+=c.getString(i) + F_SEP;
-			// adds to field separator to become row separator
+			
 			data += SEP;
 		}
-		// adds to row separator to become table separator
 		data += SEP;
 		
-		c.close();
-		// parse tag
+		// read tag table
 		c = getAllTags();
-		// first value is count - needed for empty table case
 		data+= c.getCount()+F_SEP+SEP;
 		
 		while (c.moveToNext()){
-			//id,name,catId, data
 			for(int i=0;i<tagFields;i++)
 				data+=c.getString(i) + F_SEP;	
-			// adds to field separator to become row separator
+			
 			data += SEP;
 		}
-		// adds to row separator to become table separator
 		data += SEP;
 		
-		c.close();
 		//parse item_tag
 		c = getAllItem_Tags();
-		// first value is count - needed for empty table case
 		data+= c.getCount()+F_SEP+SEP;
 		
 		while (c.moveToNext()){
-			//id,name,catId, data
+			
 			for(int i=0;i<item_tagFields;i++)
 				data+=c.getString(i) + F_SEP;
-			// adds to field separator to become row separator
+
 			data += SEP;
 		}
 		
@@ -819,11 +843,12 @@ public class WSdb {
 	 * @param data String created by Backup
 	 */
 	public boolean Restore (String data){
-		Log.v("db.Restore", "Arg data="+data);
+		if (LOG_ON)Log.v("db.Restore", "Arg data="+data);
 		
 		if (data==null||data.length()==0)
 			return false;
 		
+		// discard tables and recreate
 		rebuildTables();
 		
 		// split string by tables
@@ -838,21 +863,21 @@ public class WSdb {
 		Map <Integer,Integer> tagIdMap=new HashMap<Integer,Integer> ();
 		
 		
-		int oldId=0,newId=1;
+		int oldId=0,newId=1; // refactor id values for each entry
 		long insertRow;
 		
 		//parse, refactor ids & insert categories
 		if (tables[0] != null){
-			Log.v("db.Restore","ParseCatetories- " + tables[0]);
+			if (LOG_ON)Log.v("db.Restore","ParseCatetories- " + tables[0]);
+			
 			catRows=tables[0].split(R_SEP);
 			
-			if (Integer.valueOf(catRows[0])!=0){ // empty table
+			if (Integer.valueOf(catRows[0])!=0){ // empty table check
+				
 				for(int count=1;count < catRows.length; count++,newId++){
-					Log.v("db.Restore","CatRow- " + catRows[count]);
-
+				
 					// split row into fields
 					fields = catRows[count].split(F_SEP);
-					Log.v("db.Restore","Catfields- " + fields[0] + " @# " + fields[1] + " @# " + fields[2] + " @# " + fields[3]);
 				
 					// refactor id
 					oldId=Integer.valueOf(fields[0]);
@@ -860,20 +885,24 @@ public class WSdb {
 			
 					// insert into database
 					insertRow=insertCategory(fields[1], fields[2], fields[3]);
-					//assert(newId==(int)insertRow);
+					assert(newId==(int)insertRow);
 				}
 			}
 		}	
 		
 		//parse, refactor ids & insert items
 		if (tables[1] != null){
-			Log.v("db.Restore","ParseItems- " + tables[1]);
+			if (LOG_ON)Log.v("db.Restore","ParseItems- " + tables[1]);
+			
 			itemRows=tables[1].split(R_SEP);
-			Log.v("db.restore", "number of items="+itemRows[0]);
+			
 			if (Integer.valueOf(itemRows[0])!=0){ // empty table
-				oldId=0;  newId=1;
+				
+				oldId=0;  newId=1; // reset ids
 				int newCatId;
+				
 				for(int count=1;count < itemRows.length; count++,newId++){
+					
 					// split row into fields
 					fields = itemRows[count].split(F_SEP);
 					
@@ -895,12 +924,16 @@ public class WSdb {
 		
 		//parse, refactor ids & insert Tags
 		if (tables[2] != null){
-			Log.v("db.Restore","ParseTags- " + tables[2]);
+			if (LOG_ON)Log.v("db.Restore","ParseTags- " + tables[2]);
+			
 			tagRows=tables[2].split(R_SEP);
 		
 			if (Integer.valueOf(tagRows[0])!=0){ // empty table
-				oldId=0;  newId=1;
+				
+				oldId=0;  newId=1; // reset ids
+				
 				for(int count=1; count < tagRows.length; count++,newId++){
+					
 					// split row into fields
 					fields = tagRows[count].split(F_SEP);
 					
@@ -918,12 +951,16 @@ public class WSdb {
 		
 		//parse, refactor ids & insert Item_Tags	
 		if (tables[3] != null){
-			Log.v("db.Restore","ParseItem_Tags- " + tables[3]);
+			if (LOG_ON)Log.v("db.Restore","ParseItem_Tags- " + tables[3]);
+			
 			item_tagRows=tables[3].split(R_SEP);
 			
 			if (Integer.valueOf(item_tagRows[0])!=0){ // empty table
+				
 				int newItemId,newTagId;
+				
 				for(int count=1;count < item_tagRows.length; count++,newId++){
+					
 					// split row into fields
 					fields = item_tagRows[count].split(F_SEP);
 					

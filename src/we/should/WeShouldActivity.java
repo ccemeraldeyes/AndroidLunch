@@ -292,7 +292,7 @@ public class WeShouldActivity extends MapActivity implements LocationListener {
     	}
     	//If no items have valid addresses (or no items) the zoom wont be changed
     	if (zoom) {
-			/**Zoom to contain all of the pins and current location**/
+			//Zoom to a view containing all of the pins and current location
 			GeoPoint p = getDeviceLocation();
 			if(p != null) {
 				int locX = p.getLatitudeE6();
