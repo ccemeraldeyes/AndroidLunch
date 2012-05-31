@@ -10,13 +10,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.util.Log;
 
 /**
  * This is a specific item class used for referrals from other users. Its fields
  * are stored locally so that all of the items in the Referrals category can be
  * rendered differently. This accommodates custom fields etc made by other users.
  * @author Davis
+ * 
+ * Rep Invariant:
+ * 
+ * this.fields == this.values.keys()
  *
  */
 
@@ -54,14 +57,12 @@ public class ReferralItem extends GenericItem {
 	protected void DBtoData(JSONObject d) throws JSONException{
 		this.fields = new LinkedList<Field>();
 		super.DBtoData(d);
-		//Log.i("Referral DBtoData", "Adding Item Specific Fields for: " + d.toString());
 		Iterator<String> keys = d.keys();
 		String k;
 		while(keys.hasNext()){
 			k = keys.next();
 			fields.add(new Field(k));
 		}
-		//Log.i("Referral DBtoData", this.fields.toString());
 		Collections.sort(fields);
 	}
 }

@@ -41,6 +41,17 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.util.Log;
 
+/**
+ * This is the abstract Item class that all Item classes subclass.
+ * It contains the value map for an item as well as all of its database
+ * manipulation methods.
+ * 
+ * Rep Invariant:
+ * 	this.id >= 0
+ * 	added ---> this.id > 0
+ * @author Davis
+ *
+ */
 public abstract class Item {
 		
 	int id;
