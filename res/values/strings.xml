@@ -14,5 +14,5 @@
     <string name="delete_item_confirm">Are you sure you wish to delete this item?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="help_splash">Splash help text!</string>
+    <string name="help_splash">Select one of the accounts you have associated with this device. This account you choose will be used to send and receive referrals to and from other WeShould users. You only have to log in once. We will remember you next time ;)</string>
 </resources>
