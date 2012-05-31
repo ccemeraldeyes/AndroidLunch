@@ -11,16 +11,15 @@ import android.util.Log;
  * Helper object to create, open, and/or manage a database.
  * @author UW CSE403 SP12
  * 
- * Rep Invariant: the constraints upheld by the database are defined
- * in the create table strings.  
+ * WSdb Representation Invariant: the constraints upheld by the database
+ * are defined in the create table strings.  
  */
-
-//TODO: finish rep invariant
 
 
 public class DBHelper extends SQLiteOpenHelper{
 
 	// Create table strings
+	// Define database constraints
 	private static final String CREATE_TABLE_CATEGORY="create table " +      
 	                CategoryConst.TBL_NAME + " (" +
                     CategoryConst.ID + " integer primary key autoincrement, " +
@@ -51,8 +50,8 @@ public class DBHelper extends SQLiteOpenHelper{
 					TagConst.NAME + " text UNIQUE not null, " +
 					TagConst.COLOR + " text not null);";	
 	
-	
-	
+	// turn logging on and off
+	public static boolean LOG_ON = false;
 	
 	/**
 	 * Construct DBHelper object
@@ -74,11 +73,11 @@ public class DBHelper extends SQLiteOpenHelper{
 	 * @param db name of database to create
 	 */
 	public void onCreate(SQLiteDatabase db) {
-		Log.v("DBhelper.onCreate","Creating all the tables");
+		if (LOG_ON)Log.v("DBhelper.onCreate","Creating all the tables");
 		try {
 			createTables(db);
 		} catch(SQLiteException ex) {
-			Log.v("Create table exception", ex.getMessage());
+			if (LOG_ON)Log.v("Create table exception", ex.getMessage());
 		}
 	}
 	
@@ -117,7 +116,7 @@ public class DBHelper extends SQLiteOpenHelper{
 	 * @param db name of database to clear
 	 */
 	public void dropAllTables(SQLiteDatabase db){
-		Log.v("DBHelper.dropAllTables", "Dropping all tables");
+		if (LOG_ON)Log.v("DBHelper.dropAllTables", "Dropping all tables");
 	
 		try {
 			// drop order matters to avoid database constraint exception
@@ -127,10 +126,10 @@ public class DBHelper extends SQLiteOpenHelper{
 			db.execSQL("drop table if exists "+ TagConst.TBL_NAME);
 			
 		} catch (SQLiteException ex) {
-			Log.e("DBHelper.dropAllTables","Ooops! Error");
+			if (LOG_ON)Log.e("DBHelper.dropAllTables",ex.getMessage());
 			ex.printStackTrace();
 		}
-		Log.v("DBhelper.dropAllTables", "Exiting in good status");
+		if (LOG_ON)Log.v("DBhelper.dropAllTables", "Exiting in good status");
 	}
 	
 	
@@ -141,7 +140,7 @@ public class DBHelper extends SQLiteOpenHelper{
 	 * @param db name of database to create tables in
 	 */
 	public void createTables(SQLiteDatabase db){
-		Log.v("DBhelper.createTables","Creating tables");
+		if (LOG_ON)Log.v("DBhelper.createTables","Creating tables");
 		try {
 			// create order matters to avoid constraint exception		
 			db.execSQL(CREATE_TABLE_CATEGORY);
@@ -163,7 +162,7 @@ public class DBHelper extends SQLiteOpenHelper{
 	 * @param db name of database
 	 */
 	public void rebuild(SQLiteDatabase db){
-		Log.v("DBhelper.rebuildTest","Drop & Create tables.");
+		if (LOG_ON)Log.v("DBhelper.rebuildTest","Drop & Create tables.");
 		try {
 			dropAllTables(db);
 			createTables(db);
