@@ -73,7 +73,7 @@ public class BackupService extends IntentService {
 	
 			String paramString = buildQueryString(i, email, splitData);
 			
-			HttpGet httpget = new HttpGet("http://23.23.237.174/backup?"+paramString);
+			HttpGet httpget = new HttpGet("http://23.21.136.252/backup?"+paramString);
 	
 			try {
 

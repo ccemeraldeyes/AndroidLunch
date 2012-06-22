@@ -165,7 +165,7 @@ public class ApproveReferral extends Activity {
 	    
 		String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
 		
-		HttpGet httpget = new HttpGet("http://23.23.237.174/delete-referrals?"+paramString);
+		HttpGet httpget = new HttpGet("http://23.21.136.252/delete-referrals?"+paramString);
 		
 		try {
 			HttpResponse response = httpclient.execute(httpget);

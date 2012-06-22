@@ -88,7 +88,7 @@ public class ReferDialog extends Activity {
 		    
 		    String paramString = URLEncodedUtils.format(nameValuePairs, "utf-8");
 		    
-		    HttpGet httpget = new HttpGet("http://23.23.237.174/refer?"+paramString);
+		    HttpGet httpget = new HttpGet("http://23.21.136.252/refer?"+paramString);
 
 		    HttpResponse response = httpclient.execute(httpget);
 		    

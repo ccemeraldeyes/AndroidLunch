@@ -106,7 +106,7 @@ public class GetReferralsService extends IntentService {
 
 		String paramString = buildQueryString(username);
 		
-		HttpGet httpget = new HttpGet("http://23.23.237.174/check-referrals?"+paramString);
+		HttpGet httpget = new HttpGet("http://23.21.136.252/check-referrals?"+paramString);
 		
 		JSONObject resp = new JSONObject();
 		JSONArray data = new JSONArray();

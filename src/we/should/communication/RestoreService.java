@@ -87,7 +87,7 @@ public class RestoreService extends IntentService{
 	
 			String paramString = buildQueryString(index, username);
 			
-			HttpGet httpget = new HttpGet("http://23.23.237.174/restore?"+paramString);
+			HttpGet httpget = new HttpGet("http://23.21.136.252/restore?"+paramString);
 						
 			try {
 				
